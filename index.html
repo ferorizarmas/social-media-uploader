@@ -106,7 +106,7 @@
 
     <script>
         const SUPABASE_URL = 'https://ftsmavpfnmpeltpnsdqx.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0c21hdnBmbm1wZWx0cG5zZHF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA3NDcxMzAsImV4cCI6MjA0NjMyMzEzMH0.tJqEr_hWiNdQMbhk6p1bT8QjJJ-nSQ8xVbDrNjLl7w8';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0c21hdnBmbm1wZWx0cG5zZHF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyODE5OTUsImV4cCI6MjA3Nzg1Nzk5NX0.o7Dmk2CSYRlVF4s-FN7islAbYYPLNJ5Q2POEmcKh0zw';
         const FUNCTION_URL = 'https://ftsmavpfnmpeltpnsdqx.supabase.co/functions/v1/process-pdf';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -223,28 +223,95 @@
             const chartsDiv = document.getElementById('charts');
             chartsDiv.innerHTML = '<h3 style="margin-top: 30px;">📊 Visual Analysis</h3>';
             
-            if (chartData.current && chartData.current.length > 0) {
-                const currentDiv = document.createElement('div');
-                currentDiv.className = 'chart';
-                currentDiv.id = 'chart-current';
-                chartsDiv.appendChild(currentDiv);
+            // Chart 1: Current vs Last Month
+            if (chartData.current && chartData.current.length > 0 && chartData.lastMonth && chartData.lastMonth.length > 0) {
+                const compareDiv = document.createElement('div');
+                compareDiv.className = 'chart';
+                compareDiv.id = 'chart-vs-last';
+                chartsDiv.appendChild(compareDiv);
                 
-                const data = chartData.current.slice(0, 10);
-                Plotly.newPlot('chart-current', [{
+                const currentData = chartData.current.slice(0, 8);
+                const traces = [];
+                
+                traces.push({
                     type: 'bar',
-                    x: data.map(m => m.name),
-                    y: data.map(m => m.value),
+                    name: 'Current Month',
+                    x: currentData.map(m => m.name),
+                    y: currentData.map(m => m.value),
                     marker: { color: '#667eea' },
-                    text: data.map(m => m.value.toFixed(2)),
+                    text: currentData.map(m => m.value.toFixed(2)),
                     textposition: 'outside'
-                }], {
-                    title: 'Current Month Metrics',
-                    xaxis: { title: 'Metric' },
+                });
+                
+                const lastMonthValues = currentData.map(curr => {
+                    const lastMetric = chartData.lastMonth.find(m => m.name === curr.name);
+                    return lastMetric ? lastMetric.value : null;
+                });
+                
+                traces.push({
+                    type: 'bar',
+                    name: 'Last Month',
+                    x: currentData.map(m => m.name),
+                    y: lastMonthValues,
+                    marker: { color: '#764ba2' },
+                    text: lastMonthValues.map(v => v ? v.toFixed(2) : 'N/A'),
+                    textposition: 'outside'
+                });
+                
+                Plotly.newPlot('chart-vs-last', traces, {
+                    title: '📊 Current Month vs Last Month',
+                    xaxis: { title: 'Metrics', tickangle: -45 },
                     yaxis: { title: 'Value' },
+                    barmode: 'group',
                     height: 500
                 });
             }
             
+            // Chart 2: Current vs Historical Average
+            if (chartData.current && chartData.current.length > 0 && chartData.historicalAverage && chartData.historicalAverage.length > 0) {
+                const avgDiv = document.createElement('div');
+                avgDiv.className = 'chart';
+                avgDiv.id = 'chart-vs-avg';
+                chartsDiv.appendChild(avgDiv);
+                
+                const currentData = chartData.current.slice(0, 8);
+                const traces = [];
+                
+                traces.push({
+                    type: 'bar',
+                    name: 'Current Month',
+                    x: currentData.map(m => m.name),
+                    y: currentData.map(m => m.value),
+                    marker: { color: '#2ecc71' },
+                    text: currentData.map(m => m.value.toFixed(2)),
+                    textposition: 'outside'
+                });
+                
+                const avgValues = currentData.map(curr => {
+                    const avgMetric = chartData.historicalAverage.find(m => m.name === curr.name);
+                    return avgMetric ? avgMetric.value : null;
+                });
+                
+                traces.push({
+                    type: 'bar',
+                    name: 'Historical Average',
+                    x: currentData.map(m => m.name),
+                    y: avgValues,
+                    marker: { color: '#e74c3c' },
+                    text: avgValues.map(v => v ? v.toFixed(2) : 'N/A'),
+                    textposition: 'outside'
+                });
+                
+                Plotly.newPlot('chart-vs-avg', traces, {
+                    title: '📈 Current Month vs Historical Average (All Past Months)',
+                    xaxis: { title: 'Metrics', tickangle: -45 },
+                    yaxis: { title: 'Value' },
+                    barmode: 'group',
+                    height: 500
+                });
+            }
+            
+            // Chart 3: Trends Over Time
             if (chartData.historical && chartData.historical.length > 0) {
                 const trendsDiv = document.createElement('div');
                 trendsDiv.className = 'chart';
@@ -280,12 +347,35 @@
                 
                 if (traces.length > 0) {
                     Plotly.newPlot('chart-trends', traces, {
-                        title: 'Trends Over Time',
+                        title: '📉 Trends & Patterns Over Time',
                         xaxis: { title: 'Period' },
                         yaxis: { title: 'Value' },
                         height: 500
                     });
                 }
+            }
+            
+            // Chart 4: Current Month Overview (if no historical data)
+            if (chartData.current && chartData.current.length > 0 && (!chartData.historical || chartData.historical.length === 0)) {
+                const currentDiv = document.createElement('div');
+                currentDiv.className = 'chart';
+                currentDiv.id = 'chart-current';
+                chartsDiv.appendChild(currentDiv);
+                
+                const data = chartData.current.slice(0, 10);
+                Plotly.newPlot('chart-current', [{
+                    type: 'bar',
+                    x: data.map(m => m.name),
+                    y: data.map(m => m.value),
+                    marker: { color: '#667eea' },
+                    text: data.map(m => m.value.toFixed(2)),
+                    textposition: 'outside'
+                }], {
+                    title: '📊 Current Month Metrics',
+                    xaxis: { title: 'Metric', tickangle: -45 },
+                    yaxis: { title: 'Value' },
+                    height: 500
+                });
             }
         }
     </script>
