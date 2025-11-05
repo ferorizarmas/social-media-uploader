@@ -105,10 +105,9 @@
     </div>
 
     <script>
-        // ⚠️ REPLACE THESE WITH YOUR VALUES
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
-        const FUNCTION_URL = 'YOUR_FUNCTION_URL';
+        const SUPABASE_URL = 'https://ftsmavpfnmpeltpnsdqx.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0c21hdnBmbm1wZWx0cG5zZHF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzA3NDcxMzAsImV4cCI6MjA0NjMyMzEzMH0.tJqEr_hWiNdQMbhk6p1bT8QjJJ-nSQ8xVbDrNjLl7w8';
+        const FUNCTION_URL = 'https://ftsmavpfnmpeltpnsdqx.supabase.co/functions/v1/process-pdf';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let selectedFile = null;
@@ -159,7 +158,6 @@
             try {
                 const filename = `${Date.now()}_${selectedFile.name}`;
                 
-                // Upload to Supabase
                 const { error: uploadError } = await supabase.storage
                     .from('pdf-uploads')
                     .upload(filename, selectedFile);
@@ -168,7 +166,6 @@
                 
                 status.textContent = '🤖 Processing with AI... (this may take 30-60 seconds)';
                 
-                // Call Edge Function
                 const response = await fetch(FUNCTION_URL, {
                     method: 'POST',
                     headers: {
@@ -189,7 +186,6 @@
                 status.className = 'status success';
                 status.textContent = '✅ Processing Complete!';
                 
-                // Reset form
                 setTimeout(() => {
                     selectedFile = null;
                     fileInput.value = '';
@@ -209,18 +205,15 @@
             results.style.display = 'block';
             results.scrollIntoView({ behavior: 'smooth' });
             
-            // Download link
             document.getElementById('downloads').innerHTML = `
                 <a href="${result.result_file}" class="download-btn" download>📥 Download Full Report (JSON)</a>
             `;
             
-            // Conclusion
             document.getElementById('conclusion').innerHTML = `
                 <h3>📝 AI Analysis</h3>
                 <p>${result.conclusion || 'Analysis complete. Check downloads for details.'}</p>
             `;
             
-            // Generate charts
             if (result.chartData) {
                 generateCharts(result.chartData);
             }
@@ -230,7 +223,6 @@
             const chartsDiv = document.getElementById('charts');
             chartsDiv.innerHTML = '<h3 style="margin-top: 30px;">📊 Visual Analysis</h3>';
             
-            // Chart 1: Current Metrics
             if (chartData.current && chartData.current.length > 0) {
                 const currentDiv = document.createElement('div');
                 currentDiv.className = 'chart';
@@ -253,7 +245,6 @@
                 });
             }
             
-            // Chart 2: Trends
             if (chartData.historical && chartData.historical.length > 0) {
                 const trendsDiv = document.createElement('div');
                 trendsDiv.className = 'chart';
