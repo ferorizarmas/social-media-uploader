@@ -15,7 +15,7 @@
       border-radius: 12px;
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
-    input, button, select {
+    input, button {
       display: block;
       margin: 15px 0;
       width: 100%;
@@ -42,16 +42,8 @@
 </head>
 <body>
   <h2>Subir Reporte Mensual</h2>
-
-  <input type="file" id="fileInput" accept="application/pdf" multiple />
-  
-  <label for="comparisonType">Tipo de comparación:</label>
-  <select id="comparisonType">
-    <option value="current_vs_previous">Mes actual vs anterior</option>
-    <option value="current_vs_historical">Mes actual vs histórico (todo el año)</option>
-  </select>
-
-  <button id="uploadBtn">Subir y Analizar</button>
+  <input type="file" id="fileInput" accept="application/pdf" />
+  <button onclick="uploadPDF()">Subir PDF</button>
   <div id="status"></div>
 
   <script>
@@ -60,64 +52,52 @@
     const FUNCTION_URL = "https://ftsmavpfnmpeltpnsdqx.supabase.co/functions/v1/process-report";
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const uploadBtn = document.getElementById("uploadBtn");
 
-    uploadBtn.onclick = async () => {
-      const files = document.getElementById("fileInput").files;
-      const comparisonType = document.getElementById("comparisonType").value;
+    async function uploadPDF() {
+      const file = document.getElementById("fileInput").files[0];
       const status = document.getElementById("status");
-      
-      if (!files.length) {
-        status.innerText = "Por favor, selecciona al menos un archivo PDF.";
+
+      if (!file) {
+        status.innerText = "Por favor, selecciona un archivo PDF.";
         return;
       }
 
-      status.innerText = "Subiendo archivos...";
+      status.innerText = "Subiendo archivo...";
 
-      const uploadedUrls = [];
+      const fileName = `${Date.now()}_${file.name}`;
+      const { data, error } = await supabase.storage
+        .from("pdf-uploads")
+        .upload(fileName, file);
 
-      for (const file of files) {
-        const fileName = `${Date.now()}_${file.name}`;
-        const { data, error } = await supabase.storage
-          .from("pdf-uploads")
-          .upload(fileName, file);
-
-        if (error) {
-          status.innerText = "❌ Error al subir el archivo: " + error.message;
-          return;
-        }
-
-        const { data: publicUrlData } = supabase.storage
-          .from("pdf-uploads")
-          .getPublicUrl(fileName);
-
-        uploadedUrls.push(publicUrlData.publicUrl);
+      if (error) {
+        status.innerText = "❌ Error al subir el archivo: " + error.message;
+        return;
       }
 
-      status.innerText = "Analizando reportes...";
+      const { data: publicUrlData } = supabase.storage
+        .from("pdf-uploads")
+        .getPublicUrl(fileName);
 
-      const prompt = `
-Contexto y Rol:
-Toma el papel de un analista experto en redes sociales. 
-Analiza los PDF(s) proporcionados según el tipo de comparación: ${comparisonType === "current_vs_previous" ? "mes actual vs anterior" : "mes actual vs histórico (todo el año)"}.
-Tu estilo es claro, conciso y profesional. 
-No repitas métricas numéricas, interprétalas. 
-Explica el comportamiento de cada red social y el rendimiento general, incluyendo conclusiones y 2 recomendaciones prácticas para el siguiente periodo.`;
+      const fileUrl = publicUrlData.publicUrl;
+
+      status.innerText = "PDF subido. Enviando a análisis...";
+
+      const prompt = `Analiza el archivo PDF con enfoque profesional de redes sociales. 
+Explica métricas sin repetir números, comunica resultados del mes y conclusiones generales.`;
 
       try {
         const res = await fetch(FUNCTION_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            file_urls: uploadedUrls,
-            comparison_type: comparisonType,
-            prompt
-          }),
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          },
+          body: JSON.stringify({ file_url: fileUrl, prompt }),
+          mode: "cors"
         });
 
         if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`HTTP ${res.status}: ${errText}`);
+          throw new Error("Error HTTP: " + res.status);
         }
 
         const result = await res.json();
@@ -130,8 +110,7 @@ Explica el comportamiento de cada red social y el rendimiento general, incluyend
       } catch (err) {
         status.innerText = "❌ Error al procesar: " + err.message;
       }
-    };
+    }
   </script>
 </body>
 </html>
-
