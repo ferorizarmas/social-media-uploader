@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subir Reporte Mensual - Redes Sociales</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -19,7 +20,7 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -66,6 +67,11 @@
             border-color: #764ba2;
         }
         
+        .upload-area.dragover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+        
         .upload-icon {
             font-size: 48px;
             margin-bottom: 10px;
@@ -77,7 +83,7 @@
         
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -118,6 +124,9 @@
             color: #333;
             margin-bottom: 15px;
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .month-selector {
@@ -126,8 +135,20 @@
             margin-bottom: 20px;
         }
         
-        .month-selector select {
+        .month-selector > div {
             flex: 1;
+        }
+        
+        .month-selector label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .month-selector select {
+            width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -221,6 +242,7 @@
             text-decoration: none;
             border-radius: 8px;
             text-align: center;
+            font-weight: bold;
         }
         
         .result-link:hover {
@@ -249,8 +271,8 @@
         <div class="section">
             <div class="section-title">2. Seleccionar Meses</div>
             <div class="month-selector">
-                <div style="flex: 1;">
-                    <label style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Mes Anterior</label>
+                <div>
+                    <label>Mes Anterior</label>
                     <select id="previousMonth">
                         <option value="ENERO">Enero</option>
                         <option value="FEBRERO">Febrero</option>
@@ -265,3 +287,366 @@
                         <option value="NOVIEMBRE">Noviembre</option>
                         <option value="DICIEMBRE">Diciembre</option>
                     </select>
+                </div>
+                <div>
+                    <label>Mes Actual</label>
+                    <select id="currentMonth">
+                        <option value="ENERO">Enero</option>
+                        <option value="FEBRERO">Febrero</option>
+                        <option value="MARZO">Marzo</option>
+                        <option value="ABRIL">Abril</option>
+                        <option value="MAYO">Mayo</option>
+                        <option value="JUNIO">Junio</option>
+                        <option value="JULIO">Julio</option>
+                        <option value="AGOSTO">Agosto</option>
+                        <option value="SEPTIEMBRE">Septiembre</option>
+                        <option value="OCTUBRE" selected>Octubre</option>
+                        <option value="NOVIEMBRE">Noviembre</option>
+                        <option value="DICIEMBRE">Diciembre</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Metrics Input -->
+        <div class="section">
+            <div class="section-title">3. Ingresar Métricas del Mes Anterior</div>
+            
+            <!-- Facebook Previous -->
+            <div class="platform-section">
+                <div class="platform-title">📘 Facebook - Mes Anterior</div>
+                <div class="metrics-grid">
+                    <div class="metric-input">
+                        <label>Seguidores</label>
+                        <input type="number" id="prev_fb_seguidores" placeholder="17633">
+                    </div>
+                    <div class="metric-input">
+                        <label>Visualizaciones</label>
+                        <input type="number" id="prev_fb_visualizaciones" placeholder="198739">
+                    </div>
+                    <div class="metric-input">
+                        <label>Alcance</label>
+                        <input type="number" id="prev_fb_alcance" placeholder="47505">
+                    </div>
+                    <div class="metric-input">
+                        <label>Interacciones</label>
+                        <input type="number" id="prev_fb_interacciones" placeholder="671">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Instagram Previous -->
+            <div class="platform-section">
+                <div class="platform-title">📷 Instagram - Mes Anterior</div>
+                <div class="metrics-grid">
+                    <div class="metric-input">
+                        <label>Seguidores</label>
+                        <input type="number" id="prev_ig_seguidores" placeholder="10032">
+                    </div>
+                    <div class="metric-input">
+                        <label>Visualizaciones</label>
+                        <input type="number" id="prev_ig_visualizaciones" placeholder="246003">
+                    </div>
+                    <div class="metric-input">
+                        <label>Alcance</label>
+                        <input type="number" id="prev_ig_alcance" placeholder="21603">
+                    </div>
+                    <div class="metric-input">
+                        <label>Interacciones</label>
+                        <input type="number" id="prev_ig_interacciones" placeholder="1134">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TikTok Previous -->
+            <div class="platform-section">
+                <div class="platform-title">🎵 TikTok - Mes Anterior</div>
+                <div class="metrics-grid">
+                    <div class="metric-input">
+                        <label>Seguidores</label>
+                        <input type="number" id="prev_tt_seguidores" placeholder="1923">
+                    </div>
+                    <div class="metric-input">
+                        <label>Visualizaciones</label>
+                        <input type="number" id="prev_tt_visualizaciones" placeholder="5601">
+                    </div>
+                    <div class="metric-input">
+                        <label>Alcance</label>
+                        <input type="number" id="prev_tt_alcance" placeholder="3236">
+                    </div>
+                    <div class="metric-input">
+                        <label>Interacciones</label>
+                        <input type="number" id="prev_tt_interacciones" placeholder="196">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Current Month Metrics -->
+        <div class="section">
+            <div class="section-title">4. Ingresar Métricas del Mes Actual</div>
+            
+            <!-- Facebook Current -->
+            <div class="platform-section">
+                <div class="platform-title">📘 Facebook - Mes Actual</div>
+                <div class="metrics-grid">
+                    <div class="metric-input">
+                        <label>Seguidores</label>
+                        <input type="number" id="curr_fb_seguidores" placeholder="17704">
+                    </div>
+                    <div class="metric-input">
+                        <label>Visualizaciones</label>
+                        <input type="number" id="curr_fb_visualizaciones" placeholder="271370">
+                    </div>
+                    <div class="metric-input">
+                        <label>Alcance</label>
+                        <input type="number" id="curr_fb_alcance" placeholder="51953">
+                    </div>
+                    <div class="metric-input">
+                        <label>Interacciones</label>
+                        <input type="number" id="curr_fb_interacciones" placeholder="460">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Instagram Current -->
+            <div class="platform-section">
+                <div class="platform-title">📷 Instagram - Mes Actual</div>
+                <div class="metrics-grid">
+                    <div class="metric-input">
+                        <label>Seguidores</label>
+                        <input type="number" id="curr_ig_seguidores" placeholder="10178">
+                    </div>
+                    <div class="metric-input">
+                        <label>Visualizaciones</label>
+                        <input type="number" id="curr_ig_visualizaciones" placeholder="214741">
+                    </div>
+                    <div class="metric-input">
+                        <label>Alcance</label>
+                        <input type="number" id="curr_ig_alcance" placeholder="24115">
+                    </div>
+                    <div class="metric-input">
+                        <label>Interacciones</label>
+                        <input type="number" id="curr_ig_interacciones" placeholder="1449">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TikTok Current -->
+            <div class="platform-section">
+                <div class="platform-title">🎵 TikTok - Mes Actual</div>
+                <div class="metrics-grid">
+                    <div class="metric-input">
+                        <label>Seguidores</label>
+                        <input type="number" id="curr_tt_seguidores" placeholder="2113">
+                    </div>
+                    <div class="metric-input">
+                        <label>Visualizaciones</label>
+                        <input type="number" id="curr_tt_visualizaciones" placeholder="13140">
+                    </div>
+                    <div class="metric-input">
+                        <label>Alcance</label>
+                        <input type="number" id="curr_tt_alcance" placeholder="11070">
+                    </div>
+                    <div class="metric-input">
+                        <label>Interacciones</label>
+                        <input type="number" id="curr_tt_interacciones" placeholder="445">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Submit Button -->
+        <button class="btn" id="submitBtn" onclick="processReport()">Procesar Reporte</button>
+        
+        <!-- Loading Spinner -->
+        <div class="spinner" id="spinner"></div>
+        
+        <!-- Status Message -->
+        <div class="status" id="status"></div>
+        
+        <!-- Result Links -->
+        <div class="result-links" id="resultLinks">
+            <h3 style="text-align: center; margin-bottom: 15px;">✅ Análisis Completado</h3>
+            <a id="jsonLink" class="result-link" target="_blank">📄 Descargar Resultado JSON</a>
+            <a id="txtLink" class="result-link" target="_blank">📝 Descargar Análisis TXT</a>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ REPLACE THESE WITH YOUR ACTUAL VALUES
+        const SUPABASE_URL = 'https://ftsmavpfnmpeltpnsdqx.supabase.co'
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE'
+        const FUNCTION_URL = 'https://ftsmavpfnmpeltpnsdqx.supabase.co/functions/v1/process-report'
+        
+        // Initialize Supabase
+        const { createClient } = supabase
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        
+        let selectedFile = null
+        
+        // File upload handlers
+        const uploadArea = document.getElementById('uploadArea')
+        const fileInput = document.getElementById('fileInput')
+        const fileName = document.getElementById('fileName')
+        
+        uploadArea.addEventListener('click', () => fileInput.click())
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault()
+            uploadArea.classList.add('dragover')
+        })
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover')
+        })
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault()
+            uploadArea.classList.remove('dragover')
+            const file = e.dataTransfer.files[0]
+            if (file && file.type === 'application/pdf') {
+                handleFile(file)
+            }
+        })
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0]
+            if (file) handleFile(file)
+        })
+        
+        function handleFile(file) {
+            if (file.size > 50 * 1024 * 1024) {
+                showStatus('error', 'El archivo es muy grande. Máximo 50MB.')
+                return
+            }
+            selectedFile = file
+            fileName.textContent = `✓ ${file.name}`
+        }
+        
+        function showStatus(type, message) {
+            const status = document.getElementById('status')
+            status.className = `status show ${type}`
+            status.textContent = message
+        }
+        
+        function getInputValue(id) {
+            const val = document.getElementById(id).value
+            return val ? parseInt(val) : 0
+        }
+        
+        async function processReport() {
+            // Validate
+            if (!selectedFile) {
+                showStatus('error', 'Por favor selecciona un archivo PDF')
+                return
+            }
+            
+            const submitBtn = document.getElementById('submitBtn')
+            const spinner = document.getElementById('spinner')
+            const resultLinks = document.getElementById('resultLinks')
+            
+            submitBtn.disabled = true
+            spinner.classList.add('show')
+            resultLinks.classList.remove('show')
+            showStatus('processing', 'Subiendo PDF...')
+            
+            try {
+                // Get form data
+                const previousMonth = document.getElementById('previousMonth').value
+                const currentMonth = document.getElementById('currentMonth').value
+                
+                const previous_metrics = {
+                    facebook: {
+                        seguidores: getInputValue('prev_fb_seguidores'),
+                        visualizaciones: getInputValue('prev_fb_visualizaciones'),
+                        alcance: getInputValue('prev_fb_alcance'),
+                        interacciones: getInputValue('prev_fb_interacciones')
+                    },
+                    instagram: {
+                        seguidores: getInputValue('prev_ig_seguidores'),
+                        visualizaciones: getInputValue('prev_ig_visualizaciones'),
+                        alcance: getInputValue('prev_ig_alcance'),
+                        interacciones: getInputValue('prev_ig_interacciones')
+                    },
+                    tiktok: {
+                        seguidores: getInputValue('prev_tt_seguidores'),
+                        visualizaciones: getInputValue('prev_tt_visualizaciones'),
+                        alcance: getInputValue('prev_tt_alcance'),
+                        interacciones: getInputValue('prev_tt_interacciones')
+                    }
+                }
+                
+                const current_metrics = {
+                    facebook: {
+                        seguidores: getInputValue('curr_fb_seguidores'),
+                        visualizaciones: getInputValue('curr_fb_visualizaciones'),
+                        alcance: getInputValue('curr_fb_alcance'),
+                        interacciones: getInputValue('curr_fb_interacciones')
+                    },
+                    instagram: {
+                        seguidores: getInputValue('curr_ig_seguidores'),
+                        visualizaciones: getInputValue('curr_ig_visualizaciones'),
+                        alcance: getInputValue('curr_ig_alcance'),
+                        interacciones: getInputValue('curr_ig_interacciones')
+                    },
+                    tiktok: {
+                        seguidores: getInputValue('curr_tt_seguidores'),
+                        visualizaciones: getInputValue('curr_tt_visualizaciones'),
+                        alcance: getInputValue('curr_tt_alcance'),
+                        interacciones: getInputValue('curr_tt_interacciones')
+                    }
+                }
+                
+                // Upload PDF to Supabase
+                const filename = `reporte_${currentMonth}_${Date.now()}.pdf`
+                
+                const { data: uploadData, error: uploadError } = await supabaseClient
+                    .storage
+                    .from('pdf-uploads')
+                    .upload(filename, selectedFile)
+                
+                if (uploadError) throw uploadError
+                
+                showStatus('processing', 'Procesando con IA... Esto puede tardar 1-2 minutos')
+                
+                // Call Edge Function
+                const response = await fetch(FUNCTION_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        filename,
+                        current_month: currentMonth,
+                        previous_month: previousMonth,
+                        current_metrics,
+                        previous_metrics
+                    })
+                })
+                
+                const result = await response.json()
+                
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || 'Error procesando reporte')
+                }
+                
+                // Show results
+                document.getElementById('jsonLink').href = result.result_json
+                document.getElementById('txtLink').href = result.result_text
+                resultLinks.classList.add('show')
+                
+                showStatus('success', '✅ ¡Reporte procesado exitosamente!')
+                
+            } catch (error) {
+                console.error('Error:', error)
+                showStatus('error', `Error: ${error.message}`)
+            } finally {
+                submitBtn.disabled = false
+                spinner.classList.remove('show')
+            }
+        }
+    </script>
+</body>
+</html>
