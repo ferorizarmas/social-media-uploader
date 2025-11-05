@@ -1,116 +1,116 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Subir Reporte Mensual - Redes Sociales</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 500px;
-      margin: 60px auto;
-      background: #fafafa;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-    input, button {
-      display: block;
-      margin: 15px 0;
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-    }
-    button {
-      background-color: #4a6cff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #3456db;
-    }
-    #status {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #333;
-      white-space: pre-wrap;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subir Reporte Mensual - Redes Sociales</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 500px;
+      margin: 60px auto;
+      background: #fafafa;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    input, button {
+      display: block;
+      margin: 15px 0;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #4a6cff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3456db;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #333;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
-  <h2>Subir Reporte Mensual</h2>
-  <input type="file" id="fileInput" accept="application/pdf" />
-  <button onclick="uploadPDF()">Subir PDF</button>
-  <div id="status"></div>
+  <h2>Subir Reporte Mensual</h2>
+  <input type="file" id="fileInput" accept="application/pdf" />
+  <button onclick="uploadPDF()">Subir PDF</button>
+  <div id="status"></div>
 
-  <script>
-    const SUPABASE_URL = "https://ftsmavpfnmpeltpnsdqx.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_Sw77p_8AO5a9TiV4pepBag_0qbRCj0L";
-    const FUNCTION_URL = "https://ftsmavpfnmpeltpnsdqx.supabase.co/functions/v1/process-report";
+  <script>
+    const SUPABASE_URL = "https://ftsmavpfnmpeltpnsdqx.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_Sw77p_8AO5a9TiV4pepBag_0qbRCj0L";
+    const FUNCTION_URL = "https://ftsmavpfnmpeltpnsdqx.supabase.co/functions/v1/process-report";
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function uploadPDF() {
-      const file = document.getElementById("fileInput").files[0];
-      const status = document.getElementById("status");
+    async function uploadPDF() {
+      const file = document.getElementById("fileInput").files[0];
+      const status = document.getElementById("status");
 
-      if (!file) {
-        status.innerText = "Por favor, selecciona un archivo PDF.";
-        return;
-      }
+      if (!file) {
+        status.innerText = "Por favor, selecciona un archivo PDF.";
+        return;
+      }
 
-      status.innerText = "Subiendo archivo...";
+      status.innerText = "Subiendo archivo...";
 
-      const fileName = `${Date.now()}_${file.name}`;
-      const { data, error } = await supabase.storage
-        .from("pdf-uploads")
-        .upload(fileName, file);
+      const fileName = `${Date.now()}_${file.name}`;
+      const { data, error } = await supabase.storage
+        .from("pdf-uploads")
+        .upload(fileName, file);
 
-      if (error) {
-        status.innerText = "❌ Error al subir el archivo: " + error.message;
-        return;
-      }
+      if (error) {
+        status.innerText = "❌ Error al subir el archivo: " + error.message;
+        return;
+      }
 
-      const { data: publicUrlData } = supabase.storage
-        .from("pdf-uploads")
-        .getPublicUrl(fileName);
+      const { data: publicUrlData } = supabase.storage
+        .from("pdf-uploads")
+        .getPublicUrl(fileName);
 
-      const fileUrl = publicUrlData.publicUrl;
+      const fileUrl = publicUrlData.publicUrl;
 
-      status.innerText = "PDF subido. Enviando a análisis...";
+      status.innerText = "PDF subido. Enviando a análisis...";
 
-      const prompt = `Analiza el archivo PDF con enfoque profesional de redes sociales. 
+      const prompt = `Analiza el archivo PDF con enfoque profesional de redes sociales. 
 Explica métricas sin repetir números, comunica resultados del mes y conclusiones generales.`;
 
-      try {
-        const res = await fetch(FUNCTION_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-          },
-          body: JSON.stringify({ file_url: fileUrl, prompt }),
-          mode: "cors"
-        });
+      try {
+        const res = await fetch(FUNCTION_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // ❌ Se eliminó "Access-Control-Allow-Origin": "*". Este es un encabezado de RESPUESTA del servidor.
+          },
+          body: JSON.stringify({ file_url: fileUrl, prompt }),
+          mode: "cors"
+        });
 
-        if (!res.ok) {
-          throw new Error("Error HTTP: " + res.status);
-        }
+        if (!res.ok) {
+          throw new Error("Error HTTP: " + res.status);
+        }
 
-        const result = await res.json();
+        const result = await res.json();
 
-        if (result.error) {
-          status.innerText = "❌ Error en el análisis: " + result.error;
-        } else {
-          status.innerText = "✅ Análisis completado:\n\n" + result.result;
-        }
-      } catch (err) {
-        status.innerText = "❌ Error al procesar: " + err.message;
-      }
-    }
-  </script>
+        if (result.error) {
+          status.innerText = "❌ Error en el análisis: " + result.error;
+        } else {
+          status.innerText = "✅ Análisis completado:\n\n" + result.result;
+        }
+      } catch (err) {
+        status.innerText = "❌ Error al procesar: " + err.message;
+      }
+    }
+  </script>
 </body>
 </html>
