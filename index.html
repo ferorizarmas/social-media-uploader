@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir Reporte Mensual - Redes Sociales</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area:hover {
+            background: #f8f9ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .metric-input {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .metric-input label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .metric-input input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .metric-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .platform-section {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .platform-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .month-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .month-selector select {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            text-align: center;
+        }
+        
+        .status.show {
+            display: block;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.processing {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        .spinner.show {
+            display: block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result-links {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .result-links.show {
+            display: block;
+        }
+        
+        .result-link {
+            display: block;
+            padding: 12px;
+            margin: 10px 0;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .result-link:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Subir Reporte Mensual</h1>
+        <p class="subtitle">Gestión de Redes Sociales</p>
+        
+        <!-- PDF Upload -->
+        <div class="section">
+            <div class="section-title">1. Seleccionar PDF del Reporte</div>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📄</div>
+                <p><strong>Arrastra tu PDF aquí o haz clic para seleccionar</strong></p>
+                <p style="font-size: 12px; color: #666; margin-top: 10px;">Máximo 50MB</p>
+                <input type="file" id="fileInput" accept=".pdf">
+            </div>
+            <div id="fileName" style="text-align: center; color: #667eea; font-weight: bold;"></div>
+        </div>
+        
+        <!-- Month Selection -->
+        <div class="section">
+            <div class="section-title">2. Seleccionar Meses</div>
+            <div class="month-selector">
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Mes Anterior</label>
+                    <select id="previousMonth">
+                        <option value="ENERO">Enero</option>
+                        <option value="FEBRERO">Febrero</option>
+                        <option value="MARZO">Marzo</option>
+                        <option value="ABRIL">Abril</option>
+                        <option value="MAYO">Mayo</option>
+                        <option value="JUNIO">Junio</option>
+                        <option value="JULIO">Julio</option>
+                        <option value="AGOSTO">Agosto</option>
+                        <option value="SEPTIEMBRE" selected>Septiembre</option>
+                        <option value="OCTUBRE">Octubre</option>
+                        <option value="NOVIEMBRE">Noviembre</option>
+                        <option value="DICIEMBRE">Diciembre</option>
+                    </select>
