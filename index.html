@@ -3,19 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Subir Reporte Mensual - Redes Sociales</title>
+  <title>Subir Reportes Mensuales - Redes Sociales</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       font-family: sans-serif;
-      max-width: 500px;
+      max-width: 520px;
       margin: 60px auto;
       background: #fafafa;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
-    input, button {
+    h2 {
+      text-align: center;
+    }
+    input, select, button {
       display: block;
       margin: 15px 0;
       width: 100%;
@@ -41,9 +44,19 @@
   </style>
 </head>
 <body>
-  <h2>Subir Reporte Mensual</h2>
-  <input type="file" id="fileInput" accept="application/pdf" />
-  <button onclick="uploadPDF()">Subir PDF</button>
+  <h2>Subir Reportes Mensuales</h2>
+
+  <label for="fileInput">Selecciona uno o varios archivos PDF:</label>
+  <input type="file" id="fileInput" accept="application/pdf" multiple />
+
+  <label for="comparisonType">Tipo de comparación:</label>
+  <select id="comparisonType">
+    <option value="month_vs_previous">Mes actual vs anterior</option>
+    <option value="month_vs_historical">Mes actual vs histórico</option>
+  </select>
+
+  <button onclick="uploadPDFs()">Subir y Analizar</button>
+
   <div id="status"></div>
 
   <script>
@@ -53,56 +66,69 @@
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function uploadPDF() {
-      const file = document.getElementById("fileInput").files[0];
+    async function uploadPDFs() {
+      const files = document.getElementById("fileInput").files;
+      const comparisonType = document.getElementById("comparisonType").value;
       const status = document.getElementById("status");
 
-      if (!file) {
-        status.innerText = "Por favor, selecciona un archivo PDF.";
+      if (!files.length) {
+        status.innerText = "Por favor, selecciona al menos un archivo PDF.";
         return;
       }
 
-      status.innerText = "Subiendo archivo...";
+      status.innerText = "Subiendo archivos...";
+      const fileUrls = [];
 
-      const fileName = `${Date.now()}_${file.name}`;
-      const { data, error } = await supabase.storage
-        .from("pdf-uploads")
-        .upload(fileName, file);
+      for (const file of files) {
+        const fileName = `${Date.now()}_${file.name}`;
+        const { data, error } = await supabase.storage
+          .from("pdf-uploads")
+          .upload(fileName, file);
 
-      if (error) {
-        status.innerText = "❌ Error al subir el archivo: " + error.message;
-        return;
+        if (error) {
+          status.innerText = "❌ Error al subir " + file.name + ": " + error.message;
+          return;
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from("pdf-uploads")
+          .getPublicUrl(fileName);
+
+        fileUrls.push(publicUrlData.publicUrl);
       }
 
-      const { data: publicUrlData } = supabase.storage
-        .from("pdf-uploads")
-        .getPublicUrl(fileName);
+      status.innerText = "Archivos subidos. Enviando a análisis...";
 
-      const fileUrl = publicUrlData.publicUrl;
+      const prompt = `Contexto y Rol:
+Eres experto en análisis de redes sociales. Debes interpretar los reportes de gestión y redactar un texto analítico profesional.
+El análisis debe ser claro, sin frases vacías o de marketing.
 
-      status.innerText = "PDF subido. Enviando a análisis...";
+Tarea:
+Analiza los PDFs proporcionados (${files.length} reportes en total). 
+Dependiendo de la opción elegida:
+- "Mes actual vs anterior": compara los dos últimos archivos.
+- "Mes actual vs histórico": compara el más reciente con todos los anteriores.
 
-      const prompt = `Contexto y Rol: 
-      Toma el papel de alguien que es experto en social media y redes sociales, para ayudar a explicar los reportes de gestión que llevamos para los clientes. 
-      Tu estilo es serio y directo, sin adornos innecesarios, ni explicaciones complicadas. Escribe en párrafos corridos, no en listas. 
-      Tarea Tienes que realizar el análisis de las métricas obtenidas de la gestión de redes sociales de la marca. 
-      El resultado debe incluir un análisis por red social comparando el mes anterior con el presente; así como lograr comunicar el comportamiento de las métricas durante todo el periodo del año, con base en el PDF que se adjunta. 
-      Entregable Incluir una introducción del comportamiento del mes analizado. Análisis por red social con la información de los dos meses que se proporcionan.
-      Incluir un análisis del comportamiento general y lo que esto implica en el crecimiento y posicionamiento de la cuenta en redes sociales. 
-      Que el análisis sea fácil de entender para alguien que no maneja las redes sociales y que muestre el beneficio de forma clara de la gestión que proporciona la agencia. 
-      No repitas las métricas proporcionadas, explícalas, porque ya fueron proporcionadas al cliente en la diapositiva anterior. 
-      Para las conclusiones generales, explica de forma clara y breve el comportamiento de todo el periodo. 
-      Agrega 2 recomendaciones para el próximo periodo; con base en el análisis que tienes del mes anterior a este; para mejoras que podemos llevar a cabo en la cuenta. 
-      Haz un cierre con la importancia de contar con gestión y presencia en redes con apoyo de profesionales Verificación Antes de entregar, revisa que los textos no traigan frases como “eleva tus métricas al siguiente nivel” o un enfoque superficial y poco profesional. 
-      Que sea un texto profesional y entendible para nuestros clientes. Que las métricas sean explicadas, no repetir la información.`;
+Debes incluir:
+1. Introducción breve del comportamiento general.
+2. Análisis por red social explicando los cambios.
+3. Conclusión sobre la evolución general y qué implica para la marca.
+4. Dos recomendaciones concretas para el siguiente mes.
+
+Evita repetir las métricas numéricas, interprétalas. No uses frases genéricas.`;
 
       const res = await fetch(FUNCTION_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ file_url: fileUrl, prompt }),
+        body: JSON.stringify({
+          file_urls: fileUrls,
+          prompt,
+          comparison_type: comparisonType,
+        }),
       });
 
       const result = await res.json();
+
       if (result.error) {
         status.innerText = "❌ Error en el análisis: " + result.error;
       } else {
