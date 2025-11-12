@@ -343,7 +343,7 @@
       grid.innerHTML = '';
       
       for (let month = 1; month <= 12; month++) {
-        const existingReport = reports?.find(r => r.month === month && !r.is_current);
+        const existingReport = reports?.find(r => r.month === month);
         
         const monthDiv = document.createElement('div');
         monthDiv.className = 'month-upload' + (existingReport ? ' has-file' : '');
@@ -365,13 +365,7 @@
         grid.appendChild(monthDiv);
       }
       
-      // Verificar si hay reporte actual
-      const currentReport = reports?.find(r => r.is_current);
-      if (currentReport) {
-        currentReportId = currentReport.id;
-        document.getElementById('currentFileInfo').innerHTML = `✅ <strong>${currentReport.filename.split('_').pop()}</strong> subido`;
-        checkIfCanGenerate();
-      }
+      checkIfCanGenerate();
     }
     
     async function uploadHistorical(month) {
@@ -404,8 +398,7 @@
           month,
           year: currentYear,
           filename,
-          file_url: urlData.publicUrl,
-          is_current: false
+          file_url: urlData.publicUrl
         }, {
           onConflict: 'company_id,month,year'
         });
@@ -467,25 +460,15 @@
         .from('pdf-uploads')
         .getPublicUrl(filename);
       
-      // Primero marcar todos los otros reportes como no actuales
-      await supabase
-        .from('reports')
-        .update({ is_current: false })
-        .eq('company_id', currentCompanyId)
-        .eq('year', currentYear);
-      
-      // Luego insertar/actualizar el reporte actual
       const { data, error: dbError } = await supabase
         .from('reports')
-        .upsert({
+        .insert({
           company_id: currentCompanyId,
           month: currentMonth,
           year: currentYear,
           filename,
           file_url: urlData.publicUrl,
           is_current: true
-        }, {
-          onConflict: 'company_id,month,year'
         })
         .select();
       
