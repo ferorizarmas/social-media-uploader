@@ -3,129 +3,262 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Subir Reporte Mensual - Redes Sociales</title>
+  <title>Sistema de Análisis Multi-Empresa</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: sans-serif;
-      max-width: 900px;
-      margin: 40px auto;
-      background: #fafafa;
-      padding: 30px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 { color: #333; margin-bottom: 10px; }
+    .subtitle { color: #666; margin-bottom: 30px; }
+    
+    .section {
+      background: #f8f9fa;
+      padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
     }
-    h2 { text-align: center; color: #333; margin-bottom: 30px; }
-    input, button {
-      display: block;
-      margin: 15px 0;
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 6px;
+    .section h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+    
+    .company-selector {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .company-selector input, .company-selector select, .company-selector button {
+      padding: 12px 20px;
+      font-size: 15px;
       border: 1px solid #ddd;
+      border-radius: 8px;
     }
-    button {
-      background-color: #4a6cff;
+    .company-selector button {
+      background: #667eea;
       color: white;
       border: none;
       cursor: pointer;
       font-weight: 600;
     }
-    button:hover { background-color: #3456db; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    #status {
+    .company-selector button:hover { background: #5568d3; }
+    
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .month-upload {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      text-align: center;
+      position: relative;
+    }
+    .month-upload h3 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .month-upload.has-file {
+      border-color: #4caf50;
+      background: #f1f8f4;
+    }
+    .month-upload input[type="file"] {
+      display: none;
+    }
+    .month-upload label {
+      display: block;
+      padding: 10px;
+      background: #667eea;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .month-upload label:hover { background: #5568d3; }
+    .file-info {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #666;
+      word-break: break-all;
+    }
+    .file-actions {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+    .file-actions button {
+      padding: 6px 12px;
+      font-size: 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-delete { background: #f44336; color: white; }
+    .btn-delete:hover { background: #d32f2f; }
+    
+    .current-report-section {
+      background: #fff3e0;
+      padding: 25px;
+      border-radius: 12px;
+      border: 2px solid #ff9800;
+      margin-bottom: 25px;
+    }
+    .current-report-section h2 {
+      color: #ff9800;
+    }
+    .upload-current {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .upload-current input[type="file"] {
+      flex: 1;
+      padding: 12px;
+      border: 2px dashed #ff9800;
+      border-radius: 8px;
+      background: white;
+    }
+    
+    .generate-btn {
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+      color: white;
+      padding: 18px 40px;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+      box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+    }
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 152, 0, 0.6);
+    }
+    .generate-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .status {
       margin-top: 20px;
       padding: 15px;
       border-radius: 8px;
-      font-size: 14px;
       display: none;
+      text-align: center;
+      font-weight: 500;
     }
-    #status.loading {
-      background: #e3f2fd;
-      color: #1976d2;
-      display: block;
-    }
-    #status.success {
-      background: #e8f5e9;
-      color: #2e7d32;
-      display: block;
-    }
-    #status.error {
-      background: #ffebee;
-      color: #c62828;
-      display: block;
-    }
-    #results {
+    .status.loading { background: #e3f2fd; color: #1976d2; display: block; }
+    .status.success { background: #e8f5e9; color: #2e7d32; display: block; }
+    .status.error { background: #ffebee; color: #c62828; display: block; }
+    
+    .results {
       margin-top: 30px;
+      padding: 30px;
+      background: #f8f9fa;
+      border-radius: 12px;
       display: none;
     }
-    .analysis-section {
-      background: white;
-      padding: 25px;
-      margin: 20px 0;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      border-left: 4px solid #4a6cff;
-    }
-    .analysis-section h3 {
+    .results h2 {
       color: #333;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
     .analysis-content {
-      line-height: 1.8;
-      color: #555;
-      white-space: pre-wrap;
-    }
-    .chart-container {
       background: white;
-      padding: 20px;
-      margin: 20px 0;
+      padding: 30px;
       border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      line-height: 1.9;
+      color: #444;
+      white-space: pre-wrap;
+      font-size: 15px;
     }
     .download-btn {
       display: inline-block;
       background: #2e7d32;
       color: white;
-      padding: 12px 25px;
-      border-radius: 6px;
+      padding: 14px 30px;
+      border-radius: 8px;
       text-decoration: none;
-      margin-top: 15px;
+      margin-top: 20px;
       font-weight: 600;
     }
-    .download-btn:hover {
-      background: #1b5e20;
-    }
+    .download-btn:hover { background: #1b5e20; }
   </style>
 </head>
 <body>
-  <h2>📊 Análisis Automático de Reportes Mensuales</h2>
-  
-  <input type="file" id="fileInput" accept="application/pdf" />
-  <button onclick="uploadPDF()" id="uploadBtn">Subir y Analizar PDF</button>
-  
-  <div id="status"></div>
-  
-  <div id="results">
-    <div class="analysis-section">
-      <h3>📈 Análisis vs Mes Anterior</h3>
-      <div id="analysisPrevious" class="analysis-content"></div>
+  <div class="container">
+    <h1>📊 Sistema de Análisis Multi-Empresa</h1>
+    <p class="subtitle">Gestiona reportes históricos y genera análisis automáticos</p>
+    
+    <!-- Selector de Empresa -->
+    <div class="section">
+      <h2>1️⃣ Seleccionar Empresa</h2>
+      <div class="company-selector">
+        <select id="companySelect">
+          <option value="">Seleccionar empresa existente...</option>
+        </select>
+        <span style="padding: 12px;">O crear nueva:</span>
+        <input type="text" id="newCompanyName" placeholder="Nombre de nueva empresa" />
+        <button onclick="createCompany()">➕ Crear Empresa</button>
+      </div>
     </div>
     
-    <div class="chart-container" id="chartPrevious"></div>
-    
-    <div class="analysis-section" style="border-left-color: #2e7d32;">
-      <h3>📊 Análisis vs Promedio Histórico</h3>
-      <div id="analysisHistorical" class="analysis-content"></div>
+    <!-- Subir Reportes Históricos -->
+    <div class="section" id="historicalSection" style="display: none;">
+      <h2>2️⃣ Subir/Gestionar Reportes Históricos</h2>
+      <p style="margin-bottom: 20px; color: #666;">Sube los reportes de meses anteriores. Puedes editar o eliminar después.</p>
+      
+      <div class="upload-grid" id="monthsGrid"></div>
     </div>
     
-    <div class="chart-container" id="chartHistorical"></div>
-    <div class="chart-container" id="chartTrends"></div>
+    <!-- Subir Reporte Actual -->
+    <div class="current-report-section" id="currentSection" style="display: none;">
+      <h2>3️⃣ Subir Reporte del Mes Actual</h2>
+      <p style="margin-bottom: 15px; color: #666;">Este es el reporte que se comparará con todos los históricos</p>
+      
+      <div class="upload-current">
+        <input type="file" id="currentFile" accept=".pdf" />
+        <button onclick="uploadCurrent()" style="background: #ff9800; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+          📤 Subir Actual
+        </button>
+      </div>
+      <div id="currentFileInfo" style="margin-top: 10px; color: #666;"></div>
+    </div>
     
-    <div style="text-align: center;">
-      <a id="downloadLink" class="download-btn" style="display: none;">📥 Descargar Análisis Completo (JSON)</a>
+    <!-- Generar Análisis -->
+    <button class="generate-btn" id="generateBtn" onclick="generateAnalysis()" style="display: none;">
+      🚀 Generar Análisis Completo
+    </button>
+    
+    <div id="status" class="status"></div>
+    
+    <!-- Resultados -->
+    <div id="results" class="results">
+      <h2>📄 Análisis Generado</h2>
+      <div id="analysisContent" class="analysis-content"></div>
+      <a id="downloadLink" class="download-btn" style="display: none;">📥 Descargar Análisis (TXT)</a>
     </div>
   </div>
 
@@ -136,227 +269,290 @@
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    async function uploadPDF() {
-      const file = document.getElementById("fileInput").files[0];
-      const status = document.getElementById("status");
-      const uploadBtn = document.getElementById("uploadBtn");
-      const results = document.getElementById("results");
+    let currentCompanyId = null;
+    let currentReportId = null;
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const currentYear = new Date().getFullYear();
+    
+    // Cargar empresas al inicio
+    loadCompanies();
+    
+    async function loadCompanies() {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+        .order('name');
       
-      if (!file) {
-        status.className = "error";
-        status.textContent = "Por favor, selecciona un archivo PDF.";
+      if (!error && data) {
+        const select = document.getElementById('companySelect');
+        select.innerHTML = '<option value="">Seleccionar empresa existente...</option>';
+        data.forEach(company => {
+          const option = document.createElement('option');
+          option.value = company.id;
+          option.textContent = company.name;
+          select.appendChild(option);
+        });
+      }
+    }
+    
+    document.getElementById('companySelect').onchange = function() {
+      currentCompanyId = this.value;
+      if (currentCompanyId) {
+        document.getElementById('newCompanyName').value = '';
+        loadCompanyReports();
+      }
+    };
+    
+    async function createCompany() {
+      const name = document.getElementById('newCompanyName').value.trim();
+      if (!name) {
+        alert('Ingresa un nombre para la empresa');
         return;
       }
       
-      uploadBtn.disabled = true;
-      results.style.display = "none";
-      status.className = "loading";
-      status.textContent = "⏳ Subiendo archivo...";
+      const { data, error } = await supabase
+        .from('companies')
+        .insert({ name })
+        .select();
+      
+      if (error) {
+        alert('Error: ' + error.message);
+        return;
+      }
+      
+      currentCompanyId = data[0].id;
+      await loadCompanies();
+      document.getElementById('companySelect').value = currentCompanyId;
+      document.getElementById('newCompanyName').value = '';
+      loadCompanyReports();
+    }
+    
+    async function loadCompanyReports() {
+      document.getElementById('historicalSection').style.display = 'block';
+      document.getElementById('currentSection').style.display = 'block';
+      
+      // Cargar reportes existentes
+      const { data: reports } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('company_id', currentCompanyId)
+        .eq('year', currentYear);
+      
+      // Crear grid de meses
+      const grid = document.getElementById('monthsGrid');
+      grid.innerHTML = '';
+      
+      for (let month = 1; month <= 12; month++) {
+        const existingReport = reports?.find(r => r.month === month && !r.is_current);
+        
+        const monthDiv = document.createElement('div');
+        monthDiv.className = 'month-upload' + (existingReport ? ' has-file' : '');
+        monthDiv.innerHTML = `
+          <h3>${monthNames[month-1]}</h3>
+          <input type="file" id="file-${month}" accept=".pdf" onchange="uploadHistorical(${month})">
+          <label for="file-${month}">
+            ${existingReport ? '✏️ Cambiar PDF' : '📤 Subir PDF'}
+          </label>
+          <div class="file-info" id="info-${month}">
+            ${existingReport ? `✅ ${existingReport.filename.split('_').pop()}` : 'Sin archivo'}
+          </div>
+          ${existingReport ? `
+            <div class="file-actions">
+              <button class="btn-delete" onclick="deleteReport('${existingReport.id}', ${month})">🗑️ Eliminar</button>
+            </div>
+          ` : ''}
+        `;
+        grid.appendChild(monthDiv);
+      }
+      
+      // Verificar si hay reporte actual
+      const currentReport = reports?.find(r => r.is_current);
+      if (currentReport) {
+        currentReportId = currentReport.id;
+        document.getElementById('currentFileInfo').innerHTML = `✅ <strong>${currentReport.filename.split('_').pop()}</strong> subido`;
+        checkIfCanGenerate();
+      }
+    }
+    
+    async function uploadHistorical(month) {
+      const fileInput = document.getElementById(`file-${month}`);
+      const file = fileInput.files[0];
+      if (!file) return;
+      
+      const filename = `${currentYear}_${month}_${Date.now()}_${file.name}`;
+      
+      // Subir a Storage
+      const { error: uploadError } = await supabase.storage
+        .from('pdf-uploads')
+        .upload(filename, file);
+      
+      if (uploadError) {
+        alert('Error al subir: ' + uploadError.message);
+        return;
+      }
+      
+      // Obtener URL pública
+      const { data: urlData } = supabase.storage
+        .from('pdf-uploads')
+        .getPublicUrl(filename);
+      
+      // Guardar en DB (upsert)
+      const { error: dbError } = await supabase
+        .from('reports')
+        .upsert({
+          company_id: currentCompanyId,
+          month,
+          year: currentYear,
+          filename,
+          file_url: urlData.publicUrl,
+          is_current: false
+        }, {
+          onConflict: 'company_id,month,year'
+        });
+      
+      if (dbError) {
+        alert('Error en DB: ' + dbError.message);
+        return;
+      }
+      
+      loadCompanyReports();
+    }
+    
+    async function deleteReport(reportId, month) {
+      if (!confirm(`¿Eliminar reporte de ${monthNames[month-1]}?`)) return;
+      
+      // Obtener filename para eliminar de storage
+      const { data: report } = await supabase
+        .from('reports')
+        .select('filename')
+        .eq('id', reportId)
+        .single();
+      
+      if (report) {
+        await supabase.storage
+          .from('pdf-uploads')
+          .remove([report.filename]);
+      }
+      
+      await supabase
+        .from('reports')
+        .delete()
+        .eq('id', reportId);
+      
+      loadCompanyReports();
+    }
+    
+    async function uploadCurrent() {
+      const file = document.getElementById('currentFile').files[0];
+      if (!file) {
+        alert('Selecciona el PDF del mes actual');
+        return;
+      }
+      
+      const currentMonth = new Date().getMonth() + 1;
+      const filename = `current_${currentYear}_${currentMonth}_${Date.now()}_${file.name}`;
+      
+      document.getElementById('currentFileInfo').textContent = '⏳ Subiendo...';
+      
+      const { error: uploadError } = await supabase.storage
+        .from('pdf-uploads')
+        .upload(filename, file);
+      
+      if (uploadError) {
+        alert('Error: ' + uploadError.message);
+        return;
+      }
+      
+      const { data: urlData } = supabase.storage
+        .from('pdf-uploads')
+        .getPublicUrl(filename);
+      
+      // Primero marcar todos los otros reportes como no actuales
+      await supabase
+        .from('reports')
+        .update({ is_current: false })
+        .eq('company_id', currentCompanyId)
+        .eq('year', currentYear);
+      
+      // Luego insertar/actualizar el reporte actual
+      const { data, error: dbError } = await supabase
+        .from('reports')
+        .upsert({
+          company_id: currentCompanyId,
+          month: currentMonth,
+          year: currentYear,
+          filename,
+          file_url: urlData.publicUrl,
+          is_current: true
+        }, {
+          onConflict: 'company_id,month,year'
+        })
+        .select();
+      
+      if (dbError) {
+        alert('Error en DB: ' + dbError.message);
+        return;
+      }
+      
+      currentReportId = data[0].id;
+      document.getElementById('currentFileInfo').innerHTML = `✅ <strong>${file.name}</strong> subido`;
+      checkIfCanGenerate();
+    }
+    
+    function checkIfCanGenerate() {
+      if (currentReportId || document.getElementById('currentFileInfo').textContent.includes('✅')) {
+        document.getElementById('generateBtn').style.display = 'block';
+      }
+    }
+    
+    async function generateAnalysis() {
+      const btn = document.getElementById('generateBtn');
+      const status = document.getElementById('status');
+      
+      btn.disabled = true;
+      status.className = 'status loading';
+      status.textContent = '🤖 Generando análisis con IA... (puede tomar 2-3 minutos)';
       
       try {
-        // Upload to Supabase Storage
-        const fileName = `${Date.now()}_${file.name}`;
-        const { data, error: uploadError } = await supabase.storage
-          .from("pdf-uploads")
-          .upload(fileName, file);
-        
-        if (uploadError) {
-          throw new Error("Error al subir: " + uploadError.message);
-        }
-        
-        // Get public URL
-        const { data: publicUrlData } = supabase.storage
-          .from("pdf-uploads")
-          .getPublicUrl(fileName);
-        
-        const fileUrl = publicUrlData.publicUrl;
-        
-        status.textContent = "🤖 Analizando con IA... (60-90 segundos)";
-        
-        // Call Edge Function
-        const res = await fetch(FUNCTION_URL, {
-          method: "POST",
+        const response = await fetch(FUNCTION_URL, {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
           },
-          body: JSON.stringify({ file_url: fileUrl, filename: fileName })
+          body: JSON.stringify({
+            company_id: currentCompanyId,
+            year: currentYear
+          })
         });
         
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`HTTP ${res.status}: ${errorText}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Error en el servidor');
         }
         
-        const result = await res.json();
+        const result = await response.json();
         
-        if (result.error) {
-          throw new Error(result.error);
-        }
+        document.getElementById('analysisContent').textContent = result.analysis;
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
         
-        // Display results
-        displayResults(result);
+        // Crear archivo de texto descargable
+        const blob = new Blob([result.analysis], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const downloadLink = document.getElementById('downloadLink');
+        downloadLink.href = url;
+        downloadLink.download = `analisis_${new Date().toISOString().split('T')[0]}.txt`;
+        downloadLink.style.display = 'inline-block';
         
-        status.className = "success";
-        status.textContent = "✅ Análisis completado exitosamente!";
+        status.className = 'status success';
+        status.textContent = '✅ Análisis generado exitosamente!';
         
-      } catch (err) {
-        console.error("Error:", err);
-        status.className = "error";
-        status.textContent = "❌ Error: " + err.message;
+      } catch (error) {
+        status.className = 'status error';
+        status.textContent = '❌ Error: ' + error.message;
       } finally {
-        uploadBtn.disabled = false;
-      }
-    }
-    
-    function displayResults(result) {
-      const results = document.getElementById("results");
-      results.style.display = "block";
-      results.scrollIntoView({ behavior: 'smooth' });
-      
-      // Display analyses
-      document.getElementById("analysisPrevious").textContent = 
-        result.analysis_previous || "No hay mes anterior para comparar.";
-      
-      document.getElementById("analysisHistorical").textContent = 
-        result.analysis_historical || "No hay suficientes datos históricos.";
-      
-      // Download link
-      if (result.result_file) {
-        const downloadLink = document.getElementById("downloadLink");
-        downloadLink.href = result.result_file;
-        downloadLink.style.display = "inline-block";
-        downloadLink.download = "analisis_completo.json";
-      }
-      
-      // Generate charts
-      if (result.chartData) {
-        generateCharts(result.chartData);
-      }
-    }
-    
-    function generateCharts(chartData) {
-      // Chart 1: Current vs Previous Month
-      if (chartData.current && chartData.current.length > 0 && 
-          chartData.lastMonth && chartData.lastMonth.length > 0) {
-        
-        const currentData = chartData.current.slice(0, 8);
-        const traces = [];
-        
-        traces.push({
-          type: 'bar',
-          name: 'Mes Actual',
-          x: currentData.map(m => m.name),
-          y: currentData.map(m => m.value),
-          marker: { color: '#4a6cff' },
-          text: currentData.map(m => m.value.toFixed(1)),
-          textposition: 'outside'
-        });
-        
-        const lastMonthValues = currentData.map(curr => {
-          const lastMetric = chartData.lastMonth.find(m => m.name === curr.name);
-          return lastMetric ? lastMetric.value : 0;
-        });
-        
-        traces.push({
-          type: 'bar',
-          name: 'Mes Anterior',
-          x: currentData.map(m => m.name),
-          y: lastMonthValues,
-          marker: { color: '#9c27b0' },
-          text: lastMonthValues.map(v => v.toFixed(1)),
-          textposition: 'outside'
-        });
-        
-        Plotly.newPlot('chartPrevious', traces, {
-          title: 'Comparación: Mes Actual vs Mes Anterior',
-          xaxis: { title: 'Métricas', tickangle: -45 },
-          yaxis: { title: 'Valor' },
-          barmode: 'group',
-          height: 450
-        });
-      }
-      
-      // Chart 2: Current vs Historical Average
-      if (chartData.current && chartData.current.length > 0 && 
-          chartData.historicalAverage && chartData.historicalAverage.length > 0) {
-        
-        const currentData = chartData.current.slice(0, 8);
-        const traces = [];
-        
-        traces.push({
-          type: 'bar',
-          name: 'Mes Actual',
-          x: currentData.map(m => m.name),
-          y: currentData.map(m => m.value),
-          marker: { color: '#2e7d32' },
-          text: currentData.map(m => m.value.toFixed(1)),
-          textposition: 'outside'
-        });
-        
-        const avgValues = currentData.map(curr => {
-          const avgMetric = chartData.historicalAverage.find(m => m.name === curr.name);
-          return avgMetric ? avgMetric.value : 0;
-        });
-        
-        traces.push({
-          type: 'bar',
-          name: 'Promedio Histórico',
-          x: currentData.map(m => m.name),
-          y: avgValues,
-          marker: { color: '#d32f2f' },
-          text: avgValues.map(v => v.toFixed(1)),
-          textposition: 'outside'
-        });
-        
-        Plotly.newPlot('chartHistorical', traces, {
-          title: 'Comparación: Mes Actual vs Promedio Histórico',
-          xaxis: { title: 'Métricas', tickangle: -45 },
-          yaxis: { title: 'Valor' },
-          barmode: 'group',
-          height: 450
-        });
-      }
-      
-      // Chart 3: Trends Over Time
-      if (chartData.historical && chartData.historical.length > 0) {
-        const traces = [];
-        const topMetrics = chartData.current.slice(0, 5).map(m => m.name);
-        
-        topMetrics.forEach(metricName => {
-          const historicalValues = chartData.historical.map(h => {
-            const metric = h.metrics.find(m => m.name === metricName);
-            return metric ? metric.value : null;
-          }).filter(v => v !== null);
-          
-          const currentValue = chartData.current.find(m => m.name === metricName)?.value;
-          
-          if (historicalValues.length > 0 && currentValue) {
-            const periods = chartData.historical
-              .map(h => h.period)
-              .slice(0, historicalValues.length);
-            periods.push('Actual');
-            
-            traces.push({
-              type: 'scatter',
-              mode: 'lines+markers',
-              name: metricName,
-              x: periods,
-              y: [...historicalValues, currentValue],
-              line: { width: 3 },
-              marker: { size: 10 }
-            });
-          }
-        });
-        
-        if (traces.length > 0) {
-          Plotly.newPlot('chartTrends', traces, {
-            title: 'Tendencias a lo Largo del Tiempo',
-            xaxis: { title: 'Período' },
-            yaxis: { title: 'Valor' },
-            height: 450
-          });
-        }
+        btn.disabled = false;
       }
     }
   </script>
