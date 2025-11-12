@@ -3,129 +3,352 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Subir Reporte Mensual - Redes Sociales</title>
+  <title>Sistema de Reportes - Multi-Empresa</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: sans-serif;
-      max-width: 900px;
-      margin: 40px auto;
-      background: #fafafa;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
     }
-    h2 { text-align: center; color: #333; margin-bottom: 30px; }
-    input, button {
-      display: block;
-      margin: 15px 0;
-      width: 100%;
-      padding: 12px;
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 { font-size: 32px; margin-bottom: 10px; }
+    .header p { opacity: 0.9; font-size: 16px; }
+    .tabs {
+      display: flex;
+      background: #f5f5f5;
+      border-bottom: 2px solid #ddd;
+    }
+    .tab {
+      flex: 1;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s;
+      border: none;
+      background: none;
       font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ddd;
+    }
+    .tab.active {
+      background: white;
+      color: #667eea;
+      border-bottom: 3px solid #667eea;
+    }
+    .tab:hover { background: #e8e8e8; }
+    .content {
+      padding: 40px;
+      min-height: 600px;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .company-section {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+    }
+    .company-controls {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    select, input, button {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+      font-size: 15px;
+      font-family: inherit;
+    }
+    select {
+      flex: 1;
+      min-width: 200px;
+      background: white;
+    }
+    input[type="text"] {
+      flex: 1;
+      min-width: 200px;
     }
     button {
-      background-color: #4a6cff;
+      background: #667eea;
       color: white;
       border: none;
       cursor: pointer;
       font-weight: 600;
+      transition: all 0.3s;
     }
-    button:hover { background-color: #3456db; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    #status {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 8px;
-      font-size: 14px;
-      display: none;
-    }
-    #status.loading {
-      background: #e3f2fd;
-      color: #1976d2;
-      display: block;
-    }
-    #status.success {
-      background: #e8f5e9;
-      color: #2e7d32;
-      display: block;
-    }
-    #status.error {
-      background: #ffebee;
-      color: #c62828;
-      display: block;
-    }
-    #results {
+    button:hover { background: #5568d3; transform: translateY(-2px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    button.danger { background: #e53e3e; }
+    button.danger:hover { background: #c53030; }
+    button.success { background: #38a169; }
+    button.success:hover { background: #2f855a; }
+    
+    .reports-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
       margin-top: 30px;
+    }
+    .report-card {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+    .report-card:hover {
+      border-color: #667eea;
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+      transform: translateY(-5px);
+    }
+    .report-card h3 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    .report-meta {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    .report-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .report-actions button {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+    
+    .upload-section {
+      background: #f7fafc;
+      border: 3px dashed #cbd5e0;
+      border-radius: 15px;
+      padding: 40px;
+      text-align: center;
+      margin-bottom: 30px;
+      transition: all 0.3s;
+    }
+    .upload-section:hover {
+      border-color: #667eea;
+      background: #edf2f7;
+    }
+    .upload-section input[type="file"] {
       display: none;
+    }
+    .upload-label {
+      display: inline-block;
+      padding: 15px 30px;
+      background: #667eea;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .upload-label:hover {
+      background: #5568d3;
+      transform: scale(1.05);
+    }
+    .month-selector {
+      margin-top: 20px;
+      display: inline-block;
+    }
+    .month-selector select {
+      width: 200px;
+    }
+    
+    .analysis-container {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     .analysis-section {
-      background: white;
+      margin-bottom: 30px;
       padding: 25px;
-      margin: 20px 0;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      border-left: 4px solid #4a6cff;
+      background: #f7fafc;
+      border-radius: 12px;
+      border-left: 5px solid #667eea;
     }
     .analysis-section h3 {
-      color: #333;
+      color: #2d3748;
       margin-bottom: 15px;
+      font-size: 20px;
     }
     .analysis-content {
       line-height: 1.8;
-      color: #555;
+      color: #4a5568;
       white-space: pre-wrap;
     }
-    .chart-container {
-      background: white;
-      padding: 20px;
-      margin: 20px 0;
+    
+    .status {
+      padding: 15px 20px;
       border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      margin: 20px 0;
+      font-weight: 500;
+      display: none;
     }
-    .download-btn {
-      display: inline-block;
-      background: #2e7d32;
-      color: white;
-      padding: 12px 25px;
-      border-radius: 6px;
-      text-decoration: none;
-      margin-top: 15px;
-      font-weight: 600;
+    .status.loading {
+      background: #ebf8ff;
+      color: #2c5282;
+      border-left: 4px solid #3182ce;
+      display: block;
     }
-    .download-btn:hover {
-      background: #1b5e20;
+    .status.success {
+      background: #f0fff4;
+      color: #22543d;
+      border-left: 4px solid #38a169;
+      display: block;
+    }
+    .status.error {
+      background: #fff5f5;
+      color: #742a2a;
+      border-left: 4px solid #e53e3e;
+      display: block;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #a0aec0;
+    }
+    .empty-state svg {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 20px;
+      opacity: 0.5;
     }
   </style>
 </head>
 <body>
-  <h2>📊 Análisis Automático de Reportes Mensuales</h2>
-  
-  <input type="file" id="fileInput" accept="application/pdf" />
-  <button onclick="uploadPDF()" id="uploadBtn">Subir y Analizar PDF</button>
-  
-  <div id="status"></div>
-  
-  <div id="results">
-    <div class="analysis-section">
-      <h3>📈 Análisis vs Mes Anterior</h3>
-      <div id="analysisPrevious" class="analysis-content"></div>
+  <div class="container">
+    <div class="header">
+      <h1>📊 Sistema de Reportes Multi-Empresa</h1>
+      <p>Gestión de histórico y análisis automático con IA</p>
     </div>
     
-    <div class="chart-container" id="chartPrevious"></div>
-    
-    <div class="analysis-section" style="border-left-color: #2e7d32;">
-      <h3>📊 Análisis vs Promedio Histórico</h3>
-      <div id="analysisHistorical" class="analysis-content"></div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('historic')">📚 Gestión de Histórico</button>
+      <button class="tab" onclick="switchTab('analysis')">🔍 Generar Análisis</button>
     </div>
     
-    <div class="chart-container" id="chartHistorical"></div>
-    <div class="chart-container" id="chartTrends"></div>
-    
-    <div style="text-align: center;">
-      <a id="downloadLink" class="download-btn" style="display: none;">📥 Descargar Análisis Completo (JSON)</a>
+    <div class="content">
+      <div class="company-section">
+        <h2 style="margin-bottom: 15px; color: #2d3748;">Seleccionar Empresa</h2>
+        <div class="company-controls">
+          <select id="companySelect" onchange="loadCompanyData()">
+            <option value="">-- Seleccionar Empresa --</option>
+          </select>
+          <input type="text" id="newCompanyName" placeholder="Nueva empresa..." />
+          <button onclick="createCompany()">➕ Crear Empresa</button>
+          <button class="danger" onclick="deleteCompany()" id="deleteCompanyBtn" disabled>🗑️ Eliminar</button>
+        </div>
+      </div>
+      
+      <div id="status" class="status"></div>
+      
+      <div id="tab-historic" class="tab-content active">
+        <h2 style="margin-bottom: 20px; color: #2d3748;">Cargar Reportes Históricos</h2>
+        
+        <div class="upload-section">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 20px; color: #667eea;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          <h3 style="margin-bottom: 10px; color: #2d3748;">Subir Reportes Pasados</h3>
+          <p style="color: #718096; margin-bottom: 20px;">Puedes subir múltiples PDFs para construir el histórico</p>
+          <label for="historicFile" class="upload-label">📄 Seleccionar PDF(s)</label>
+          <input type="file" id="historicFile" accept="application/pdf" multiple />
+          
+          <div class="month-selector">
+            <label style="display: block; margin-bottom: 8px; color: #4a5568; font-weight: 600;">Asignar Mes:</label>
+            <select id="monthSelect">
+              <option value="">-- Seleccionar Mes --</option>
+              <option value="2025-01">Enero 2025</option>
+              <option value="2025-02">Febrero 2025</option>
+              <option value="2025-03">Marzo 2025</option>
+              <option value="2025-04">Abril 2025</option>
+              <option value="2025-05">Mayo 2025</option>
+              <option value="2025-06">Junio 2025</option>
+              <option value="2025-07">Julio 2025</option>
+              <option value="2025-08">Agosto 2025</option>
+              <option value="2025-09">Septiembre 2025</option>
+              <option value="2025-10">Octubre 2025</option>
+              <option value="2025-11">Noviembre 2025</option>
+              <option value="2024-01">Enero 2024</option>
+              <option value="2024-02">Febrero 2024</option>
+              <option value="2024-03">Marzo 2024</option>
+              <option value="2024-04">Abril 2024</option>
+              <option value="2024-05">Mayo 2024</option>
+              <option value="2024-06">Junio 2024</option>
+              <option value="2024-07">Julio 2024</option>
+              <option value="2024-08">Agosto 2024</option>
+              <option value="2024-09">Septiembre 2024</option>
+              <option value="2024-10">Octubre 2024</option>
+              <option value="2024-11">Noviembre 2024</option>
+              <option value="2024-12">Diciembre 2024</option>
+            </select>
+          </div>
+          
+          <button onclick="uploadHistoric()" style="margin-top: 20px; padding: 15px 40px;" id="uploadHistoricBtn">
+            ⬆️ Subir al Histórico
+          </button>
+        </div>
+        
+        <h3 style="margin: 30px 0 20px; color: #2d3748;">Reportes Guardados</h3>
+        <div id="reportsGrid" class="reports-grid">
+          <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <p style="font-size: 18px;">Selecciona una empresa y sube reportes históricos</p>
+          </div>
+        </div>
+      </div>
+      
+      <div id="tab-analysis" class="tab-content">
+        <h2 style="margin-bottom: 20px; color: #2d3748;">Generar Nuevo Análisis</h2>
+        
+        <div class="upload-section">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 20px; color: #38a169;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          <h3 style="margin-bottom: 10px; color: #2d3748;">Subir Reporte del Mes Actual</h3>
+          <p style="color: #718096; margin-bottom: 20px;">Se comparará automáticamente con el histórico de esta empresa</p>
+          <label for="currentFile" class="upload-label" style="background: #38a169;">📊 Seleccionar PDF Actual</label>
+          <input type="file" id="currentFile" accept="application/pdf" />
+          <button onclick="generateAnalysis()" class="success" style="margin-top: 20px; padding: 15px 40px;" id="analyzeBtn">
+            🚀 Generar Análisis Completo
+          </button>
+        </div>
+        
+        <div id="analysisResults" style="display: none;">
+          <div class="analysis-container">
+            <h2 style="margin-bottom: 25px; color: #2d3748;">📋 Análisis Completo</h2>
+            <div id="analysisContent"></div>
+            <div style="text-align: center; margin-top: 30px;">
+              <a id="downloadLink" class="upload-label" style="display: none; text-decoration: none;">
+                📥 Descargar Análisis (JSON)
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -135,228 +358,332 @@
     const FUNCTION_URL = "https://ftsmavpfnmpeltpnsdqx.supabase.co/functions/v1/process-report";
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentCompany = null;
     
-    async function uploadPDF() {
-      const file = document.getElementById("fileInput").files[0];
-      const status = document.getElementById("status");
-      const uploadBtn = document.getElementById("uploadBtn");
-      const results = document.getElementById("results");
-      
-      if (!file) {
-        status.className = "error";
-        status.textContent = "Por favor, selecciona un archivo PDF.";
+    window.onload = () => {
+      loadCompanies();
+    };
+    
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tab}`).classList.add('active');
+    }
+    
+    function showStatus(message, type) {
+      const status = document.getElementById('status');
+      status.className = `status ${type}`;
+      status.textContent = message;
+      if (type !== 'loading') {
+        setTimeout(() => status.style.display = 'none', 5000);
+      }
+    }
+    
+    async function loadCompanies() {
+      try {
+        const { data, error } = await supabase
+          .from('companies')
+          .select('*')
+          .order('name');
+        
+        if (error) throw error;
+        
+        const select = document.getElementById('companySelect');
+        select.innerHTML = '<option value="">-- Seleccionar Empresa --</option>';
+        
+        data.forEach(company => {
+          const option = document.createElement('option');
+          option.value = company.id;
+          option.textContent = company.name;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        showStatus('Error al cargar empresas: ' + err.message, 'error');
+      }
+    }
+    
+    async function createCompany() {
+      const name = document.getElementById('newCompanyName').value.trim();
+      if (!name) {
+        showStatus('Ingresa un nombre para la empresa', 'error');
         return;
       }
       
-      uploadBtn.disabled = true;
-      results.style.display = "none";
-      status.className = "loading";
-      status.textContent = "⏳ Subiendo archivo...";
+      try {
+        const { data, error } = await supabase
+          .from('companies')
+          .insert({ name })
+          .select();
+        
+        if (error) throw error;
+        
+        showStatus(`✅ Empresa "${name}" creada exitosamente`, 'success');
+        document.getElementById('newCompanyName').value = '';
+        await loadCompanies();
+        
+        document.getElementById('companySelect').value = data[0].id;
+        loadCompanyData();
+      } catch (err) {
+        showStatus('Error al crear empresa: ' + err.message, 'error');
+      }
+    }
+    
+    async function deleteCompany() {
+      if (!currentCompany) return;
+      
+      if (!confirm('¿Eliminar esta empresa y TODOS sus reportes? Esta acción no se puede deshacer.')) {
+        return;
+      }
       
       try {
-        // Upload to Supabase Storage
-        const fileName = `${Date.now()}_${file.name}`;
-        const { data, error: uploadError } = await supabase.storage
-          .from("pdf-uploads")
-          .upload(fileName, file);
+        const { error } = await supabase
+          .from('companies')
+          .delete()
+          .eq('id', currentCompany);
         
-        if (uploadError) {
-          throw new Error("Error al subir: " + uploadError.message);
+        if (error) throw error;
+        
+        showStatus('✅ Empresa eliminada exitosamente', 'success');
+        currentCompany = null;
+        document.getElementById('companySelect').value = '';
+        await loadCompanies();
+        loadCompanyData();
+      } catch (err) {
+        showStatus('Error al eliminar empresa: ' + err.message, 'error');
+      }
+    }
+    
+    function loadCompanyData() {
+      currentCompany = document.getElementById('companySelect').value;
+      document.getElementById('deleteCompanyBtn').disabled = !currentCompany;
+      
+      if (currentCompany) {
+        loadHistoricReports();
+      } else {
+        document.getElementById('reportsGrid').innerHTML = `
+          <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <p style="font-size: 18px;">Selecciona una empresa para ver sus reportes</p>
+          </div>
+        `;
+      }
+    }
+    
+    async function loadHistoricReports() {
+      if (!currentCompany) {
+        showStatus('Selecciona una empresa primero', 'error');
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('report_history')
+          .select('*')
+          .eq('company_id', currentCompany)
+          .order('report_month', { ascending: false });
+        
+        if (error) throw error;
+        
+        const grid = document.getElementById('reportsGrid');
+        
+        if (data.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state">
+              <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              <p style="font-size: 18px;">No hay reportes históricos. ¡Sube el primero!</p>
+            </div>
+          `;
+          return;
         }
         
-        // Get public URL
-        const { data: publicUrlData } = supabase.storage
-          .from("pdf-uploads")
-          .getPublicUrl(fileName);
-        
-        const fileUrl = publicUrlData.publicUrl;
-        
-        status.textContent = "🤖 Analizando con IA... (60-90 segundos)";
-        
-        // Call Edge Function
-        const res = await fetch(FUNCTION_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({ file_url: fileUrl, filename: fileName })
-        });
-        
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`HTTP ${res.status}: ${errorText}`);
-        }
-        
-        const result = await res.json();
-        
-        if (result.error) {
-          throw new Error(result.error);
-        }
-        
-        // Display results
-        displayResults(result);
-        
-        status.className = "success";
-        status.textContent = "✅ Análisis completado exitosamente!";
+        grid.innerHTML = data.map(report => `
+          <div class="report-card">
+            <h3>${formatMonth(report.report_month)}</h3>
+            <div class="report-meta">
+              📄 ${report.filename}<br>
+              📅 Subido: ${new Date(report.upload_date).toLocaleDateString('es-MX')}
+            </div>
+            <div class="report-actions">
+              <button class="danger" onclick="deleteReport('${report.id}')">🗑️ Eliminar</button>
+            </div>
+          </div>
+        `).join('');
         
       } catch (err) {
-        console.error("Error:", err);
-        status.className = "error";
-        status.textContent = "❌ Error: " + err.message;
-      } finally {
-        uploadBtn.disabled = false;
+        showStatus('Error al cargar reportes: ' + err.message, 'error');
       }
     }
     
-    function displayResults(result) {
-      const results = document.getElementById("results");
-      results.style.display = "block";
-      results.scrollIntoView({ behavior: 'smooth' });
-      
-      // Display analyses
-      document.getElementById("analysisPrevious").textContent = 
-        result.analysis_previous || "No hay mes anterior para comparar.";
-      
-      document.getElementById("analysisHistorical").textContent = 
-        result.analysis_historical || "No hay suficientes datos históricos.";
-      
-      // Download link
-      if (result.result_file) {
-        const downloadLink = document.getElementById("downloadLink");
-        downloadLink.href = result.result_file;
-        downloadLink.style.display = "inline-block";
-        downloadLink.download = "analisis_completo.json";
-      }
-      
-      // Generate charts
-      if (result.chartData) {
-        generateCharts(result.chartData);
-      }
+    function formatMonth(monthStr) {
+      const months = {
+        '01': 'Enero', '02': 'Febrero', '03': 'Marzo', '04': 'Abril',
+        '05': 'Mayo', '06': 'Junio', '07': 'Julio', '08': 'Agosto',
+        '09': 'Septiembre', '10': 'Octubre', '11': 'Noviembre', '12': 'Diciembre'
+      };
+      const [year, month] = monthStr.split('-');
+      return `${months[month]} ${year}`;
     }
     
-    function generateCharts(chartData) {
-      // Chart 1: Current vs Previous Month
-      if (chartData.current && chartData.current.length > 0 && 
-          chartData.lastMonth && chartData.lastMonth.length > 0) {
-        
-        const currentData = chartData.current.slice(0, 8);
-        const traces = [];
-        
-        traces.push({
-          type: 'bar',
-          name: 'Mes Actual',
-          x: currentData.map(m => m.name),
-          y: currentData.map(m => m.value),
-          marker: { color: '#4a6cff' },
-          text: currentData.map(m => m.value.toFixed(1)),
-          textposition: 'outside'
-        });
-        
-        const lastMonthValues = currentData.map(curr => {
-          const lastMetric = chartData.lastMonth.find(m => m.name === curr.name);
-          return lastMetric ? lastMetric.value : 0;
-        });
-        
-        traces.push({
-          type: 'bar',
-          name: 'Mes Anterior',
-          x: currentData.map(m => m.name),
-          y: lastMonthValues,
-          marker: { color: '#9c27b0' },
-          text: lastMonthValues.map(v => v.toFixed(1)),
-          textposition: 'outside'
-        });
-        
-        Plotly.newPlot('chartPrevious', traces, {
-          title: 'Comparación: Mes Actual vs Mes Anterior',
-          xaxis: { title: 'Métricas', tickangle: -45 },
-          yaxis: { title: 'Valor' },
-          barmode: 'group',
-          height: 450
-        });
+    async function uploadHistoric() {
+      if (!currentCompany) {
+        showStatus('Selecciona una empresa primero', 'error');
+        return;
       }
       
-      // Chart 2: Current vs Historical Average
-      if (chartData.current && chartData.current.length > 0 && 
-          chartData.historicalAverage && chartData.historicalAverage.length > 0) {
-        
-        const currentData = chartData.current.slice(0, 8);
-        const traces = [];
-        
-        traces.push({
-          type: 'bar',
-          name: 'Mes Actual',
-          x: currentData.map(m => m.name),
-          y: currentData.map(m => m.value),
-          marker: { color: '#2e7d32' },
-          text: currentData.map(m => m.value.toFixed(1)),
-          textposition: 'outside'
-        });
-        
-        const avgValues = currentData.map(curr => {
-          const avgMetric = chartData.historicalAverage.find(m => m.name === curr.name);
-          return avgMetric ? avgMetric.value : 0;
-        });
-        
-        traces.push({
-          type: 'bar',
-          name: 'Promedio Histórico',
-          x: currentData.map(m => m.name),
-          y: avgValues,
-          marker: { color: '#d32f2f' },
-          text: avgValues.map(v => v.toFixed(1)),
-          textposition: 'outside'
-        });
-        
-        Plotly.newPlot('chartHistorical', traces, {
-          title: 'Comparación: Mes Actual vs Promedio Histórico',
-          xaxis: { title: 'Métricas', tickangle: -45 },
-          yaxis: { title: 'Valor' },
-          barmode: 'group',
-          height: 450
-        });
+      const files = document.getElementById('historicFile').files;
+      const month = document.getElementById('monthSelect').value;
+      
+      if (files.length === 0) {
+        showStatus('Selecciona al menos un archivo PDF', 'error');
+        return;
       }
       
-      // Chart 3: Trends Over Time
-      if (chartData.historical && chartData.historical.length > 0) {
-        const traces = [];
-        const topMetrics = chartData.current.slice(0, 5).map(m => m.name);
-        
-        topMetrics.forEach(metricName => {
-          const historicalValues = chartData.historical.map(h => {
-            const metric = h.metrics.find(m => m.name === metricName);
-            return metric ? metric.value : null;
-          }).filter(v => v !== null);
+      if (!month) {
+        showStatus('Selecciona el mes correspondiente', 'error');
+        return;
+      }
+      
+      const btn = document.getElementById('uploadHistoricBtn');
+      btn.disabled = true;
+      showStatus(`⏳ Subiendo ${files.length} archivo(s)...`, 'loading');
+      
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const fileName = `${currentCompany}_${month}_${Date.now()}_${file.name}`;
           
-          const currentValue = chartData.current.find(m => m.name === metricName)?.value;
+          const { data, error: uploadError } = await supabase.storage
+            .from('pdf-uploads')
+            .upload(fileName, file);
           
-          if (historicalValues.length > 0 && currentValue) {
-            const periods = chartData.historical
-              .map(h => h.period)
-              .slice(0, historicalValues.length);
-            periods.push('Actual');
-            
-            traces.push({
-              type: 'scatter',
-              mode: 'lines+markers',
-              name: metricName,
-              x: periods,
-              y: [...historicalValues, currentValue],
-              line: { width: 3 },
-              marker: { size: 10 }
-            });
-          }
-        });
-        
-        if (traces.length > 0) {
-          Plotly.newPlot('chartTrends', traces, {
-            title: 'Tendencias a lo Largo del Tiempo',
-            xaxis: { title: 'Período' },
-            yaxis: { title: 'Valor' },
-            height: 450
+          if (uploadError) throw uploadError;
+          
+          const { data: urlData } = supabase.storage
+            .from('pdf-uploads')
+            .getPublicUrl(fileName);
+          
+          await fetch(FUNCTION_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+              file_url: urlData.publicUrl,
+              filename: fileName,
+              company_id: currentCompany,
+              report_month: month,
+              is_historical: true
+            })
           });
         }
+        
+        showStatus(`✅ ${files.length} archivo(s) subido(s) exitosamente`, 'success');
+        document.getElementById('historicFile').value = '';
+        await loadHistoricReports();
+        
+      } catch (err) {
+        showStatus('Error: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    
+    async function generateAnalysis() {
+      if (!currentCompany) {
+        showStatus('Selecciona una empresa primero', 'error');
+        return;
+      }
+      
+      const file = document.getElementById('currentFile').files[0];
+      if (!file) {
+        showStatus('Selecciona el PDF del mes actual', 'error');
+        return;
+      }
+      
+      const btn = document.getElementById('analyzeBtn');
+      btn.disabled = true;
+      showStatus('⏳ Subiendo y analizando... (60-90 segundos)', 'loading');
+      
+      try {
+        const fileName = `${currentCompany}_current_${Date.now()}_${file.name}`;
+        
+        const { data, error: uploadError } = await supabase.storage
+          .from('pdf-uploads')
+          .upload(fileName, file);
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: urlData } = supabase.storage
+          .from('pdf-uploads')
+          .getPublicUrl(fileName);
+        
+        const res = await fetch(FUNCTION_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            file_url: urlData.publicUrl,
+            filename: fileName,
+            company_id: currentCompany,
+            is_historical: false
+          })
+        });
+        
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const result = await res.json();
+        if (result.error) throw new Error(result.error);
+        
+        displayAnalysis(result);
+        showStatus('✅ Análisis completado exitosamente!', 'success');
+        
+      } catch (err) {
+        showStatus('Error: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    
+    function displayAnalysis(result) {
+      const container = document.getElementById('analysisResults');
+      const content = document.getElementById('analysisContent');
+      
+      content.innerHTML = `
+        <div class="analysis-section">
+          <h3>📊 Análisis Estratégico Completo</h3>
+          <div class="analysis-content">${result.strategic_analysis || 'No disponible'}</div>
+        </div>
+      `;
+      
+      if (result.result_file) {
+        const link = document.getElementById('downloadLink');
+        link.href = result.result_file;
+        link.style.display = 'inline-block';
+      }
+      
+      container.style.display = 'block';
+      container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    async function deleteReport(reportId) {
+      if (!confirm('¿Eliminar este reporte del histórico?')) return;
+      
+      try {
+        const { error } = await supabase
+          .from('report_history')
+          .delete()
+          .eq('id', reportId);
+        
+        if (error) throw error;
+        
+        showStatus('✅ Reporte eliminado', 'success');
+        await loadHistoricReports();
+      } catch (err) {
+        showStatus('Error: ' + err.message, 'error');
       }
     }
   </script>
