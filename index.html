@@ -533,15 +533,27 @@
         
         const result = await response.json();
         
-        document.getElementById('analysisContent').textContent = result.analysis;
+        // Convertir markdown a HTML simple
+        let htmlContent = result.analysis
+          .replace(/^# (.+)$/gm, '<h2 style="color: #00BFFF; margin-top: 30px; margin-bottom: 15px; font-size: 24px;">$1</h2>')
+          .replace(/^## (.+)$/gm, '<h3 style="color: #333; margin-top: 20px; margin-bottom: 10px; font-size: 20px;">$3</h3>')
+          .replace(/^\*\*(.+?)\*\*/gm, '<strong style="color: #00BFFF;">$1</strong>')
+          .replace(/^---$/gm, '<hr style="border: none; border-top: 2px solid #e0e0e0; margin: 30px 0;">')
+          .replace(/\n\n/g, '</p><p style="margin-bottom: 15px;">')
+          .replace(/^\* (.+)$/gm, '<li style="margin-left: 20px; margin-bottom: 8px;">$1</li>');
+        
+        htmlContent = '<p style="margin-bottom: 15px;">' + htmlContent + '</p>';
+        
+        document.getElementById('analysisContent').innerHTML = htmlContent;
         document.getElementById('results').style.display = 'block';
         
-        // Generar gráficas si hay métricas
-        if (result.metadata && result.metadata.metrics) {
+        // Generar gráficas
+        if (result.metadata && result.metadata.metrics && result.metadata.metrics.length > 0) {
+          console.log('📊 Generando gráficas con', result.metadata.metrics.length, 'meses');
           generateCharts(result.metadata.metrics);
         } else {
-          // Si no vienen métricas, cargar de la base de datos
-          loadAndGenerateCharts();
+          console.log('⚠️ No hay métricas disponibles para gráficas');
+          document.getElementById('chartsSection').style.display = 'none';
         }
         
         document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
@@ -583,34 +595,35 @@
       }
     }
     
-    function generateChartsFromReports(reportsData) {
-      if (!reportsData || reportsData.length === 0) return;
+    function generateCharts(metricsData) {
+      console.log('📈 Generando gráficas...', metricsData);
       
-      // Gráfica 1: Comparación mensual (últimos 3 meses disponibles)
-      const lastMonths = reportsData.slice(-3);
+      if (!metricsData || metricsData.length === 0) {
+        console.log('❌ No hay datos para gráficas');
+        document.getElementById('chartsSection').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('chartsSection').style.display = 'block';
       
-      if (lastMonths.length >= 2) {
-        const traces = [];
-        const months = lastMonths.map(r => r.month);
+      // Gráfica 1: Comparación mensual (barras agrupadas)
+      if (metricsData.length >= 2) {
+        const lastMonths = metricsData.slice(-3); // Últimos 3 meses disponibles
+        const months = lastMonths.map(m => m.month);
         
-        // Extraer métricas comunes
-        const allMetrics = new Set();
-        lastMonths.forEach(r => {
-          if (r.metrics && r.metrics.metrics) {
-            r.metrics.metrics.forEach(m => allMetrics.add(m.name));
-          }
+        // Obtener nombres de métricas comunes
+        const allMetricNames = new Set();
+        lastMonths.forEach(m => {
+          m.metrics.forEach(metric => allMetricNames.add(metric.name));
         });
         
-        // Tomar las primeras 5 métricas
-        const topMetrics = Array.from(allMetrics).slice(0, 5);
+        const topMetrics = Array.from(allMetricNames).slice(0, 5);
+        const traces = [];
         
-        topMetrics.forEach((metricName, idx) => {
-          const values = lastMonths.map(r => {
-            if (r.metrics && r.metrics.metrics) {
-              const metric = r.metrics.metrics.find(m => m.name === metricName);
-              return metric ? metric.value : 0;
-            }
-            return 0;
+        topMetrics.forEach((metricName) => {
+          const values = lastMonths.map(m => {
+            const metric = m.metrics.find(met => met.name === metricName);
+            return metric ? metric.value : 0;
           });
           
           traces.push({
@@ -618,72 +631,74 @@
             name: metricName,
             x: months,
             y: values,
-            text: values.map(v => v.toFixed(1)),
+            text: values.map(v => typeof v === 'number' ? v.toFixed(1) : v),
             textposition: 'outside'
           });
         });
         
         if (traces.length > 0) {
           Plotly.newPlot('chartMonthly', traces, {
-            title: 'Comparación Mensual (Últimos 3 Meses)',
+            title: {
+              text: 'Comparación Mensual (Últimos ' + lastMonths.length + ' Meses)',
+              font: { size: 20, color: '#333' }
+            },
             xaxis: { title: 'Mes' },
             yaxis: { title: 'Valor' },
             barmode: 'group',
-            height: 450
+            height: 450,
+            paper_bgcolor: 'white',
+            plot_bgcolor: '#f8f9fa'
           });
+          console.log('✅ Gráfica mensual creada');
         }
       }
       
-      // Gráfica 2: Tendencias a lo largo del tiempo
-      if (reportsData.length >= 2) {
-        const traces = [];
-        const months = reportsData.map(r => r.month);
+      // Gráfica 2: Tendencias (líneas)
+      if (metricsData.length >= 2) {
+        const months = metricsData.map(m => m.month);
         
-        const allMetrics = new Set();
-        reportsData.forEach(r => {
-          if (r.metrics && r.metrics.metrics) {
-            r.metrics.metrics.forEach(m => allMetrics.add(m.name));
-          }
+        const allMetricNames = new Set();
+        metricsData.forEach(m => {
+          m.metrics.forEach(metric => allMetricNames.add(metric.name));
         });
         
-        const topMetrics = Array.from(allMetrics).slice(0, 5);
+        const topMetrics = Array.from(allMetricNames).slice(0, 5);
+        const traces = [];
         
-        topMetrics.forEach((metricName, idx) => {
-          const values = reportsData.map(r => {
-            if (r.metrics && r.metrics.metrics) {
-              const metric = r.metrics.metrics.find(m => m.name === metricName);
-              return metric ? metric.value : null;
-            }
-            return null;
-          }).filter(v => v !== null);
+        topMetrics.forEach((metricName) => {
+          const values = metricsData.map(m => {
+            const metric = m.metrics.find(met => met.name === metricName);
+            return metric ? metric.value : null;
+          });
           
-          if (values.length > 0) {
-            traces.push({
-              type: 'scatter',
-              mode: 'lines+markers',
-              name: metricName,
-              x: months.slice(0, values.length),
-              y: values,
-              line: { width: 3 },
-              marker: { size: 10 }
-            });
-          }
+          traces.push({
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: metricName,
+            x: months,
+            y: values,
+            line: { width: 3 },
+            marker: { size: 10 }
+          });
         });
         
         if (traces.length > 0) {
           Plotly.newPlot('chartTrends', traces, {
-            title: 'Tendencias a lo Largo del Tiempo',
+            title: {
+              text: 'Tendencias a lo Largo del Tiempo',
+              font: { size: 20, color: '#333' }
+            },
             xaxis: { title: 'Mes' },
             yaxis: { title: 'Valor' },
-            height: 450
+            height: 450,
+            paper_bgcolor: 'white',
+            plot_bgcolor: '#f8f9fa'
           });
+          console.log('✅ Gráfica de tendencias creada');
         }
+      } else {
+        console.log('⚠️ Solo hay', metricsData.length, 'mes(es), no se pueden generar tendencias');
       }
-    }
-    
-    function generateCharts(metricsData) {
-      // Si vienen métricas del backend, usarlas
-      generateChartsFromReports(metricsData);
     }
   </script>
 </body>
