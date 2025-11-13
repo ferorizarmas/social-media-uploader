@@ -533,26 +533,84 @@
         
         const result = await response.json();
         
-        // Convertir markdown a HTML simple
-        let htmlContent = result.analysis
-          .replace(/^# (.+)$/gm, '<h2 style="color: #00BFFF; margin-top: 30px; margin-bottom: 15px; font-size: 24px;">$1</h2>')
-          .replace(/^## (.+)$/gm, '<h3 style="color: #333; margin-top: 20px; margin-bottom: 10px; font-size: 20px;">$1</h3>')
-          .replace(/\*\*(.+?)\*\*/g, '$1') // Remove ** instead of making bold
-          .replace(/^---$/gm, '<hr style="border: none; border-top: 2px solid #e0e0e0; margin: 30px 0;">')
-          .replace(/\n\n/g, '</p><p style="margin-bottom: 15px;">')
-          .replace(/^- (.+)$/gm, '<li style="margin-left: 20px; margin-bottom: 8px; list-style-type: disc;">$1</li>');
+        // Convertir markdown a HTML con mejor formato
+        let htmlContent = result.analysis;
         
-        htmlContent = '<p style="margin-bottom: 15px;">' + htmlContent + '</p>';
+        // Primero convertir títulos
+        htmlContent = htmlContent.replace(/^# (.+)$/gm, '<h2 style="color: #00BFFF; margin-top: 30px; margin-bottom: 15px; font-size: 24px; font-weight: 600;">$1</h2>');
+        htmlContent = htmlContent.replace(/^## (.+)$/gm, '<h3 style="color: #333; margin-top: 20px; margin-bottom: 10px; font-size: 20px; font-weight: 600;">$1</h3>');
+        
+        // Remover ** (negritas)
+        htmlContent = htmlContent.replace(/\*\*(.+?)\*\*/g, '$1');
+        
+        // Convertir separadores
+        htmlContent = htmlContent.replace(/^---$/gm, '<hr style="border: none; border-top: 2px solid #e0e0e0; margin: 30px 0;">');
+        
+        // Convertir listas con - pero NO con * o •
+        const lines = htmlContent.split('\n');
+        let inList = false;
+        const processedLines = [];
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          
+          // Si empieza con "- " (guión seguido de espacio)
+          if (line.match(/^- (.+)$/)) {
+            if (!inList) {
+              processedLines.push('<ul style="margin: 15px 0; padding-left: 20px;">');
+              inList = true;
+            }
+            const content = line.substring(2); // Remover "- "
+            processedLines.push(`<li style="margin-bottom: 8px; line-height: 1.6;">${content}</li>`);
+          } 
+          // Si empieza con "* " o otros bullets, NO convertir a lista
+          else if (line.match(/^[\*•] (.+)$/)) {
+            if (inList) {
+              processedLines.push('</ul>');
+              inList = false;
+            }
+            const content = line.substring(2); // Remover el símbolo
+            processedLines.push(`<p style="margin-bottom: 8px; padding-left: 20px;">${content}</p>`);
+          }
+          else {
+            if (inList && line !== '') {
+              processedLines.push('</ul>');
+              inList = false;
+            }
+            if (line !== '') {
+              processedLines.push(line);
+            }
+          }
+        }
+        
+        if (inList) {
+          processedLines.push('</ul>');
+        }
+        
+        htmlContent = processedLines.join('\n');
+        
+        // Convertir párrafos
+        htmlContent = htmlContent.replace(/\n\n/g, '</p><p style="margin-bottom: 15px; line-height: 1.8;">');
+        htmlContent = '<div style="line-height: 1.8;"><p style="margin-bottom: 15px; line-height: 1.8;">' + htmlContent + '</p></div>';
         
         document.getElementById('analysisContent').innerHTML = htmlContent;
         document.getElementById('results').style.display = 'block';
         
         // Generar gráficas
-        if (result.metadata && result.metadata.metrics && result.metadata.metrics.length > 0) {
-          console.log('📊 Generando gráficas con', result.metadata.metrics.length, 'meses');
-          generateCharts(result.metadata.metrics);
+        console.log('🔍 Verificando métricas...', result.metadata);
+        
+        if (result.metadata && result.metadata.metrics) {
+          console.log('📊 Métricas encontradas:', result.metadata.metrics.length, 'meses');
+          console.log('📊 Datos de métricas:', JSON.stringify(result.metadata.metrics, null, 2));
+          
+          if (result.metadata.metrics.length > 0) {
+            generateCharts(result.metadata.metrics);
+          } else {
+            console.log('⚠️ Array de métricas está vacío');
+            document.getElementById('chartsSection').style.display = 'none';
+          }
         } else {
-          console.log('⚠️ No hay métricas disponibles para gráficas');
+          console.log('❌ No hay metadata.metrics en la respuesta');
           document.getElementById('chartsSection').style.display = 'none';
         }
         
