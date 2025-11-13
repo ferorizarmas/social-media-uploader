@@ -459,7 +459,36 @@
         return;
       }
       
-      const currentMonth = new Date().getMonth() + 1;
+      // Detectar mes del nombre del archivo si es posible
+      let detectedMonth = null;
+      const fileName = file.name.toLowerCase();
+      const monthKeywords = {
+        1: ['enero', 'january'],
+        2: ['febrero', 'february'],
+        3: ['marzo', 'march'],
+        4: ['abril', 'april'],
+        5: ['mayo', 'may'],
+        6: ['junio', 'june'],
+        7: ['julio', 'july'],
+        8: ['agosto', 'august'],
+        9: ['septiembre', 'september'],
+        10: ['octubre', 'october'],
+        11: ['noviembre', 'november'],
+        12: ['diciembre', 'december']
+      };
+      
+      for (const [month, keywords] of Object.entries(monthKeywords)) {
+        if (keywords.some(keyword => fileName.includes(keyword))) {
+          detectedMonth = parseInt(month);
+          break;
+        }
+      }
+      
+      // Si no se detectó, usar mes actual del sistema
+      const currentMonth = detectedMonth || new Date().getMonth() + 1;
+      
+      console.log(`📅 Mes detectado: ${currentMonth} (${monthNames[currentMonth-1]})`);
+      
       const filename = `current_${currentYear}_${currentMonth}_${Date.now()}_${file.name}`;
       
       document.getElementById('currentFileInfo').textContent = '⏳ Subiendo...';
@@ -495,7 +524,7 @@
       }
       
       currentReportId = data[0].id;
-      document.getElementById('currentFileInfo').innerHTML = `✅ <strong>${file.name}</strong> subido`;
+      document.getElementById('currentFileInfo').innerHTML = `✅ <strong>${file.name}</strong> subido como ${monthNames[currentMonth-1]}`;
       checkIfCanGenerate();
     }
     
@@ -607,11 +636,23 @@
             generateCharts(result.metadata.metrics);
           } else {
             console.log('⚠️ Array de métricas está vacío');
-            document.getElementById('chartsSection').style.display = 'none';
+            document.getElementById('chartsSection').innerHTML = `
+              <h3 style="color: #00BFFF; margin-bottom: 20px; font-size: 18px;">📈 Visualización de Métricas</h3>
+              <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="margin: 0; color: #856404;"><strong>⚠️ No se pudieron extraer métricas automáticamente</strong></p>
+                <p style="margin: 10px 0 0 0; color: #856404;">Las gráficas requieren datos numéricos del reporte. Verifica que el PDF contenga tablas o métricas claras.</p>
+              </div>
+            `;
           }
         } else {
           console.log('❌ No hay metadata.metrics en la respuesta');
-          document.getElementById('chartsSection').style.display = 'none';
+          document.getElementById('chartsSection').innerHTML = `
+            <h3 style="color: #00BFFF; margin-bottom: 20px; font-size: 18px;">📈 Visualización de Métricas</h3>
+            <div style="background: #f8d7da; padding: 20px; border-radius: 8px; border-left: 4px solid #dc3545;">
+              <p style="margin: 0; color: #721c24;"><strong>❌ Error al procesar métricas</strong></p>
+              <p style="margin: 10px 0 0 0; color: #721c24;">Revisa los logs de Supabase Edge Function para más detalles.</p>
+            </div>
+          `;
         }
         
         document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
