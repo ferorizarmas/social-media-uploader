@@ -1,705 +1,336 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Análisis de Reportes Mkt-View</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #FFA947 0%, #FF8C1A 50%, #FF9933 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 16px;
-      padding: 40px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    h1 { color: #333; margin-bottom: 10px; }
-    .subtitle { color: #666; margin-bottom: 30px; }
-    
-    .section {
-      background: #f8f9fa;
-      padding: 25px;
-      border-radius: 12px;
-      margin-bottom: 25px;
-    }
-    .section h2 {
-      color: #00BFFF;
-      margin-bottom: 20px;
-      font-size: 20px;
-    }
-    
-    .company-selector {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    .company-selector input, .company-selector select, .company-selector button {
-      padding: 12px 20px;
-      font-size: 15px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
-    .company-selector button {
-      background: #00BFFF;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .company-selector button:hover { background: #00A3E0; }
-    
-    .upload-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    .month-upload {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      border: 2px solid #e0e0e0;
-      text-align: center;
-      position: relative;
-    }
-    .month-upload h3 {
-      color: #333;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-    .month-upload.has-file {
-      border-color: #4caf50;
-      background: #f1f8f4;
-    }
-    .month-upload input[type="file"] {
-      display: none;
-    }
-    .month-upload label {
-      display: block;
-      padding: 10px;
-      background: #00BFFF;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-    }
-    .month-upload label:hover { background: #00A3E0; }
-    .file-info {
-      margin-top: 10px;
-      font-size: 12px;
-      color: #666;
-      word-break: break-all;
-    }
-    .file-actions {
-      display: flex;
-      gap: 5px;
-      margin-top: 10px;
-      justify-content: center;
-    }
-    .file-actions button {
-      padding: 6px 12px;
-      font-size: 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn-delete { background: #f44336; color: white; }
-    .btn-delete:hover { background: #d32f2f; }
-    
-    .current-report-section {
-      background: #fff3e0;
-      padding: 25px;
-      border-radius: 12px;
-      border: 2px solid #00BFFF;
-      margin-bottom: 25px;
-    }
-    .current-report-section h2 {
-      color: #00BFFF;
-    }
-    .upload-current {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .upload-current input[type="file"] {
-      flex: 1;
-      padding: 12px;
-      border: 2px dashed #00BFFF;
-      border-radius: 8px;
-      background: white;
-    }
-    
-    .generate-btn {
-      background: linear-gradient(135deg, #00BFFF 0%, #00A3E0 100%);
-      color: white;
-      padding: 18px 40px;
-      border: none;
-      border-radius: 10px;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 20px;
-      box-shadow: 0 4px 15px rgba(0, 191, 255, 0.4);
-    }
-    .generate-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 191, 255, 0.6);
-    }
-    .generate-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-    
-    .status {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 8px;
-      display: none;
-      text-align: center;
-      font-weight: 500;
-    }
-    .status.loading { background: #e3f2fd; color: #1976d2; display: block; }
-    .status.success { background: #e8f5e9; color: #2e7d32; display: block; }
-    .status.error { background: #ffebee; color: #c62828; display: block; }
-    
-    .results {
-      margin-top: 30px;
-      padding: 30px;
-      background: #f8f9fa;
-      border-radius: 12px;
-      display: none;
-    }
-    .results h2 {
-      color: #333;
-      margin-bottom: 20px;
-    }
-    .analysis-content {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      line-height: 1.9;
-      color: #444;
-      white-space: pre-wrap;
-      font-size: 15px;
-      margin-bottom: 30px;
-    }
-    .charts-section {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      margin-top: 30px;
-    }
-    .charts-section h3 {
-      color: #00BFFF;
-      margin-bottom: 20px;
-      font-size: 18px;
-    }
-    .chart-container {
-      margin-bottom: 40px;
-    }
-    .download-btn {
-      display: inline-block;
-      background: #2e7d32;
-      color: white;
-      padding: 14px 30px;
-      border-radius: 8px;
-      text-decoration: none;
-      margin-top: 20px;
-      font-weight: 600;
-    }
-    .download-btn:hover { background: #1b5e20; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>📊 Análisis de Reportes Mkt-View</h1>
-    <p class="subtitle">Gestiona reportes históricos y genera análisis automáticos</p>
-    
-    <!-- Selector de Empresa -->
-    <div class="section">
-      <h2>1️⃣ Seleccionar Empresa</h2>
-      <div class="company-selector">
-        <select id="companySelect">
-          <option value="">Seleccionar empresa existente...</option>
-        </select>
-        <span style="padding: 12px;">O crear nueva:</span>
-        <input type="text" id="newCompanyName" placeholder="Nombre de nueva empresa" />
-        <button onclick="createCompany()">➕ Crear Empresa</button>
-      </div>
-    </div>
-    
-    <!-- Subir Reportes Históricos -->
-    <div class="section" id="historicalSection" style="display: none;">
-      <h2>2️⃣ Subir/Gestionar Reportes Históricos</h2>
-      <p style="margin-bottom: 20px; color: #666;">Sube los reportes de meses anteriores. Puedes editar o eliminar después.</p>
-      
-      <div class="upload-grid" id="monthsGrid"></div>
-    </div>
-    
-    <!-- Subir Reporte Actual -->
-    <div class="current-report-section" id="currentSection" style="display: none;">
-      <h2>3️⃣ Subir Reporte del Mes Actual</h2>
-      <p style="margin-bottom: 15px; color: #666;">Este es el reporte que se comparará con todos los históricos</p>
-      
-      <div class="upload-current">
-        <input type="file" id="currentFile" accept=".pdf" />
-        <button onclick="uploadCurrent()" style="background: #00BFFF; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-          📤 Subir Actual
-        </button>
-      </div>
-      <div id="currentFileInfo" style="margin-top: 10px; color: #666;"></div>
-    </div>
-    
-    <!-- Generar Análisis -->
-    <button class="generate-btn" id="generateBtn" onclick="generateAnalysis()" style="display: none;">
-      🚀 Generar Análisis Completo
-    </button>
-    
-    <div id="status" class="status"></div>
-    
-    <!-- Resultados -->
-    <div id="results" class="results">
-      <h2>📄 Análisis Generado</h2>
-      <div id="analysisContent" class="analysis-content"></div>
-      
-      <!-- Gráficas -->
-      <div class="charts-section" id="chartsSection">
-        <h3>📈 Visualización de Métricas</h3>
-        <div class="chart-container" id="chartMonthly"></div>
-        <div class="chart-container" id="chartTrends"></div>
-      </div>
-      
-      <a id="downloadLink" class="download-btn" style="display: none;">📥 Descargar Análisis (TXT)</a>
-    </div>
-  </div>
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-  <script>
-    const SUPABASE_URL = "https://ftsmavpfnmpeltpnsdqx.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0c21hdnBmbm1wZWx0cG5zZHF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyODE5OTUsImV4cCI6MjA3Nzg1Nzk5NX0.o7Dmk2CSYRlVF4s-FN7islAbYYPLNJ5Q2POEmcKh0zw";
-    const FUNCTION_URL = "https://ftsmavpfnmpeltpnsdqx.supabase.co/functions/v1/process-report";
-    
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    let currentCompanyId = null;
-    let currentReportId = null;
-    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    const currentYear = new Date().getFullYear();
-    
-    loadCompanies();
-    
-    async function loadCompanies() {
-      const { data, error } = await supabase
-        .from('companies')
-        .select('*')
-        .order('name');
-      
-      if (!error && data) {
-        const select = document.getElementById('companySelect');
-        select.innerHTML = '<option value="">Seleccionar empresa existente...</option>';
-        data.forEach(company => {
-          const option = document.createElement('option');
-          option.value = company.id;
-          option.textContent = company.name;
-          select.appendChild(option);
-        });
-      }
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const CLIENT_PROMPT = `Eres un experto analista de marketing digital. Debes generar un reporte profesional y bien estructurado.
+
+IMPORTANTE - REGLAS ESTRICTAS:
+- SOLO usa los datos de los meses que se te proporcionan en los textos extraídos de los PDFs
+- NUNCA inventes datos de meses que no están en los PDFs proporcionados
+- Si solo hay 1 o 2 meses disponibles, menciona explícitamente que no hay suficiente historial
+
+PRECISIÓN EN LA IDENTIFICACIÓN DE LA BASE DE COMPARACIÓN:
+- La mayoría de los reportes de gestión incluyen métricas del mes actual Y del mes anterior dentro del mismo PDF
+- ANTES de afirmar "No se cuenta con datos del mes anterior", revisa cuidadosamente si el PDF actual contiene comparaciones o datos del mes previo
+- Busca secciones como "Mes Anterior", "Comparación", "vs. mes pasado", tablas comparativas, etc.
+- SOLO indica que faltan datos del mes anterior si realmente no aparecen en ningún PDF proporcionado
+
+REGLAS DE FORMATO:
+- NO uses ** para negritas en ninguna parte del texto
+- USA guiones (-) para listas cuando sea necesario
+- Siempre incluye números y métricas específicas en TODAS las secciones
+- En el análisis histórico, aunque sean pocos meses, SIEMPRE incluye las métricas concretas observadas
+
+FORMATO DE SALIDA:
+Usa formato Markdown con las siguientes secciones claramente separadas:
+
+# Introducción y Comportamiento General del Mes Actual
+
+[Resumen del rendimiento del mes actual basado SOLO en los datos disponibles. Incluye números específicos.]
+
+---
+
+# Análisis Comparativo (Mes Actual vs. Mes Anterior)
+
+[Revisa PRIMERO si el PDF del mes actual contiene datos del mes anterior]
+[Si existen datos (en el mismo PDF o en PDFs separados): Compara métricas y analiza tendencias CON NÚMEROS]
+[Si NO existen en NINGÚN lado: "No se dispone de datos del mes anterior para realizar esta comparación"]
+
+Importante: No solo repitas números, explica qué significan las tendencias para el negocio, pero SÍ incluye los números.
+
+---
+
+# Análisis Histórico y Posicionamiento
+
+[Aunque solo haya 1-2 meses disponibles, SIEMPRE incluye las métricas observadas]
+[Ejemplo: "El análisis histórico es limitado dado que solo se dispone de 2 meses de información. Las métricas observadas son:"]
+- Métrica 1: [valor mes 1] vs [valor mes 2] - [explicación de tendencia]
+- Métrica 2: [valor mes 1] vs [valor mes 2] - [explicación de tendencia]
+[etc.]
+
+CRÍTICO: Siempre incluye números en esta sección, no la dejes sin métricas.
+
+---
+
+# Recomendaciones Estratégicas
+
+Recomendación 1: [Descripción concreta y accionable]
+
+Recomendación 2: [Descripción concreta y accionable]
+
+---
+
+# Conclusión
+
+[Párrafo final sobre la importancia de la gestión profesional continua]
+
+---
+
+RECUERDA: 
+1. Busca datos del mes anterior DENTRO del PDF del mes actual antes de decir que no existen
+2. Solo usa información real de los PDFs proporcionados
+3. No inventes meses o datos
+4. NO uses ** en ninguna parte
+5. SIEMPRE incluye números y métricas en todas las secciones, especialmente en el análisis histórico`;
+
+async function extractTextFromPDF(pdfUrl: string): Promise<string> {
+  console.log("🔍 Extracting text from PDF using Jina Reader...");
+  
+  const jinaUrl = `https://r.jina.ai/${pdfUrl}`;
+  
+  const response = await fetch(jinaUrl, {
+    headers: {
+      "Accept": "text/plain"
     }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Jina Reader failed: ${response.status}`);
+  }
+  
+  const text = await response.text();
+  console.log(`✅ Extracted ${text.length} characters from PDF`);
+  
+  return text;
+}
+
+async function callOpenRouter(apiKey: string, prompt: string) {
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+      "HTTP-Referer": "https://ftsmavpfnmpeltpnsdqx.supabase.co",
+      "X-Title": "PDF Report Analyzer"
+    },
+    body: JSON.stringify({
+      model: "meta-llama/llama-4-scout:free",
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 8192
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("OpenRouter Error Response:", errorText);
+    throw new Error(`OpenRouter API Error ${response.status}: ${errorText}`);
+  }
+
+  const result = await response.json();
+  
+  if (!result.choices || !result.choices[0] || !result.choices[0].message) {
+    console.error("Invalid OpenRouter response:", result);
+    throw new Error("OpenRouter no devolvió una respuesta válida");
+  }
+
+  return result.choices[0].message.content;
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { status: 200, headers: corsHeaders });
+  }
+
+  try {
+    const { company_id, year } = await req.json();
     
-    document.getElementById('companySelect').onchange = function() {
-      currentCompanyId = this.value;
-      if (currentCompanyId) {
-        document.getElementById('newCompanyName').value = '';
-        loadCompanyReports();
-      }
-    };
-    
-    async function createCompany() {
-      const name = document.getElementById('newCompanyName').value.trim();
-      if (!name) {
-        alert('Ingresa un nombre para la empresa');
-        return;
-      }
-      
-      const { data, error } = await supabase
-        .from('companies')
-        .insert({ name })
-        .select();
-      
-      if (error) {
-        alert('Error: ' + error.message);
-        return;
-      }
-      
-      currentCompanyId = data[0].id;
-      await loadCompanies();
-      document.getElementById('companySelect').value = currentCompanyId;
-      document.getElementById('newCompanyName').value = '';
-      loadCompanyReports();
+    if (!company_id || !year) {
+      throw new Error("Faltan parámetros: company_id y year son requeridos");
     }
-    
-    async function loadCompanyReports() {
-      document.getElementById('historicalSection').style.display = 'block';
-      document.getElementById('currentSection').style.display = 'block';
-      
-      const { data: reports } = await supabase
-        .from('reports')
-        .select('*')
-        .eq('company_id', currentCompanyId)
-        .eq('year', currentYear);
-      
-      const grid = document.getElementById('monthsGrid');
-      grid.innerHTML = '';
-      
-      for (let month = 1; month <= 12; month++) {
-        const existingReport = reports?.find(r => r.month === month);
-        
-        const monthDiv = document.createElement('div');
-        monthDiv.className = 'month-upload' + (existingReport ? ' has-file' : '');
-        monthDiv.innerHTML = `
-          <h3>${monthNames[month-1]}</h3>
-          <input type="file" id="file-${month}" accept=".pdf" onchange="uploadHistorical(${month})">
-          <label for="file-${month}">
-            ${existingReport ? '✏️ Cambiar PDF' : '📤 Subir PDF'}
-          </label>
-          <div class="file-info" id="info-${month}">
-            ${existingReport ? `✅ ${existingReport.filename.split('_').pop()}` : 'Sin archivo'}
-          </div>
-          ${existingReport ? `
-            <div class="file-actions">
-              <button class="btn-delete" onclick="deleteReport('${existingReport.id}', ${month})">🗑️ Eliminar</button>
-            </div>
-          ` : ''}
-        `;
-        grid.appendChild(monthDiv);
-      }
-      
-      checkIfCanGenerate();
+
+    console.log(`📊 Generando análisis para empresa: ${company_id}, año: ${year}`);
+
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY")!;
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Obtener todos los reportes de la empresa para el año
+    const { data: reports, error: reportsError } = await supabase
+      .from('reports')
+      .select('*')
+      .eq('company_id', company_id)
+      .eq('year', year)
+      .order('month', { ascending: true });
+
+    if (reportsError) {
+      throw new Error(`Error obteniendo reportes: ${reportsError.message}`);
     }
-    
-    async function uploadHistorical(month) {
-      const fileInput = document.getElementById(`file-${month}`);
-      const file = fileInput.files[0];
-      if (!file) return;
-      
-      const filename = `${currentYear}_${month}_${Date.now()}_${file.name}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('pdf-uploads')
-        .upload(filename, file);
-      
-      if (uploadError) {
-        alert('Error al subir: ' + uploadError.message);
-        return;
-      }
-      
-      const { data: urlData } = supabase.storage
-        .from('pdf-uploads')
-        .getPublicUrl(filename);
-      
-      const { error: dbError } = await supabase
-        .from('reports')
-        .upsert({
-          company_id: currentCompanyId,
-          month,
-          year: currentYear,
-          filename,
-          file_url: urlData.publicUrl
-        }, {
-          onConflict: 'company_id,month,year'
-        });
-      
-      if (dbError) {
-        alert('Error en DB: ' + dbError.message);
-        return;
-      }
-      
-      loadCompanyReports();
+
+    if (!reports || reports.length === 0) {
+      throw new Error("No hay reportes cargados para esta empresa");
     }
-    
-    async function deleteReport(reportId, month) {
-      if (!confirm(`¿Eliminar reporte de ${monthNames[month-1]}?`)) return;
-      
-      const { data: report } = await supabase
-        .from('reports')
-        .select('filename')
-        .eq('id', reportId)
-        .single();
-      
-      if (report) {
-        await supabase.storage
-          .from('pdf-uploads')
-          .remove([report.filename]);
-      }
-      
-      await supabase
-        .from('reports')
-        .delete()
-        .eq('id', reportId);
-      
-      loadCompanyReports();
-    }
-    
-    async function uploadCurrent() {
-      const file = document.getElementById('currentFile').files[0];
-      if (!file) {
-        alert('Selecciona el PDF del mes actual');
-        return;
-      }
-      
-      const currentMonth = new Date().getMonth() + 1;
-      const filename = `current_${currentYear}_${currentMonth}_${Date.now()}_${file.name}`;
-      
-      document.getElementById('currentFileInfo').textContent = '⏳ Subiendo...';
-      
-      const { error: uploadError } = await supabase.storage
-        .from('pdf-uploads')
-        .upload(filename, file);
-      
-      if (uploadError) {
-        alert('Error: ' + uploadError.message);
-        return;
-      }
-      
-      const { data: urlData } = supabase.storage
-        .from('pdf-uploads')
-        .getPublicUrl(filename);
-      
-      const { data, error: dbError } = await supabase
-        .from('reports')
-        .insert({
-          company_id: currentCompanyId,
-          month: currentMonth,
-          year: currentYear,
-          filename,
-          file_url: urlData.publicUrl,
-          is_current: true
-        })
-        .select();
-      
-      if (dbError) {
-        alert('Error en DB: ' + dbError.message);
-        return;
-      }
-      
-      currentReportId = data[0].id;
-      document.getElementById('currentFileInfo').innerHTML = `✅ <strong>${file.name}</strong> subido`;
-      checkIfCanGenerate();
-    }
-    
-    function checkIfCanGenerate() {
-      if (currentReportId || document.getElementById('currentFileInfo').textContent.includes('✅')) {
-        document.getElementById('generateBtn').style.display = 'block';
-      }
-    }
-    
-    async function generateAnalysis() {
-      const btn = document.getElementById('generateBtn');
-      const status = document.getElementById('status');
-      
-      btn.disabled = true;
-      status.className = 'status loading';
-      status.textContent = '🤖 Generando análisis con IA... (puede tomar 2-3 minutos)';
-      
+
+    console.log(`📁 Encontrados ${reports.length} reportes`);
+
+    // Identificar reportes clave
+    const currentReport = reports.find(r => r.is_current) || reports[reports.length - 1];
+    const currentMonth = currentReport.month;
+    const previousReport = reports.find(r => r.month === currentMonth - 1);
+    const startReport = reports[0];
+
+    console.log(`📅 Mes actual: ${currentMonth}, Anterior: ${previousReport?.month || 'N/A'}, Inicio: ${startReport.month}`);
+
+    // Extraer texto de todos los PDFs usando Jina Reader
+    const pdfTexts = [];
+
+    console.log("📥 Extrayendo texto de PDFs con Jina Reader...");
+
+    for (const report of reports) {
       try {
-        const response = await fetch(FUNCTION_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({
-            company_id: currentCompanyId,
-            year: currentYear
-          })
+        const text = await extractTextFromPDF(report.file_url);
+        pdfTexts.push({
+          month: report.month,
+          text: text.substring(0, 10000) // Limitar a 10k caracteres por PDF
         });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Error en el servidor');
-        }
-        
-        const result = await response.json();
-        
-        // Convertir markdown a HTML simple
-        let htmlContent = result.analysis
-          .replace(/^# (.+)$/gm, '<h2 style="color: #00BFFF; margin-top: 30px; margin-bottom: 15px; font-size: 24px;">$1</h2>')
-          .replace(/^## (.+)$/gm, '<h3 style="color: #333; margin-top: 20px; margin-bottom: 10px; font-size: 20px;">$3</h3>')
-          .replace(/^\*\*(.+?)\*\*/gm, '<strong style="color: #00BFFF;">$1</strong>')
-          .replace(/^---$/gm, '<hr style="border: none; border-top: 2px solid #e0e0e0; margin: 30px 0;">')
-          .replace(/\n\n/g, '</p><p style="margin-bottom: 15px;">')
-          .replace(/^\* (.+)$/gm, '<li style="margin-left: 20px; margin-bottom: 8px;">$1</li>');
-        
-        htmlContent = '<p style="margin-bottom: 15px;">' + htmlContent + '</p>';
-        
-        document.getElementById('analysisContent').innerHTML = htmlContent;
-        document.getElementById('results').style.display = 'block';
-        
-        // Generar gráficas
-        if (result.metadata && result.metadata.metrics && result.metadata.metrics.length > 0) {
-          console.log('📊 Generando gráficas con', result.metadata.metrics.length, 'meses');
-          generateCharts(result.metadata.metrics);
-        } else {
-          console.log('⚠️ No hay métricas disponibles para gráficas');
-          document.getElementById('chartsSection').style.display = 'none';
-        }
-        
-        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
-        
-        const blob = new Blob([result.analysis], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const downloadLink = document.getElementById('downloadLink');
-        downloadLink.href = url;
-        downloadLink.download = `analisis_${new Date().toISOString().split('T')[0]}.txt`;
-        downloadLink.style.display = 'inline-block';
-        
-        status.className = 'status success';
-        status.textContent = '✅ Análisis generado exitosamente!';
-        
+        console.log(`✅ Texto extraído: Mes ${report.month}`);
       } catch (error) {
-        status.className = 'status error';
-        status.textContent = '❌ Error: ' + error.message;
-      } finally {
-        btn.disabled = false;
+        console.error(`❌ Error extrayendo mes ${report.month}:`, error);
+        // Continuar con los demás aunque falle uno
       }
     }
-    
-    async function loadAndGenerateCharts() {
-      // Cargar reportes con métricas de la base de datos
-      const { data: reports } = await supabase
-        .from('reports')
-        .select('month, metrics')
-        .eq('company_id', currentCompanyId)
-        .eq('year', currentYear)
-        .order('month', { ascending: true });
-      
-      if (reports && reports.length > 0) {
-        const metricsData = reports.map(r => ({
-          month: monthNames[r.month - 1],
-          metrics: r.metrics || {}
-        }));
-        
-        generateChartsFromReports(metricsData);
-      }
-    }
-    
-    function generateCharts(metricsData) {
-      console.log('📈 Generando gráficas...', metricsData);
-      
-      if (!metricsData || metricsData.length === 0) {
-        console.log('❌ No hay datos para gráficas');
-        document.getElementById('chartsSection').style.display = 'none';
-        return;
-      }
 
-      document.getElementById('chartsSection').style.display = 'block';
-      
-      // Gráfica 1: Comparación mensual (barras agrupadas)
-      if (metricsData.length >= 2) {
-        const lastMonths = metricsData.slice(-3); // Últimos 3 meses disponibles
-        const months = lastMonths.map(m => m.month);
+    if (pdfTexts.length === 0) {
+      throw new Error("No se pudo extraer texto de ningún PDF");
+    }
+
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    // Construir el contexto completo para el análisis
+    const pdfContexts = pdfTexts.map(pdf => {
+      return `\n========== MES: ${monthNames[pdf.month - 1]} ${year} ==========\n${pdf.text}\n`;
+    }).join('\n');
+
+    const fullPrompt = `
+CONTEXTO DE LOS REPORTES:
+
+- MES ACTUAL: ${monthNames[currentMonth - 1]} ${year}
+- MES ANTERIOR: ${previousReport ? monthNames[previousReport.month - 1] + ' ' + year : 'No disponible'}
+- MES DE INICIO: ${monthNames[startReport.month - 1]} ${year}
+- TOTAL DE MESES DISPONIBLES: ${reports.length}
+
+Los textos extraídos de los PDFs de cada mes son los siguientes:
+
+${pdfContexts}
+
+========== INSTRUCCIONES ==========
+
+${CLIENT_PROMPT}
+
+IMPORTANTE: Analiza todos los textos de los meses proporcionados para obtener el contexto completo. El primer texto corresponde al mes de ${monthNames[startReport.month - 1]}, y el último al mes de ${monthNames[currentMonth - 1]} (mes actual).
+
+Genera el análisis completo siguiendo todas las secciones indicadas en las instrucciones.
+`;
+
+    console.log("🤖 Llamando a Llama 4 Scout via OpenRouter...");
+    console.log(`📝 Prompt length: ${fullPrompt.length} characters`);
+
+    const analysisText = await callOpenRouter(OPENROUTER_API_KEY, fullPrompt);
+
+    console.log("✅ Análisis generado con Llama 4 Scout");
+
+    // Extraer métricas de cada reporte para las gráficas
+    console.log("📊 Extrayendo métricas para gráficas...");
+    const metricsData = [];
+    
+    for (const report of reports) {
+      const pdfText = pdfTexts.find(p => p.month === report.month)?.text;
+      if (!pdfText) continue;
+
+      try {
+        const metricsPrompt = `Extrae las métricas numéricas del siguiente texto de reporte de redes sociales.
+
+TEXTO DEL REPORTE:
+${pdfText.substring(0, 5000)}
+
+Devuelve SOLO un JSON con este formato:
+{
+  "metrics": [
+    {"name": "Seguidores Facebook", "value": 1234},
+    {"name": "Engagement Instagram", "value": 5.6},
+    {"name": "Alcance Total", "value": 45000}
+  ]
+}
+
+Extrae las métricas principales. Responde SOLO con el JSON, sin texto adicional.`;
+
+        const metricsResponse = await callOpenRouter(OPENROUTER_API_KEY, metricsPrompt);
+        let cleanJson = metricsResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
+        if (jsonMatch) cleanJson = jsonMatch[0];
         
-        // Obtener nombres de métricas comunes
-        const allMetricNames = new Set();
-        lastMonths.forEach(m => {
-          m.metrics.forEach(metric => allMetricNames.add(metric.name));
+        const parsed = JSON.parse(cleanJson);
+        metricsData.push({
+          month: monthNames[report.month - 1],
+          metrics: parsed.metrics || []
         });
         
-        const topMetrics = Array.from(allMetricNames).slice(0, 5);
-        const traces = [];
-        
-        topMetrics.forEach((metricName) => {
-          const values = lastMonths.map(m => {
-            const metric = m.metrics.find(met => met.name === metricName);
-            return metric ? metric.value : 0;
-          });
-          
-          traces.push({
-            type: 'bar',
-            name: metricName,
-            x: months,
-            y: values,
-            text: values.map(v => typeof v === 'number' ? v.toFixed(1) : v),
-            textposition: 'outside'
-          });
-        });
-        
-        if (traces.length > 0) {
-          Plotly.newPlot('chartMonthly', traces, {
-            title: {
-              text: 'Comparación Mensual (Últimos ' + lastMonths.length + ' Meses)',
-              font: { size: 20, color: '#333' }
-            },
-            xaxis: { title: 'Mes' },
-            yaxis: { title: 'Valor' },
-            barmode: 'group',
-            height: 450,
-            paper_bgcolor: 'white',
-            plot_bgcolor: '#f8f9fa'
-          });
-          console.log('✅ Gráfica mensual creada');
-        }
-      }
-      
-      // Gráfica 2: Tendencias (líneas)
-      if (metricsData.length >= 2) {
-        const months = metricsData.map(m => m.month);
-        
-        const allMetricNames = new Set();
-        metricsData.forEach(m => {
-          m.metrics.forEach(metric => allMetricNames.add(metric.name));
-        });
-        
-        const topMetrics = Array.from(allMetricNames).slice(0, 5);
-        const traces = [];
-        
-        topMetrics.forEach((metricName) => {
-          const values = metricsData.map(m => {
-            const metric = m.metrics.find(met => met.name === metricName);
-            return metric ? metric.value : null;
-          });
-          
-          traces.push({
-            type: 'scatter',
-            mode: 'lines+markers',
-            name: metricName,
-            x: months,
-            y: values,
-            line: { width: 3 },
-            marker: { size: 10 }
-          });
-        });
-        
-        if (traces.length > 0) {
-          Plotly.newPlot('chartTrends', traces, {
-            title: {
-              text: 'Tendencias a lo Largo del Tiempo',
-              font: { size: 20, color: '#333' }
-            },
-            xaxis: { title: 'Mes' },
-            yaxis: { title: 'Valor' },
-            height: 450,
-            paper_bgcolor: 'white',
-            plot_bgcolor: '#f8f9fa'
-          });
-          console.log('✅ Gráfica de tendencias creada');
-        }
-      } else {
-        console.log('⚠️ Solo hay', metricsData.length, 'mes(es), no se pueden generar tendencias');
+        console.log(`✅ Métricas extraídas para ${monthNames[report.month - 1]}`);
+      } catch (error) {
+        console.error(`❌ Error extrayendo métricas del mes ${report.month}:`, error);
       }
     }
-  </script>
-</body>
-</html>
+
+    console.log(`📈 Total de ${metricsData.length} meses con métricas`);
+
+    // Guardar análisis en la base de datos
+    const { error: analysisError } = await supabase
+      .from('analyses')
+      .insert({
+        company_id,
+        current_report_id: currentReport.id,
+        analysis_text: analysisText
+      });
+
+    if (analysisError) {
+      console.error("Error guardando análisis:", analysisError);
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        analysis: analysisText,
+        metadata: {
+          company_id,
+          year,
+          current_month: currentMonth,
+          reports_analyzed: reports.length,
+          model_used: "meta-llama/llama-4-scout:free",
+          metrics: metricsData
+        }
+      }),
+      { 
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
+
+  } catch (error) {
+    console.error("❌ Error:", error);
+    console.error("Error stack:", error.stack);
+    return new Response(
+      JSON.stringify({ 
+        success: false,
+        error: error.message,
+        stack: error.stack
+      }),
+      { 
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
+  }
+});
