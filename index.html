@@ -15,15 +15,15 @@
       padding: 20px;
     }
     .container {
-      max-width: 1400px;
+      max-width: 1600px;
       margin: 0 auto;
       background: white;
       border-radius: 16px;
       padding: 40px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
-    h1 { color: #333; margin-bottom: 10px; }
-    .subtitle { color: #666; margin-bottom: 30px; }
+    h1 { color: #333; margin-bottom: 10px; font-size: 32px; }
+    .subtitle { color: #666; margin-bottom: 30px; font-size: 16px; }
     
     .section {
       background: #f8f9fa;
@@ -37,10 +37,11 @@
       font-size: 20px;
     }
     
+    /* Company Selector */
     .company-selector {
       display: flex;
       gap: 15px;
-      margin-bottom: 20px;
+      align-items: center;
       flex-wrap: wrap;
     }
     .company-selector input, .company-selector select, .company-selector button {
@@ -49,97 +50,135 @@
       border: 1px solid #ddd;
       border-radius: 8px;
     }
+    .company-selector select {
+      flex: 1;
+      min-width: 250px;
+    }
     .company-selector button {
       background: #00BFFF;
       color: white;
       border: none;
       cursor: pointer;
       font-weight: 600;
+      transition: all 0.3s;
     }
-    .company-selector button:hover { background: #00A3E0; }
+    .company-selector button:hover { background: #00A3E0; transform: translateY(-2px); }
     
-    .upload-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
+    /* Historical Data Table */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
     }
-    .month-upload {
+    table {
+      width: 100%;
+      border-collapse: collapse;
       background: white;
-      padding: 20px;
-      border-radius: 10px;
-      border: 2px solid #e0e0e0;
-      text-align: center;
-      position: relative;
+      font-size: 14px;
     }
-    .month-upload h3 {
-      color: #333;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-    .month-upload.has-file {
-      border-color: #4caf50;
-      background: #f1f8f4;
-    }
-    .month-upload input[type="file"] {
-      display: none;
-    }
-    .month-upload label {
-      display: block;
-      padding: 10px;
+    th {
       background: #00BFFF;
       color: white;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
     }
-    .month-upload label:hover { background: #00A3E0; }
-    .file-info {
-      margin-top: 10px;
-      font-size: 12px;
-      color: #666;
-      word-break: break-all;
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e0e0e0;
     }
-    .file-actions {
-      display: flex;
-      gap: 5px;
-      margin-top: 10px;
-      justify-content: center;
-    }
-    .file-actions button {
-      padding: 6px 12px;
-      font-size: 12px;
+    tr:hover { background: #f5f5f5; }
+    .edit-btn {
+      background: #00BFFF;
+      color: white;
       border: none;
+      padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 12px;
     }
-    .btn-delete { background: #f44336; color: white; }
-    .btn-delete:hover { background: #d32f2f; }
+    .edit-btn:hover { background: #00A3E0; }
+    .delete-btn {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 5px;
+    }
+    .delete-btn:hover { background: #d32f2f; }
+    .add-month-btn {
+      background: #4caf50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 15px;
+    }
+    .add-month-btn:hover { background: #388e3c; }
     
-    .current-report-section {
-      background: #fff3e0;
+    /* CSV Upload Section */
+    .upload-section {
+      background: #e3f2fd;
       padding: 25px;
       border-radius: 12px;
       border: 2px solid #00BFFF;
       margin-bottom: 25px;
     }
-    .current-report-section h2 {
+    .upload-section h2 {
       color: #00BFFF;
+      margin-bottom: 15px;
     }
-    .upload-current {
+    .month-year-selector {
       display: flex;
       gap: 15px;
-      align-items: center;
-      flex-wrap: wrap;
+      margin-bottom: 20px;
     }
-    .upload-current input[type="file"] {
-      flex: 1;
-      padding: 12px;
-      border: 2px dashed #00BFFF;
+    .month-year-selector select {
+      padding: 10px;
+      border: 1px solid #ddd;
       border-radius: 8px;
-      background: white;
+      font-size: 15px;
     }
     
+    .csv-upload-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .csv-upload-item {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      border: 2px dashed #00BFFF;
+    }
+    .csv-upload-item h4 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .csv-upload-item input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 13px;
+    }
+    .csv-status {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+    .csv-status.success {
+      color: #4caf50;
+      font-weight: 600;
+    }
+    
+    /* Generate Button */
     .generate-btn {
       background: linear-gradient(135deg, #00BFFF 0%, #00A3E0 100%);
       color: white;
@@ -152,6 +191,7 @@
       width: 100%;
       margin-top: 20px;
       box-shadow: 0 4px 15px rgba(0, 191, 255, 0.4);
+      transition: all 0.3s;
     }
     .generate-btn:hover {
       transform: translateY(-2px);
@@ -163,6 +203,7 @@
       transform: none;
     }
     
+    /* Status Messages */
     .status {
       margin-top: 20px;
       padding: 15px;
@@ -175,6 +216,7 @@
     .status.success { background: #e8f5e9; color: #2e7d32; display: block; }
     .status.error { background: #ffebee; color: #c62828; display: block; }
     
+    /* Results Section */
     .results {
       margin-top: 30px;
       padding: 30px;
@@ -185,17 +227,20 @@
     .results h2 {
       color: #333;
       margin-bottom: 20px;
+      font-size: 24px;
     }
-    .analysis-content {
+    .report-content {
       background: white;
-      padding: 30px;
+      padding: 40px;
       border-radius: 10px;
-      line-height: 1.9;
-      color: #444;
-      white-space: pre-wrap;
+      line-height: 2;
+      color: #333;
       font-size: 15px;
       margin-bottom: 30px;
+      white-space: pre-wrap;
     }
+    
+    /* Charts Section */
     .charts-section {
       background: white;
       padding: 30px;
@@ -205,100 +250,324 @@
     .charts-section h3 {
       color: #00BFFF;
       margin-bottom: 20px;
-      font-size: 18px;
+      font-size: 20px;
     }
     .chart-container {
       margin-bottom: 40px;
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
     }
+    
+    /* Download Button */
     .download-btn {
       display: inline-block;
-      background: #2e7d32;
+      background: #4caf50;
       color: white;
       padding: 14px 30px;
       border-radius: 8px;
       text-decoration: none;
       margin-top: 20px;
       font-weight: 600;
+      transition: all 0.3s;
     }
-    .download-btn:hover { background: #1b5e20; }
+    .download-btn:hover { 
+      background: #388e3c; 
+      transform: translateY(-2px);
+    }
+    
+    /* Modal for editing */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-content h3 {
+      color: #00BFFF;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #333;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .modal-buttons button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-save {
+      background: #00BFFF;
+      color: white;
+    }
+    .btn-cancel {
+      background: #ccc;
+      color: #333;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>📊 Análisis de Reportes Mkt-View</h1>
-    <p class="subtitle">Gestiona reportes históricos y genera análisis automáticos</p>
+    <p class="subtitle">Sistema de análisis automatizado con CSVs de Meta Business Suite</p>
     
-    <!-- Selector de Empresa -->
+    <!-- 1. Selector de Empresa -->
     <div class="section">
       <h2>1️⃣ Seleccionar Empresa</h2>
       <div class="company-selector">
         <select id="companySelect">
           <option value="">Seleccionar empresa existente...</option>
         </select>
-        <span style="padding: 12px;">O crear nueva:</span>
+        <span>O crear nueva:</span>
         <input type="text" id="newCompanyName" placeholder="Nombre de nueva empresa" />
         <button onclick="createCompany()">➕ Crear Empresa</button>
       </div>
     </div>
     
-    <!-- Subir Reportes Históricos -->
+    <!-- 2. Datos Históricos -->
     <div class="section" id="historicalSection" style="display: none;">
-      <h2>2️⃣ Subir/Gestionar Reportes Históricos</h2>
-      <p style="margin-bottom: 20px; color: #666;">Sube los reportes de meses anteriores. Puedes editar o eliminar después.</p>
+      <h2>2️⃣ Datos Históricos (Editable)</h2>
+      <p style="margin-bottom: 15px; color: #666;">Visualiza y edita los datos de meses anteriores</p>
       
-      <div class="upload-grid" id="monthsGrid"></div>
-    </div>
-    
-    <!-- Subir Reporte Actual -->
-    <div class="current-report-section" id="currentSection" style="display: none;">
-      <h2>3️⃣ Subir Reporte del Mes Actual</h2>
-      <p style="margin-bottom: 15px; color: #666;">Este es el reporte que se comparará con todos los históricos</p>
-      
-      <div class="upload-current">
-        <input type="file" id="currentFile" accept=".pdf" />
-        <button onclick="uploadCurrent()" style="background: #00BFFF; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-          📤 Subir Actual
-        </button>
+      <div class="table-container">
+        <table id="historicalTable">
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>Año</th>
+              <th>FB Seguidores</th>
+              <th>IG Seguidores</th>
+              <th>FB Alcance</th>
+              <th>IG Alcance</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="historicalTableBody">
+            <!-- Se llena dinámicamente -->
+          </tbody>
+        </table>
       </div>
-      <div id="currentFileInfo" style="margin-top: 10px; color: #666;"></div>
+      
+      <button class="add-month-btn" onclick="openAddMonthModal()">➕ Agregar Mes Manualmente</button>
     </div>
     
-    <!-- Generar Análisis -->
-    <button class="generate-btn" id="generateBtn" onclick="generateAnalysis()" style="display: none;">
-      🚀 Generar Análisis Completo
-    </button>
+    <!-- 3. Subir CSVs del Mes Actual -->
+    <div class="upload-section" id="uploadSection" style="display: none;">
+      <h2>3️⃣ Análisis del Mes Actual</h2>
+      <p style="margin-bottom: 15px; color: #666;">Sube los CSVs descargados de Meta Business Suite</p>
+      
+      <div class="month-year-selector">
+        <select id="monthSelect">
+          <option value="">Seleccionar mes...</option>
+          <option value="1">Enero</option>
+          <option value="2">Febrero</option>
+          <option value="3">Marzo</option>
+          <option value="4">Abril</option>
+          <option value="5">Mayo</option>
+          <option value="6">Junio</option>
+          <option value="7">Julio</option>
+          <option value="8">Agosto</option>
+          <option value="9">Septiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+        <select id="yearSelect">
+          <option value="">Seleccionar año...</option>
+        </select>
+      </div>
+      
+      <div class="csv-upload-grid" id="csvUploadGrid">
+        <!-- Los items de upload se crean dinámicamente -->
+      </div>
+      
+      <button class="generate-btn" id="generateBtn" onclick="generateReport()" disabled>
+        🚀 Generar Análisis Completo
+      </button>
+    </div>
     
     <div id="status" class="status"></div>
     
-    <!-- Resultados -->
+    <!-- 4. Resultados -->
     <div id="results" class="results">
-      <h2>📄 Análisis Generado</h2>
-      <div id="analysisContent" class="analysis-content"></div>
+      <h2>📄 Reporte Generado</h2>
+      <div id="reportContent" class="report-content"></div>
       
-      <!-- Gráficas -->
       <div class="charts-section" id="chartsSection">
-        <h3>📈 Visualización de Métricas</h3>
-        <div class="chart-container" id="chartMonthly"></div>
-        <div class="chart-container" id="chartTrends"></div>
+        <h3>📈 Gráficas de Rendimiento</h3>
+        <div class="chart-container" id="chartFacebook"></div>
+        <div class="chart-container" id="chartInstagramReach"></div>
+        <div class="chart-container" id="chartInstagramImpressions"></div>
       </div>
       
-      <a id="downloadLink" class="download-btn" style="display: none;">📥 Descargar Análisis (TXT)</a>
+      <a id="downloadLink" class="download-btn" style="display: none;">📥 Descargar Reporte (TXT)</a>
+    </div>
+  </div>
+
+  <!-- Modal para editar/agregar -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Editar Datos del Mes</h3>
+      <div id="modalForm">
+        <!-- Se llena dinámicamente -->
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-save" onclick="saveMonthData()">💾 Guardar</button>
+        <button class="btn-cancel" onclick="closeModal()">❌ Cancelar</button>
+      </div>
     </div>
   </div>
 
   <script>
     const SUPABASE_URL = "https://ftsmavpfnmpeltpnsdqx.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0c21hdnBmbm1wZWx0cG5zZHF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyODE5OTUsImV4cCI6MjA3Nzg1Nzk5NX0.o7Dmk2CSYRlVF4s-FN7islAbYYPLNJ5Q2POEmcKh0zw";
-    const FUNCTION_URL = "https://ftsmavpfnmpeltpnsdqx.supabase.co/functions/v1/process-report";
+    const FUNCTION_URL = "https://ftsmavpfnmpeltpnsdqx.supabase.co/functions/v1/process-csv-report";
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     let currentCompanyId = null;
-    let currentReportId = null;
-    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    const currentYear = new Date().getFullYear();
+    let editingMonthData = null;
+    const uploadedCSVs = [];
     
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    // CSV categories
+    const csvCategories = [
+      { id: 'fb_followers', name: 'Facebook - Seguidores', network: 'facebook' },
+      { id: 'fb_reach', name: 'Facebook - Alcance', network: 'facebook' },
+      { id: 'fb_views', name: 'Facebook - Visualizaciones', network: 'facebook' },
+      { id: 'fb_engagement', name: 'Facebook - Interacciones', network: 'facebook' },
+      { id: 'ig_followers', name: 'Instagram - Seguidores', network: 'instagram' },
+      { id: 'ig_reach', name: 'Instagram - Alcance', network: 'instagram' },
+      { id: 'ig_views', name: 'Instagram - Visualizaciones', network: 'instagram' },
+      { id: 'ig_engagement', name: 'Instagram - Interacciones', network: 'instagram' },
+      { id: 'ig_impressions', name: 'Instagram - Impresiones', network: 'instagram' },
+    ];
+    
+    // Initialize
     loadCompanies();
+    populateYearSelect();
+    createCSVUploadItems();
+    
+    function populateYearSelect() {
+      const yearSelect = document.getElementById('yearSelect');
+      const currentYear = new Date().getFullYear();
+      for (let year = currentYear; year >= currentYear - 5; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+      }
+      yearSelect.value = currentYear;
+    }
+    
+    function createCSVUploadItems() {
+      const grid = document.getElementById('csvUploadGrid');
+      csvCategories.forEach(cat => {
+        const item = document.createElement('div');
+        item.className = 'csv-upload-item';
+        item.innerHTML = `
+          <h4>${cat.name}</h4>
+          <input type="file" id="csv_${cat.id}" accept=".csv" onchange="handleCSVUpload('${cat.id}', '${cat.network}', this)">
+          <div class="csv-status" id="status_${cat.id}">📄 Sin archivo</div>
+        `;
+        grid.appendChild(item);
+      });
+    }
+    
+    async function handleCSVUpload(categoryId, network, input) {
+      const file = input.files[0];
+      if (!file) return;
+      
+      const statusEl = document.getElementById(`status_${categoryId}`);
+      statusEl.textContent = '⏳ Subiendo...';
+      
+      try {
+        const filename = `${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('csv-uploads')
+          .upload(filename, file);
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: urlData } = supabase.storage
+          .from('csv-uploads')
+          .getPublicUrl(filename);
+        
+        const csvData = {
+          category: categoryId,
+          network: network,
+          filename: file.name,
+          url: urlData.publicUrl
+        };
+        
+        // Remove existing entry for this category
+        const index = uploadedCSVs.findIndex(c => c.category === categoryId);
+        if (index > -1) {
+          uploadedCSVs.splice(index, 1);
+        }
+        
+        uploadedCSVs.push(csvData);
+        
+        statusEl.textContent = `✅ ${file.name}`;
+        statusEl.className = 'csv-status success';
+        
+        checkIfCanGenerate();
+        
+      } catch (error) {
+        statusEl.textContent = '❌ Error';
+        alert('Error al subir: ' + error.message);
+      }
+    }
+    
+    function checkIfCanGenerate() {
+      const month = document.getElementById('monthSelect').value;
+      const year = document.getElementById('yearSelect').value;
+      const btn = document.getElementById('generateBtn');
+      
+      if (currentCompanyId && month && year && uploadedCSVs.length > 0) {
+        btn.disabled = false;
+      } else {
+        btn.disabled = true;
+      }
+    }
+    
+    document.getElementById('monthSelect').onchange = checkIfCanGenerate;
+    document.getElementById('yearSelect').onchange = checkIfCanGenerate;
     
     async function loadCompanies() {
       const { data, error } = await supabase
@@ -322,7 +591,9 @@
       currentCompanyId = this.value;
       if (currentCompanyId) {
         document.getElementById('newCompanyName').value = '';
-        loadCompanyReports();
+        loadHistoricalData();
+        document.getElementById('historicalSection').style.display = 'block';
+        document.getElementById('uploadSection').style.display = 'block';
       }
     };
     
@@ -347,200 +618,188 @@
       await loadCompanies();
       document.getElementById('companySelect').value = currentCompanyId;
       document.getElementById('newCompanyName').value = '';
-      loadCompanyReports();
+      loadHistoricalData();
+      document.getElementById('historicalSection').style.display = 'block';
+      document.getElementById('uploadSection').style.display = 'block';
     }
     
-    async function loadCompanyReports() {
-      document.getElementById('historicalSection').style.display = 'block';
-      document.getElementById('currentSection').style.display = 'block';
-      
-      const { data: reports } = await supabase
-        .from('reports')
+    async function loadHistoricalData() {
+      const { data, error } = await supabase
+        .from('monthly_metrics')
         .select('*')
         .eq('company_id', currentCompanyId)
-        .eq('year', currentYear);
+        .order('year', { ascending: false })
+        .order('month', { ascending: false });
       
-      const grid = document.getElementById('monthsGrid');
-      grid.innerHTML = '';
-      
-      for (let month = 1; month <= 12; month++) {
-        const existingReport = reports?.find(r => r.month === month);
-        
-        const monthDiv = document.createElement('div');
-        monthDiv.className = 'month-upload' + (existingReport ? ' has-file' : '');
-        monthDiv.innerHTML = `
-          <h3>${monthNames[month-1]}</h3>
-          <input type="file" id="file-${month}" accept=".pdf" onchange="uploadHistorical(${month})">
-          <label for="file-${month}">
-            ${existingReport ? '✏️ Cambiar PDF' : '📤 Subir PDF'}
-          </label>
-          <div class="file-info" id="info-${month}">
-            ${existingReport ? `✅ ${existingReport.filename.split('_').pop()}` : 'Sin archivo'}
-          </div>
-          ${existingReport ? `
-            <div class="file-actions">
-              <button class="btn-delete" onclick="deleteReport('${existingReport.id}', ${month})">🗑️ Eliminar</button>
-            </div>
-          ` : ''}
-        `;
-        grid.appendChild(monthDiv);
-      }
-      
-      checkIfCanGenerate();
-    }
-    
-    async function uploadHistorical(month) {
-      const fileInput = document.getElementById(`file-${month}`);
-      const file = fileInput.files[0];
-      if (!file) return;
-      
-      const filename = `${currentYear}_${month}_${Date.now()}_${file.name}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('pdf-uploads')
-        .upload(filename, file);
-      
-      if (uploadError) {
-        alert('Error al subir: ' + uploadError.message);
+      if (error) {
+        console.error('Error loading historical data:', error);
         return;
       }
       
-      const { data: urlData } = supabase.storage
-        .from('pdf-uploads')
-        .getPublicUrl(filename);
+      const tbody = document.getElementById('historicalTableBody');
+      tbody.innerHTML = '';
       
-      const { error: dbError } = await supabase
-        .from('reports')
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">No hay datos históricos. Genera tu primer reporte o agrega datos manualmente.</td></tr>';
+        return;
+      }
+      
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${monthNames[row.month - 1]}</td>
+          <td>${row.year}</td>
+          <td>${row.fb_followers_current || 0}</td>
+          <td>${row.ig_followers_current || 0}</td>
+          <td>${row.fb_reach_current || 0}</td>
+          <td>${row.ig_reach_current || 0}</td>
+          <td>
+            <button class="edit-btn" onclick='editMonth(${JSON.stringify(row)})'>✏️ Editar</button>
+            <button class="delete-btn" onclick="deleteMonth('${row.id}', ${row.month}, ${row.year})">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    
+    function openAddMonthModal() {
+      document.getElementById('modalTitle').textContent = 'Agregar Nuevo Mes';
+      editingMonthData = null;
+      
+      const form = document.getElementById('modalForm');
+      form.innerHTML = `
+        <div class="form-group">
+          <label>Mes:</label>
+          <select id="editMonth">
+            ${monthNames.map((m, i) => `<option value="${i + 1}">${m}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Año:</label>
+          <input type="number" id="editYear" value="${new Date().getFullYear()}" min="2020" max="2030">
+        </div>
+        <div class="form-group">
+          <label>Facebook - Seguidores:</label>
+          <input type="number" id="editFbFollowers" value="0">
+        </div>
+        <div class="form-group">
+          <label>Instagram - Seguidores:</label>
+          <input type="number" id="editIgFollowers" value="0">
+        </div>
+        <div class="form-group">
+          <label>Facebook - Alcance:</label>
+          <input type="number" id="editFbReach" value="0">
+        </div>
+        <div class="form-group">
+          <label>Instagram - Alcance:</label>
+          <input type="number" id="editIgReach" value="0">
+        </div>
+      `;
+      
+      document.getElementById('editModal').style.display = 'block';
+    }
+    
+    function editMonth(data) {
+      document.getElementById('modalTitle').textContent = 'Editar Datos del Mes';
+      editingMonthData = data;
+      
+      const form = document.getElementById('modalForm');
+      form.innerHTML = `
+        <div class="form-group">
+          <label>Mes: ${monthNames[data.month - 1]} ${data.year}</label>
+        </div>
+        <div class="form-group">
+          <label>Facebook - Seguidores:</label>
+          <input type="number" id="editFbFollowers" value="${data.fb_followers_current || 0}">
+        </div>
+        <div class="form-group">
+          <label>Instagram - Seguidores:</label>
+          <input type="number" id="editIgFollowers" value="${data.ig_followers_current || 0}">
+        </div>
+        <div class="form-group">
+          <label>Facebook - Alcance:</label>
+          <input type="number" id="editFbReach" value="${data.fb_reach_current || 0}">
+        </div>
+        <div class="form-group">
+          <label>Instagram - Alcance:</label>
+          <input type="number" id="editIgReach" value="${data.ig_reach_current || 0}">
+        </div>
+      `;
+      
+      document.getElementById('editModal').style.display = 'block';
+    }
+    
+    async function saveMonthData() {
+      const fbFollowers = parseInt(document.getElementById('editFbFollowers').value) || 0;
+      const igFollowers = parseInt(document.getElementById('editIgFollowers').value) || 0;
+      const fbReach = parseInt(document.getElementById('editFbReach').value) || 0;
+      const igReach = parseInt(document.getElementById('editIgReach').value) || 0;
+      
+      let month, year;
+      
+      if (editingMonthData) {
+        // Editing existing
+        month = editingMonthData.month;
+        year = editingMonthData.year;
+      } else {
+        // Adding new
+        month = parseInt(document.getElementById('editMonth').value);
+        year = parseInt(document.getElementById('editYear').value);
+      }
+      
+      const { error } = await supabase
+        .from('monthly_metrics')
         .upsert({
           company_id: currentCompanyId,
           month,
-          year: currentYear,
-          filename,
-          file_url: urlData.publicUrl
+          year,
+          fb_followers_current: fbFollowers,
+          ig_followers_current: igFollowers,
+          fb_reach_current: fbReach,
+          ig_reach_current: igReach
         }, {
           onConflict: 'company_id,month,year'
         });
       
-      if (dbError) {
-        alert('Error en DB: ' + dbError.message);
+      if (error) {
+        alert('Error guardando: ' + error.message);
         return;
       }
       
-      loadCompanyReports();
+      closeModal();
+      loadHistoricalData();
     }
     
-    async function deleteReport(reportId, month) {
-      if (!confirm(`¿Eliminar reporte de ${monthNames[month-1]}?`)) return;
+    async function deleteMonth(id, month, year) {
+      if (!confirm(`¿Eliminar datos de ${monthNames[month - 1]} ${year}?`)) return;
       
-      const { data: report } = await supabase
-        .from('reports')
-        .select('filename')
-        .eq('id', reportId)
-        .single();
-      
-      if (report) {
-        await supabase.storage
-          .from('pdf-uploads')
-          .remove([report.filename]);
-      }
-      
-      await supabase
-        .from('reports')
+      const { error } = await supabase
+        .from('monthly_metrics')
         .delete()
-        .eq('id', reportId);
+        .eq('id', id);
       
-      loadCompanyReports();
-    }
-    
-    async function uploadCurrent() {
-      const file = document.getElementById('currentFile').files[0];
-      if (!file) {
-        alert('Selecciona el PDF del mes actual');
+      if (error) {
+        alert('Error eliminando: ' + error.message);
         return;
       }
       
-      // Detectar mes del nombre del archivo si es posible
-      let detectedMonth = null;
-      const fileName = file.name.toLowerCase();
-      const monthKeywords = {
-        1: ['enero', 'january'],
-        2: ['febrero', 'february'],
-        3: ['marzo', 'march'],
-        4: ['abril', 'april'],
-        5: ['mayo', 'may'],
-        6: ['junio', 'june'],
-        7: ['julio', 'july'],
-        8: ['agosto', 'august'],
-        9: ['septiembre', 'september'],
-        10: ['octubre', 'october'],
-        11: ['noviembre', 'november'],
-        12: ['diciembre', 'december']
-      };
-      
-      for (const [month, keywords] of Object.entries(monthKeywords)) {
-        if (keywords.some(keyword => fileName.includes(keyword))) {
-          detectedMonth = parseInt(month);
-          break;
-        }
-      }
-      
-      // Si no se detectó, usar mes actual del sistema
-      const currentMonth = detectedMonth || new Date().getMonth() + 1;
-      
-      console.log(`📅 Mes detectado: ${currentMonth} (${monthNames[currentMonth-1]})`);
-      
-      const filename = `current_${currentYear}_${currentMonth}_${Date.now()}_${file.name}`;
-      
-      document.getElementById('currentFileInfo').textContent = '⏳ Subiendo...';
-      
-      const { error: uploadError } = await supabase.storage
-        .from('pdf-uploads')
-        .upload(filename, file);
-      
-      if (uploadError) {
-        alert('Error: ' + uploadError.message);
-        return;
-      }
-      
-      const { data: urlData } = supabase.storage
-        .from('pdf-uploads')
-        .getPublicUrl(filename);
-      
-      const { data, error: dbError } = await supabase
-        .from('reports')
-        .insert({
-          company_id: currentCompanyId,
-          month: currentMonth,
-          year: currentYear,
-          filename,
-          file_url: urlData.publicUrl,
-          is_current: true
-        })
-        .select();
-      
-      if (dbError) {
-        alert('Error en DB: ' + dbError.message);
-        return;
-      }
-      
-      currentReportId = data[0].id;
-      document.getElementById('currentFileInfo').innerHTML = `✅ <strong>${file.name}</strong> subido como ${monthNames[currentMonth-1]}`;
-      checkIfCanGenerate();
+      loadHistoricalData();
     }
     
-    function checkIfCanGenerate() {
-      if (currentReportId || document.getElementById('currentFileInfo').textContent.includes('✅')) {
-        document.getElementById('generateBtn').style.display = 'block';
-      }
+    function closeModal() {
+      document.getElementById('editModal').style.display = 'none';
+      editingMonthData = null;
     }
     
-    async function generateAnalysis() {
+    async function generateReport() {
+      const month = parseInt(document.getElementById('monthSelect').value);
+      const year = parseInt(document.getElementById('yearSelect').value);
       const btn = document.getElementById('generateBtn');
       const status = document.getElementById('status');
       
       btn.disabled = true;
       status.className = 'status loading';
-      status.textContent = '🤖 Generando análisis con IA... (puede tomar 2-3 minutos)';
+      status.textContent = '🤖 Procesando CSVs y generando análisis con IA... (puede tomar 2-3 minutos)';
       
       try {
         const response = await fetch(FUNCTION_URL, {
@@ -551,7 +810,9 @@
           },
           body: JSON.stringify({
             company_id: currentCompanyId,
-            year: currentYear
+            month,
+            year,
+            csv_files: uploadedCSVs
           })
         });
         
@@ -562,110 +823,28 @@
         
         const result = await response.json();
         
-        // Convertir markdown a HTML con mejor formato
-        let htmlContent = result.analysis;
-        
-        // Primero convertir títulos
-        htmlContent = htmlContent.replace(/^# (.+)$/gm, '<h2 style="color: #00BFFF; margin-top: 30px; margin-bottom: 15px; font-size: 24px; font-weight: 600;">$1</h2>');
-        htmlContent = htmlContent.replace(/^## (.+)$/gm, '<h3 style="color: #333; margin-top: 20px; margin-bottom: 10px; font-size: 20px; font-weight: 600;">$1</h3>');
-        
-        // Remover ** (negritas)
-        htmlContent = htmlContent.replace(/\*\*(.+?)\*\*/g, '$1');
-        
-        // Convertir separadores
-        htmlContent = htmlContent.replace(/^---$/gm, '<hr style="border: none; border-top: 2px solid #e0e0e0; margin: 30px 0;">');
-        
-        // Convertir listas con - pero NO con * o •
-        const lines = htmlContent.split('\n');
-        let inList = false;
-        const processedLines = [];
-        
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
-          
-          // Si empieza con "- " (guión seguido de espacio)
-          if (line.match(/^- (.+)$/)) {
-            if (!inList) {
-              processedLines.push('<ul style="margin: 15px 0; padding-left: 20px;">');
-              inList = true;
-            }
-            const content = line.substring(2); // Remover "- "
-            processedLines.push(`<li style="margin-bottom: 8px; line-height: 1.6;">${content}</li>`);
-          } 
-          // Si empieza con "* " o otros bullets, NO convertir a lista
-          else if (line.match(/^[\*•] (.+)$/)) {
-            if (inList) {
-              processedLines.push('</ul>');
-              inList = false;
-            }
-            const content = line.substring(2); // Remover el símbolo
-            processedLines.push(`<p style="margin-bottom: 8px; padding-left: 20px;">${content}</p>`);
-          }
-          else {
-            if (inList && line !== '') {
-              processedLines.push('</ul>');
-              inList = false;
-            }
-            if (line !== '') {
-              processedLines.push(line);
-            }
-          }
-        }
-        
-        if (inList) {
-          processedLines.push('</ul>');
-        }
-        
-        htmlContent = processedLines.join('\n');
-        
-        // Convertir párrafos
-        htmlContent = htmlContent.replace(/\n\n/g, '</p><p style="margin-bottom: 15px; line-height: 1.8;">');
-        htmlContent = '<div style="line-height: 1.8;"><p style="margin-bottom: 15px; line-height: 1.8;">' + htmlContent + '</p></div>';
-        
-        document.getElementById('analysisContent').innerHTML = htmlContent;
+        // Show report
+        document.getElementById('reportContent').textContent = result.report;
         document.getElementById('results').style.display = 'block';
         
-        // Generar gráficas
-        console.log('🔍 Verificando métricas...', result.metadata);
+        // Generate charts
+        await generateCharts(currentCompanyId, month, year);
         
-        if (result.metadata && result.metadata.metrics) {
-          console.log('📊 Métricas encontradas:', result.metadata.metrics.length, 'meses');
-          console.log('📊 Datos de métricas:', JSON.stringify(result.metadata.metrics, null, 2));
-          
-          if (result.metadata.metrics.length > 0) {
-            generateCharts(result.metadata.metrics);
-          } else {
-            console.log('⚠️ Array de métricas está vacío');
-            document.getElementById('chartsSection').innerHTML = `
-              <h3 style="color: #00BFFF; margin-bottom: 20px; font-size: 18px;">📈 Visualización de Métricas</h3>
-              <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107;">
-                <p style="margin: 0; color: #856404;"><strong>⚠️ No se pudieron extraer métricas automáticamente</strong></p>
-                <p style="margin: 10px 0 0 0; color: #856404;">Las gráficas requieren datos numéricos del reporte. Verifica que el PDF contenga tablas o métricas claras.</p>
-              </div>
-            `;
-          }
-        } else {
-          console.log('❌ No hay metadata.metrics en la respuesta');
-          document.getElementById('chartsSection').innerHTML = `
-            <h3 style="color: #00BFFF; margin-bottom: 20px; font-size: 18px;">📈 Visualización de Métricas</h3>
-            <div style="background: #f8d7da; padding: 20px; border-radius: 8px; border-left: 4px solid #dc3545;">
-              <p style="margin: 0; color: #721c24;"><strong>❌ Error al procesar métricas</strong></p>
-              <p style="margin: 10px 0 0 0; color: #721c24;">Revisa los logs de Supabase Edge Function para más detalles.</p>
-            </div>
-          `;
-        }
-        
-        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
-        
-        const blob = new Blob([result.analysis], { type: 'text/plain' });
+        // Download link
+        const blob = new Blob([result.report], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const downloadLink = document.getElementById('downloadLink');
         downloadLink.href = url;
-        downloadLink.download = `analisis_${new Date().toISOString().split('T')[0]}.txt`;
+        downloadLink.download = `reporte_${monthNames[month-1]}_${year}.txt`;
         downloadLink.style.display = 'inline-block';
         
         status.className = 'status success';
         status.textContent = '✅ Análisis generado exitosamente!';
+        
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        
+        // Reload historical data
+        loadHistoricalData();
         
       } catch (error) {
         status.className = 'status error';
@@ -675,156 +854,89 @@
       }
     }
     
-    async function loadAndGenerateCharts() {
-      // Cargar reportes con métricas de la base de datos
-      const { data: reports } = await supabase
-        .from('reports')
-        .select('month, metrics')
-        .eq('company_id', currentCompanyId)
+    async function generateCharts(companyId, currentMonth, currentYear) {
+      // Load historical data for charts
+      const { data } = await supabase
+        .from('monthly_metrics')
+        .select('*')
+        .eq('company_id', companyId)
         .eq('year', currentYear)
         .order('month', { ascending: true });
       
-      if (reports && reports.length > 0) {
-        const metricsData = reports.map(r => ({
-          month: monthNames[r.month - 1],
-          metrics: r.metrics || {}
-        }));
-        
-        generateChartsFromReports(metricsData);
-      }
-    }
-    
-    function generateCharts(metricsData) {
-      console.log('📈 Generando gráficas...', metricsData);
+      if (!data || data.length === 0) return;
       
-      if (!metricsData || metricsData.length === 0) {
-        console.log('❌ No hay datos para gráficas');
-        document.getElementById('chartsSection').style.display = 'none';
-        return;
-      }
-
-      // Filtrar meses que tienen métricas con valores
-      const validMonths = metricsData.filter(m => m.metrics && m.metrics.length > 0);
+      const months = data.map(d => monthNames[d.month - 1]);
       
-      if (validMonths.length === 0) {
-        console.log('❌ No hay meses con métricas válidas');
-        document.getElementById('chartsSection').style.display = 'none';
-        return;
-      }
-
-      document.getElementById('chartsSection').style.display = 'block';
+      // Chart 1: Facebook Stats (Interactions + Reach)
+      const fbInteractions = data.map(d => d.fb_interactions_current || 0);
+      const fbReach = data.map(d => d.fb_reach_current || 0);
       
-      // Gráfica 1: Comparación mensual (barras agrupadas) - Solo meses con datos
-      if (validMonths.length >= 2) {
-        const lastMonths = validMonths.slice(-3); // Últimos 3 meses con datos
-        const months = lastMonths.map(m => m.month);
-        
-        // Obtener nombres de métricas comunes
-        const allMetricNames = new Set();
-        lastMonths.forEach(m => {
-          m.metrics.forEach(metric => allMetricNames.add(metric.name));
-        });
-        
-        const topMetrics = Array.from(allMetricNames).slice(0, 5);
-        const traces = [];
-        
-        topMetrics.forEach((metricName) => {
-          const values = lastMonths.map(m => {
-            const metric = m.metrics.find(met => met.name === metricName);
-            return metric ? metric.value : null;
-          });
-          
-          // Solo agregar trace si tiene al menos un valor válido
-          if (values.some(v => v !== null && v > 0)) {
-            traces.push({
-              type: 'bar',
-              name: metricName,
-              x: months,
-              y: values.map(v => v === null ? 0 : v),
-              text: values.map(v => v !== null && v > 0 ? (typeof v === 'number' ? v.toFixed(1) : v) : ''),
-              textposition: 'outside'
-            });
-          }
-        });
-        
-        if (traces.length > 0) {
-          Plotly.newPlot('chartMonthly', traces, {
-            title: {
-              text: 'Comparación Mensual (Últimos ' + lastMonths.length + ' Meses con Datos)',
-              font: { size: 20, color: '#333' }
-            },
-            xaxis: { 
-              title: 'Mes',
-              type: 'category'
-            },
-            yaxis: { title: 'Valor' },
-            barmode: 'group',
-            height: 450,
-            paper_bgcolor: 'white',
-            plot_bgcolor: '#f8f9fa'
-          });
-          console.log('✅ Gráfica mensual creada con', traces.length, 'métricas');
+      Plotly.newPlot('chartFacebook', [
+        {
+          x: months,
+          y: fbInteractions,
+          name: 'Interacción con la publicación',
+          type: 'bar',
+          marker: { color: '#9b59b6' }
+        },
+        {
+          x: months,
+          y: fbReach,
+          name: 'Alcance de las publicaciones',
+          type: 'bar',
+          marker: { color: '#66cc99' }
         }
-      } else if (validMonths.length === 1) {
-        console.log('⚠️ Solo hay 1 mes con datos, se necesitan al menos 2 para comparación');
-        document.getElementById('chartMonthly').innerHTML = '<p style="text-align: center; padding: 50px; color: #666;">Se necesitan al menos 2 meses con datos para generar la comparación mensual</p>';
-      }
+      ], {
+        title: 'ESTADÍSTICAS FACEBOOK - ENE-' + monthNames[currentMonth - 1].toUpperCase() + ' ' + currentYear,
+        barmode: 'group',
+        height: 400,
+        font: { family: 'Arial', size: 12 }
+      });
       
-      // Gráfica 2: Tendencias (líneas) - Solo meses con datos
-      if (validMonths.length >= 2) {
-        const months = validMonths.map(m => m.month);
-        
-        const allMetricNames = new Set();
-        validMonths.forEach(m => {
-          m.metrics.forEach(metric => allMetricNames.add(metric.name));
-        });
-        
-        const topMetrics = Array.from(allMetricNames).slice(0, 5);
-        const traces = [];
-        
-        topMetrics.forEach((metricName) => {
-          const values = validMonths.map(m => {
-            const metric = m.metrics.find(met => met.name === metricName);
-            return metric ? metric.value : null;
-          });
-          
-          // Solo crear línea si tiene al menos 2 valores válidos
-          const validValues = values.filter(v => v !== null && v > 0);
-          if (validValues.length >= 2) {
-            traces.push({
-              type: 'scatter',
-              mode: 'lines+markers',
-              name: metricName,
-              x: months,
-              y: values,
-              line: { width: 3 },
-              marker: { size: 10 },
-              connectgaps: false // No conectar si hay valores null
-            });
-          }
-        });
-        
-        if (traces.length > 0) {
-          Plotly.newPlot('chartTrends', traces, {
-            title: {
-              text: 'Tendencias a lo Largo del Tiempo',
-              font: { size: 20, color: '#333' }
-            },
-            xaxis: { 
-              title: 'Mes',
-              type: 'category'
-            },
-            yaxis: { title: 'Valor' },
-            height: 450,
-            paper_bgcolor: 'white',
-            plot_bgcolor: '#f8f9fa'
-          });
-          console.log('✅ Gráfica de tendencias creada con', traces.length, 'métricas');
+      // Chart 2: Instagram Reach + Profile Visits
+      const igReach = data.map(d => d.ig_reach_current || 0);
+      const igVisits = data.map(d => d.ig_profile_visits || 0);
+      
+      Plotly.newPlot('chartInstagramReach', [
+        {
+          x: months,
+          y: igReach,
+          name: 'Cuentas alcanzadas',
+          type: 'bar',
+          marker: { color: '#9b59b6' }
+        },
+        {
+          x: months,
+          y: igVisits,
+          name: 'Visitas al perfil',
+          type: 'bar',
+          marker: { color: '#66cc99' }
         }
-      } else {
-        console.log('⚠️ Solo hay', validMonths.length, 'mes(es) con datos, no se pueden generar tendencias');
-        document.getElementById('chartTrends').innerHTML = '<p style="text-align: center; padding: 50px; color: #666;">Se necesitan al menos 2 meses con datos para generar tendencias</p>';
-      }
+      ], {
+        title: 'ESTADÍSTICAS INSTAGRAM - ENE-' + monthNames[currentMonth - 1].toUpperCase() + ' ' + currentYear,
+        barmode: 'group',
+        height: 400,
+        font: { family: 'Arial', size: 12 }
+      });
+      
+      // Chart 3: Instagram Impressions
+      const igImpressions = data.map(d => d.ig_impressions_total || 0);
+      
+      Plotly.newPlot('chartInstagramImpressions', [
+        {
+          x: months,
+          y: igImpressions,
+          name: 'Impresiones',
+          type: 'bar',
+          marker: { color: '#66cc99' }
+        }
+      ], {
+        title: 'ESTADÍSTICAS INSTAGRAM - ENE-' + monthNames[currentMonth - 1].toUpperCase() + ' ' + currentYear,
+        height: 400,
+        font: { family: 'Arial', size: 12 }
+      });
+      
+      console.log('✅ Gráficas generadas');
     }
   </script>
 </body>
