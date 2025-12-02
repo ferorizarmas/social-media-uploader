@@ -31,10 +31,33 @@
       border-radius: 12px;
       margin-bottom: 25px;
     }
-    .section h2 {
-      color: #00BFFF;
-      margin-bottom: 20px;
-      font-size: 20px;
+    /* Historical Section - Collapsible */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .section-header h2 {
+      margin: 0;
+    }
+    .collapse-icon {
+      font-size: 24px;
+      transition: transform 0.3s;
+    }
+    .collapse-icon.collapsed {
+      transform: rotate(-90deg);
+    }
+    .section-content {
+      margin-top: 20px;
+      max-height: 1000px;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    .section-content.collapsed {
+      max-height: 0;
+      margin-top: 0;
     }
     
     /* Company Selector */
@@ -122,7 +145,7 @@
     }
     .add-month-btn:hover { background: #388e3c; }
     
-    /* CSV Upload Section */
+    /* CSV Upload Section - Drag & Drop */
     .upload-section {
       background: #e3f2fd;
       padding: 25px;
@@ -146,36 +169,118 @@
       font-size: 15px;
     }
     
-    .csv-upload-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 15px;
+    /* Drag & Drop Zone */
+    .dropzone {
+      background: white;
+      border: 3px dashed #00BFFF;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
       margin-bottom: 20px;
     }
-    .csv-upload-item {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      border: 2px dashed #00BFFF;
+    .dropzone:hover {
+      background: #f0f8ff;
+      border-color: #0099cc;
     }
-    .csv-upload-item h4 {
+    .dropzone.dragover {
+      background: #e3f2fd;
+      border-color: #0066cc;
+      transform: scale(1.02);
+    }
+    .dropzone-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    .dropzone-text {
+      font-size: 18px;
       color: #333;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .dropzone-hint {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    /* Uploaded Files List */
+    .uploaded-files {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .uploaded-files.has-files {
+      display: block;
+    }
+    .uploaded-files h4 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .file-item-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    .file-item-icon {
+      font-size: 20px;
+    }
+    .file-item-name {
+      font-size: 14px;
+      color: #333;
+    }
+    .file-item-detected {
+      font-size: 12px;
+      color: #666;
+      margin-left: 10px;
+    }
+    .file-item-remove {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .file-item-remove:hover {
+      background: #d32f2f;
+    }
+    
+    /* Help Guide */
+    .help-guide {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .help-guide h4 {
+      color: #856404;
       margin-bottom: 10px;
       font-size: 14px;
     }
-    .csv-upload-item input[type="file"] {
-      width: 100%;
-      padding: 8px;
+    .help-guide ol {
+      margin-left: 20px;
+      color: #856404;
       font-size: 13px;
+      line-height: 1.6;
     }
-    .csv-status {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #666;
-    }
-    .csv-status.success {
-      color: #4caf50;
-      font-weight: 600;
+    .help-guide li {
+      margin-bottom: 5px;
     }
     
     /* Generate Button */
@@ -358,41 +463,51 @@
       </div>
     </div>
     
-    <!-- 2. Datos Históricos -->
+    <!-- 2. Datos Históricos - Collapsible -->
     <div class="section" id="historicalSection" style="display: none;">
-      <h2>2️⃣ Datos Históricos (Editable)</h2>
-      <p style="margin-bottom: 15px; color: #666;">Visualiza y edita los datos de meses anteriores</p>
-      
-      <div class="table-container">
-        <table id="historicalTable">
-          <thead>
-            <tr>
-              <th>Mes</th>
-              <th>Año</th>
-              <th>FB Seguidores</th>
-              <th>IG Seguidores</th>
-              <th>FB Alcance</th>
-              <th>IG Alcance</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="historicalTableBody">
-            <!-- Se llena dinámicamente -->
-          </tbody>
-        </table>
+      <div class="section-header" onclick="toggleHistorical()">
+        <h2 style="color: #00BFFF; font-size: 20px;">📊 Base de Datos Histórica</h2>
+        <span class="collapse-icon collapsed">▼</span>
       </div>
       
-      <button class="add-month-btn" onclick="openAddMonthModal()">➕ Agregar Mes Manualmente</button>
+      <div class="section-content collapsed" id="historicalContent">
+        <p style="margin-bottom: 15px; color: #666;">Visualiza y edita los datos de meses anteriores. Estos datos se usan para comparaciones históricas.</p>
+        
+        <div class="table-container">
+          <table id="historicalTable">
+            <thead>
+              <tr>
+                <th>Mes</th>
+                <th>Año</th>
+                <th>FB Seguidores</th>
+                <th>IG Seguidores</th>
+                <th>FB Visualizaciones</th>
+                <th>IG Visualizaciones</th>
+                <th>FB Alcance</th>
+                <th>IG Alcance</th>
+                <th>FB Interacciones</th>
+                <th>IG Interacciones</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="historicalTableBody">
+              <!-- Se llena dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+        
+        <button class="add-month-btn" onclick="openAddMonthModal()">➕ Agregar Mes Manualmente</button>
+      </div>
     </div>
     
-    <!-- 3. Subir CSVs del Mes Actual -->
+    <!-- 3. Subir CSVs del Mes Actual - Drag & Drop -->
     <div class="upload-section" id="uploadSection" style="display: none;">
-      <h2>3️⃣ Análisis del Mes Actual</h2>
-      <p style="margin-bottom: 15px; color: #666;">Sube los CSVs descargados de Meta Business Suite</p>
+      <h2>2️⃣ Análisis del Mes Actual</h2>
       
       <div class="month-year-selector">
+        <label style="font-weight: 600; color: #333;">Selecciona el período:</label>
         <select id="monthSelect">
-          <option value="">Seleccionar mes...</option>
+          <option value="">Mes...</option>
           <option value="1">Enero</option>
           <option value="2">Febrero</option>
           <option value="3">Marzo</option>
@@ -407,12 +522,30 @@
           <option value="12">Diciembre</option>
         </select>
         <select id="yearSelect">
-          <option value="">Seleccionar año...</option>
+          <option value="">Año...</option>
         </select>
       </div>
       
-      <div class="csv-upload-grid" id="csvUploadGrid">
-        <!-- Los items de upload se crean dinámicamente -->
+      <div class="help-guide">
+        <h4>💡 Cómo exportar datos de Meta Business Suite:</h4>
+        <ol>
+          <li>Ve a <strong>Meta Business Suite → Estadísticas</strong></li>
+          <li>Para cada métrica (Alcance, Seguidores, Interacciones, etc.), click en <strong>"Exportar"</strong></li>
+          <li>Descarga todos los CSVs que necesites</li>
+          <li>Arrastra TODOS los archivos juntos en la zona de abajo ⬇️</li>
+        </ol>
+      </div>
+      
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" multiple accept=".csv" style="display: none;">
+        <div class="dropzone-icon">📤</div>
+        <div class="dropzone-text">Arrastra todos los CSVs aquí</div>
+        <div class="dropzone-hint">o haz click para seleccionar múltiples archivos</div>
+      </div>
+      
+      <div class="uploaded-files" id="uploadedFiles">
+        <h4>📁 Archivos subidos (<span id="fileCount">0</span>):</h4>
+        <div id="fileList"></div>
       </div>
       
       <button class="generate-btn" id="generateBtn" onclick="generateReport()" disabled>
@@ -465,23 +598,18 @@
     
     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     
-    // CSV categories
-    const csvCategories = [
-      { id: 'fb_followers', name: 'Facebook - Seguidores', network: 'facebook' },
-      { id: 'fb_reach', name: 'Facebook - Alcance', network: 'facebook' },
-      { id: 'fb_views', name: 'Facebook - Visualizaciones', network: 'facebook' },
-      { id: 'fb_engagement', name: 'Facebook - Interacciones', network: 'facebook' },
-      { id: 'ig_followers', name: 'Instagram - Seguidores', network: 'instagram' },
-      { id: 'ig_reach', name: 'Instagram - Alcance', network: 'instagram' },
-      { id: 'ig_views', name: 'Instagram - Visualizaciones', network: 'instagram' },
-      { id: 'ig_engagement', name: 'Instagram - Interacciones', network: 'instagram' },
-      { id: 'ig_impressions', name: 'Instagram - Impresiones', network: 'instagram' },
-    ];
-    
     // Initialize
     loadCompanies();
     populateYearSelect();
-    createCSVUploadItems();
+    initDragAndDrop();
+    
+    function toggleHistorical() {
+      const content = document.getElementById('historicalContent');
+      const icon = document.querySelector('.collapse-icon');
+      
+      content.classList.toggle('collapsed');
+      icon.classList.toggle('collapsed');
+    }
     
     function populateYearSelect() {
       const yearSelect = document.getElementById('yearSelect');
@@ -495,63 +623,147 @@
       yearSelect.value = currentYear;
     }
     
-    function createCSVUploadItems() {
-      const grid = document.getElementById('csvUploadGrid');
-      csvCategories.forEach(cat => {
-        const item = document.createElement('div');
-        item.className = 'csv-upload-item';
-        item.innerHTML = `
-          <h4>${cat.name}</h4>
-          <input type="file" id="csv_${cat.id}" accept=".csv" onchange="handleCSVUpload('${cat.id}', '${cat.network}', this)">
-          <div class="csv-status" id="status_${cat.id}">📄 Sin archivo</div>
-        `;
-        grid.appendChild(item);
+    function initDragAndDrop() {
+      const dropzone = document.getElementById('dropzone');
+      const fileInput = document.getElementById('fileInput');
+      
+      // Click to select files
+      dropzone.addEventListener('click', () => fileInput.click());
+      
+      // Drag & drop events
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+      
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('dragover');
+      });
+      
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        
+        const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.csv'));
+        if (files.length > 0) {
+          handleFiles(files);
+        }
+      });
+      
+      // File input change
+      fileInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        handleFiles(files);
       });
     }
     
-    async function handleCSVUpload(categoryId, network, input) {
-      const file = input.files[0];
-      if (!file) return;
+    async function handleFiles(files) {
+      const fileList = document.getElementById('fileList');
+      const uploadedFilesDiv = document.getElementById('uploadedFiles');
       
-      const statusEl = document.getElementById(`status_${categoryId}`);
-      statusEl.textContent = '⏳ Subiendo...';
-      
-      try {
+      for (const file of files) {
+        // Upload to Supabase Storage
         const filename = `${Date.now()}_${file.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from('csv-uploads')
-          .upload(filename, file);
         
-        if (uploadError) throw uploadError;
-        
-        const { data: urlData } = supabase.storage
-          .from('csv-uploads')
-          .getPublicUrl(filename);
-        
-        const csvData = {
-          category: categoryId,
-          network: network,
-          filename: file.name,
-          url: urlData.publicUrl
-        };
-        
-        // Remove existing entry for this category
-        const index = uploadedCSVs.findIndex(c => c.category === categoryId);
-        if (index > -1) {
-          uploadedCSVs.splice(index, 1);
+        try {
+          const { error: uploadError } = await supabase.storage
+            .from('csv-uploads')
+            .upload(filename, file);
+          
+          if (uploadError) throw uploadError;
+          
+          const { data: urlData } = supabase.storage
+            .from('csv-uploads')
+            .getPublicUrl(filename);
+          
+          // Detect what metric this CSV contains
+          const detectedMetric = await detectCSVMetric(file);
+          
+          const csvData = {
+            filename: file.name,
+            url: urlData.publicUrl,
+            detected: detectedMetric
+          };
+          
+          uploadedCSVs.push(csvData);
+          
+          // Add to UI
+          const fileItem = document.createElement('div');
+          fileItem.className = 'file-item';
+          fileItem.innerHTML = `
+            <div class="file-item-info">
+              <span class="file-item-icon">✅</span>
+              <span class="file-item-name">${file.name}</span>
+              <span class="file-item-detected">(${detectedMetric})</span>
+            </div>
+            <button class="file-item-remove" onclick="removeFile(${uploadedCSVs.length - 1})">🗑️</button>
+          `;
+          fileList.appendChild(fileItem);
+          
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          alert(`Error subiendo ${file.name}: ${error.message}`);
         }
-        
-        uploadedCSVs.push(csvData);
-        
-        statusEl.textContent = `✅ ${file.name}`;
-        statusEl.className = 'csv-status success';
-        
-        checkIfCanGenerate();
-        
-      } catch (error) {
-        statusEl.textContent = '❌ Error';
-        alert('Error al subir: ' + error.message);
       }
+      
+      // Update UI
+      uploadedFilesDiv.classList.add('has-files');
+      document.getElementById('fileCount').textContent = uploadedCSVs.length;
+      checkIfCanGenerate();
+    }
+    
+    async function detectCSVMetric(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target.result;
+          const firstLine = text.split('\n')[0].toLowerCase();
+          
+          // Detect by column names
+          if (firstLine.includes('seguidores') || firstLine.includes('followers')) {
+            resolve('Seguidores');
+          } else if (firstLine.includes('alcance') || firstLine.includes('reach')) {
+            resolve('Alcance');
+          } else if (firstLine.includes('visualizaciones') || firstLine.includes('views') || firstLine.includes('impresiones')) {
+            resolve('Visualizaciones/Impresiones');
+          } else if (firstLine.includes('interacciones') || firstLine.includes('engagement') || firstLine.includes('reacciones')) {
+            resolve('Interacciones');
+          } else {
+            resolve('Detectando...');
+          }
+        };
+        reader.readAsText(file.slice(0, 500)); // Read first 500 chars
+      });
+    }
+    
+    function removeFile(index) {
+      uploadedCSVs.splice(index, 1);
+      
+      // Rebuild file list
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+      
+      uploadedCSVs.forEach((csv, i) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+          <div class="file-item-info">
+            <span class="file-item-icon">✅</span>
+            <span class="file-item-name">${csv.filename}</span>
+            <span class="file-item-detected">(${csv.detected})</span>
+          </div>
+          <button class="file-item-remove" onclick="removeFile(${i})">🗑️</button>
+        `;
+        fileList.appendChild(fileItem);
+      });
+      
+      document.getElementById('fileCount').textContent = uploadedCSVs.length;
+      
+      if (uploadedCSVs.length === 0) {
+        document.getElementById('uploadedFiles').classList.remove('has-files');
+      }
+      
+      checkIfCanGenerate();
     }
     
     function checkIfCanGenerate() {
@@ -640,7 +852,7 @@
       tbody.innerHTML = '';
       
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #999;">No hay datos históricos. Genera tu primer reporte o agrega datos manualmente.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 20px; color: #999;">No hay datos históricos. Genera tu primer reporte o agrega datos manualmente.</td></tr>';
         return;
       }
       
@@ -651,10 +863,14 @@
           <td>${row.year}</td>
           <td>${row.fb_followers_current || 0}</td>
           <td>${row.ig_followers_current || 0}</td>
+          <td>${row.fb_views_current || 0}</td>
+          <td>${row.ig_views_current || 0}</td>
           <td>${row.fb_reach_current || 0}</td>
           <td>${row.ig_reach_current || 0}</td>
+          <td>${row.fb_interactions_current || 0}</td>
+          <td>${row.ig_interactions_current || 0}</td>
           <td>
-            <button class="edit-btn" onclick='editMonth(${JSON.stringify(row)})'>✏️ Editar</button>
+            <button class="edit-btn" onclick='editMonth(${JSON.stringify(row).replace(/'/g, "&#39;")})'>✏️ Editar</button>
             <button class="delete-btn" onclick="deleteMonth('${row.id}', ${row.month}, ${row.year})">🗑️</button>
           </td>
         `;
