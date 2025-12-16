@@ -21,68 +21,42 @@
       padding: 40px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
-    h1 { color: #333; margin-bottom: 30px; font-size: 32px; text-align: center; }
+    h1 { color: #333; margin-bottom: 30px; text-align: center; }
     
     .company-selector {
-      margin: 30px 0;
-      padding: 30px;
-      background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-      border-radius: 12px;
+      margin: 30px 0; padding: 30px;
+      background: #f5f7fa; border-radius: 12px;
+      text-align: center;
     }
-    .company-selector h2 { color: #333; margin-bottom: 20px; font-size: 24px; text-align: center; }
     
-    .dropdown-container { max-width: 500px; margin: 0 auto; }
-    .dropdown-container label { display: block; font-size: 16px; font-weight: 600; color: #555; margin-bottom: 10px; }
     .dropdown-container select {
-      width: 100%;
-      padding: 15px;
-      font-size: 16px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      background: white;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .dropdown-container select:hover { border-color: #00BFFF; }
-    
-    .add-company-btn {
-      display: block;
-      margin: 20px auto 0;
-      background: #4caf50;
-      color: white;
-      padding: 12px 30px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
+      width: 100%; max-width: 400px;
+      padding: 15px; font-size: 16px;
+      border: 2px solid #ddd; border-radius: 8px;
     }
     
     .generate-button {
-      background: linear-gradient(135deg, #00BFFF 0%, #00A3E0 100%);
-      color: white;
-      padding: 20px 50px;
-      border: none;
-      border-radius: 12px;
-      font-size: 20px;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      margin: 30px 0;
-      display: none;
+      background: #00BFFF; color: white;
+      padding: 20px; border: none; border-radius: 12px;
+      font-size: 20px; font-weight: bold;
+      width: 100%; cursor: pointer; display: none;
+      margin-top: 20px;
     }
     .generate-button.active { display: block; }
+
+    .results { margin-top: 30px; display: none; }
     
-    .status { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; text-align: center; }
-    .status.loading { background: #e3f2fd; color: #1976d2; display: block; }
-    .status.success { background: #e8f5e9; color: #2e7d32; display: block; }
+    /* Estilo para simular el PDF */
+    .report-content {
+      background: white; padding: 40px;
+      border: 1px solid #eee; border-radius: 10px;
+      line-height: 1.8; color: #444;
+      white-space: pre-wrap; font-size: 14px;
+    }
+    .report-title { color: #00BFFF; font-weight: bold; text-transform: uppercase; margin-top: 20px; display: block; }
     
-    .results { margin-top: 30px; padding: 30px; background: #f8f9fa; border-radius: 12px; display: none; }
-    .report-content { background: white; padding: 40px; border-radius: 10px; line-height: 2; white-space: pre-wrap; }
-    .chart-container { margin-bottom: 40px; background: white; padding: 20px; border-radius: 8px; }
-    .download-btn { display: inline-block; background: #4caf50; color: white; padding: 14px 30px; border-radius: 8px; text-decoration: none; margin-top: 20px; }
-    .back-btn { background: #666; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 20px; }
+    .chart-container { margin-bottom: 30px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
+    .back-btn { background: #666; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
   </style>
 </head>
 <body>
@@ -92,13 +66,11 @@
     <div class="company-selector" id="companySelector">
       <h2>Selecciona la Empresa</h2>
       <div class="dropdown-container">
-        <label for="companyDropdown">Empresa:</label>
         <select id="companyDropdown" onchange="selectCompany()">
           <option value="">-- Selecciona una empresa --</option>
           <option value="adiestra">🐾 Adiestra - Educación Canina</option>
           <option value="dentalcrea">🦷 DentalCrea - Clínica Dental</option>
         </select>
-        <button class="add-company-btn" onclick="addNewCompany()">➕ Agregar Nueva Empresa</button>
       </div>
     </div>
     
@@ -106,168 +78,211 @@
       🚀 Generar Reporte de Diciembre 2025
     </button>
     
-    <div id="status" class="status"></div>
-    
     <div id="results" class="results">
-      <button class="back-btn" onclick="backToSelection()">← Volver</button>
-      <h2>📄 Reporte Generado</h2>
-      <div id="reportContent" class="report-content"></div>
+      <button class="back-btn" onclick="location.reload()">← Nueva Selección</button>
+      <div id="reportOutput" class="report-content"></div>
       
-      <div class="charts-section">
-        <h3 style="color: #00BFFF; margin-bottom: 20px;">📈 Gráficas de Rendimiento</h3>
-        <div class="chart-container" id="chartFacebook"></div>
-        <div class="chart-container" id="chartInstagramReach"></div>
-        <div class="chart-container" id="chartInstagramImpressions"></div>
+      <div style="margin-top:40px;">
+        <div class="chart-container" id="chart1"></div>
+        <div class="chart-container" id="chart2"></div>
+        <div class="chart-container" id="chart3"></div>
       </div>
-      
-      <a id="downloadLink" class="download-btn">📥 Descargar Reporte</a>
     </div>
   </div>
 
   <script>
-    let selectedCompany = null;
-    
-    const companiesData = {
+    const dataStore = {
       adiestra: {
-        company: "Adiestra",
-        currentMonth: {
-          month: 12, year: 2025,
-          fb_followers_current: 2540, fb_followers_previous: 2541, fb_new_followers: 0, fb_unfollows: 1,
-          fb_views_current: 979, fb_views_previous: 31472, fb_reach_current: 533, fb_reach_previous: 23914,
-          fb_interactions_current: 10, fb_interactions_previous: 1594,
-          fb_best_posts: ["Una buena convivencia en casa", "🐾 Travesuras", "✨ Confianza paso a paso", "👉🏼 Qué llevar al paseo"],
-          ig_followers_current: 1882, ig_followers_previous: 1876, ig_new_followers: 6, ig_unfollows: 0,
-          ig_views_current: 96, ig_views_previous: 4836, ig_reach_current: 2036, ig_reach_previous: 1150,
-          ig_interactions_current: 70, ig_interactions_previous: 99,
-          ig_likes_posts: 31, ig_likes_reels: 12, ig_saves_posts: 1, ig_saves_reels: 0, ig_shares_posts: 1, ig_shares_reels: 4,
-          ig_best_post: "Mejor Post: 371 visualizaciones", ig_best_reel: "Mejor Reel: 320 visualizaciones",
-          ig_impressions_total: 2243, ig_profile_visits: 102
+        name: "Adiestra",
+        current: {
+          fb_f_oct: 2541, fb_f_nov: 2541, fb_f_dic: 2540,
+          ig_f_oct: 1877, ig_f_nov: 1876, ig_f_dic: 1882,
+          fb_v_nov: 31472, fb_v_dic: 979,
+          ig_v_nov: 4836, ig_v_dic: 96,
+          fb_r_nov: 23914, fb_r_dic: 533,
+          ig_r_nov: 1150, ig_r_dic: 2036,
+          fb_i_nov: 1594, fb_i_dic: 10,
+          ig_i_nov: 99, ig_i_dic: 70
         },
         historical: {
-          months: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-          fb_interactions: [113, 114, 138, 116, 117, 111, 114, 113, 114, 1481, 1594, 10],
-          fb_reach: [146, 112, 171, 116, 141, 136, 112, 136, 131, 19476, 23914, 533],
-          ig_reach: [502, 1251, 1756, 636, 1119, 961, 682, 1902, 1595, 1347, 1150, 2036],
-          ig_visits: [55, 416, 131, 182, 97, 101, 119, 352, 258, 195, 99, 102],
-          ig_impressions: [3130, 5427, 5746, 2433, 2971, 2578, 2669, 9097, 6877, 6401, 4836, 2243]
+          months: ['Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+          fb_inter: [111, 114, 113, 114, 1481, 1594, 10],
+          fb_reach: [136, 112, 136, 131, 19476, 23914, 533],
+          ig_reach: [961, 682, 1902, 1595, 1347, 1150, 2036],
+          ig_impressions: [2578, 2669, 9097, 6877, 6401, 4836, 2243]
         }
       },
       dentalcrea: {
-        company: "DentalCrea",
-        currentMonth: {
-          month: 12, year: 2025,
-          fb_followers_current: 180, fb_followers_previous: 180, fb_new_followers: 0, fb_unfollows: 0,
-          fb_views_current: 482, fb_views_previous: 338, fb_reach_current: 166, fb_reach_previous: 45,
-          fb_interactions_current: 4, fb_interactions_previous: 5,
-          fb_best_posts: ["3 claves para cuidarte", "🌿 Mini-implantes ortodoncia", "¿Sabías que el diseño de sonrisa...?"],
-          ig_followers_current: 1151, ig_followers_previous: 1145, ig_new_followers: 6, ig_unfollows: 0,
-          ig_views_current: 11895, ig_views_previous: 11895, ig_reach_current: 781, ig_reach_previous: 781,
-          ig_interactions_current: 54, ig_interactions_previous: 54,
-          ig_likes_posts: 7, ig_likes_reels: 82, ig_saves_posts: 0, ig_saves_reels: 12, ig_shares_posts: 1, ig_shares_reels: 2,
-          ig_best_post: "Mejor Post: 589 visualizaciones", ig_best_reel: "Mejor Reel: Ortodoncia educativa - 3,543 views",
-          ig_impressions_total: 11895, ig_profile_visits: 59
+        name: "DentalCrea",
+        current: {
+          fb_f_prev: 180, fb_f_dic: 180,
+          ig_f_prev: 1145, ig_f_dic: 1151,
+          fb_v_nov: 338, fb_v_dic: 482,
+          ig_v_nov: 11895, ig_v_dic: 11895,
+          fb_r_nov: 45, fb_r_dic: 166,
+          ig_r_nov: 781, ig_r_dic: 781,
+          fb_i_nov: 5, fb_i_dic: 4,
+          ig_i_nov: 54, ig_i_dic: 54
         },
         historical: {
           months: ['Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-          fb_interactions: [9, 12, 14, 3, 6, 10, 11, 4],
           fb_reach: [91, 88, 87, 96, 68, 59, 45, 166],
           ig_reach: [1735, 1390, 1480, 5384, 3982, 1098, 781, 781],
-          ig_visits: [405, 399, 318, 313, 307, 441, 333, 59],
           ig_impressions: [9539, 7568, 13109, 21077, 19805, 14616, 11895, 11895]
         }
       }
     };
 
     function selectCompany() {
-      const dropdown = document.getElementById('companyDropdown');
-      selectedCompany = dropdown.value;
-      const btn = document.getElementById('generateBtn');
-      if (selectedCompany) btn.classList.add('active');
-      else btn.classList.remove('active');
-    }
-
-    function backToSelection() {
-      document.getElementById('results').style.display = 'none';
-      document.getElementById('companySelector').style.display = 'block';
-      document.getElementById('status').style.display = 'none';
-      document.getElementById('generateBtn').style.display = 'block';
+      const val = document.getElementById('companyDropdown').value;
+      document.getElementById('generateBtn').classList.toggle('active', val !== "");
     }
 
     function generateReport() {
-      const status = document.getElementById('status');
-      status.className = 'status loading';
-      status.textContent = '⏳ Generando reporte...';
+      const companyKey = document.getElementById('companyDropdown').value;
+      const data = dataStore[companyKey];
       document.getElementById('companySelector').style.display = 'none';
       document.getElementById('generateBtn').style.display = 'none';
+      document.getElementById('results').style.display = 'block';
 
-      setTimeout(() => {
-        const data = companiesData[selectedCompany];
-        const reportText = generateReportText(data);
-        document.getElementById('reportContent').textContent = reportText;
-        document.getElementById('results').style.display = 'block';
-        generateCharts(data);
-        
-        const blob = new Blob([reportText], { type: 'text/plain' });
-        const link = document.getElementById('downloadLink');
-        link.href = URL.createObjectURL(blob);
-        link.download = `Reporte_${data.company}_Dic_2025.txt`;
-        
-        status.className = 'status success';
-        status.textContent = '✅ Reporte completado';
-      }, 800);
+      if(companyKey === 'adiestra') {
+        renderAdiestra(data);
+      } else {
+        renderDental(data);
+      }
     }
 
-    function generateReportText(data) {
-      const d = data.currentMonth;
-      return `# REPORTE MENSUAL: ${data.company.toUpperCase()} - DICIEMBRE 2025
+    function renderAdiestra(d) {
+      const text = `RESUMEN DICIEMBRE 2025
 
-## MÉTRICAS DE SEGUIDORES
-Facebook: ${d.fb_followers_current} (${d.fb_new_followers} nuevos, ${d.fb_unfollows} bajas)
-Instagram: ${d.ig_followers_current} (${d.ig_new_followers} nuevos, ${d.ig_unfollows} bajas)
+Durante diciembre de 2025, se observó un comportamiento de transición en las redes sociales de Adiestra. Facebook experimentó una disminución significativa en todas las métricas tras el pico excepcional de noviembre, regresando a niveles más cercanos a los primeros meses del año. Instagram mostró una recuperación importante en alcance y mantuvo métricas estables.
 
-## RENDIMIENTO FACEBOOK
-- Alcance: ${d.fb_reach_current} (Previo: ${d.fb_reach_previous})
-- Visualizaciones: ${d.fb_views_current} (Previo: ${d.fb_views_previous})
-- Interacciones: ${d.fb_interactions_current}
+SEGUIDORES REDES SOCIALES
+• Facebook:
+  - OCTUBRE: ${d.current.fb_f_oct}
+  - NOVIEMBRE: ${d.current.fb_f_nov}
+  - DICIEMBRE: ${d.current.fb_f_dic}
+  - AUMENTO SEGUIDORES: 0
+  - DEJARON DE SEGUIRTE: 1
 
-## RENDIMIENTO INSTAGRAM
-- Alcance: ${d.ig_reach_current} (Previo: ${d.ig_reach_previous})
-- Impresiones Totales: ${d.ig_impressions_total}
-- Interacciones Totales: ${d.ig_interactions_current}
-  * Likes: ${d.ig_likes_posts} (Posts) / ${d.ig_likes_reels} (Reels)
-  * Guardados: ${d.ig_saves_posts + d.ig_saves_reels}
+• Instagram:
+  - OCTUBRE: ${d.current.ig_f_oct}
+  - NOVIEMBRE: ${d.current.ig_f_nov}
+  - DICIEMBRE: ${d.current.ig_f_dic}
+  - AUMENTO SEGUIDORES: 6
+  - DEJARON DE SEGUIRTE: 0
 
-## MEJORES CONTENIDOS
-${d.fb_best_posts.map(p => `- FB: ${p}`).join('\n')}
-- IG Post: ${d.ig_best_post}
-- IG Reel: ${d.ig_best_reel}
+MEJORES POSTS
+• DICIEMBRE, Facebook:
+  - Una buena convivencia en casa con tu peludo
+  - 🐾 A veces pueden poner a prueba tu paciencia...
+  - ✨ La confianza no aparece de un día para otro...
+• DICIEMBRE, Instagram:
+  - Mejor Post: 371 visualizaciones
+  - Mejor Reel: 320 visualizaciones
 
-## CONCLUSIONES FINALES
-${data.company === 'Adiestra' ? 
-'Diciembre representó una normalización tras el pico atípico de Noviembre. Facebook regresó a niveles históricos base, mientras Instagram duplicó su alcance orgánico.' : 
-'Facebook mostró una recuperación sólida en alcance (+260%), mientras que Instagram se mantuvo como el pilar de credibilidad con visualizaciones constantes en contenido educativo.'}`;
+VISUALIZACIONES
+• Facebook:
+  - NOVIEMBRE: ${d.current.fb_v_nov.toLocaleString()}
+  - DICIEMBRE: ${d.current.fb_v_dic.toLocaleString()}
+• Instagram:
+  - NOVIEMBRE: ${d.current.ig_v_nov.toLocaleString()}
+  - DICIEMBRE: ${d.current.ig_v_dic.toLocaleString()}
+
+CONCLUSIONES:
+Facebook registró una disminución drástica descendiendo de las cifras excepcionales de noviembre. Este comportamiento es natural tras un pico viral y representa un retorno a niveles consistentes con el histórico. Instagram experimentó una baja típica de fin de año al reducirse la frecuencia de reels.
+
+ALCANCE
+• Facebook:
+  - NOVIEMBRE: ${d.current.fb_r_nov.toLocaleString()}
+  - DICIEMBRE: ${d.current.fb_r_dic.toLocaleString()}
+• Instagram:
+  - NOVIEMBRE: ${d.current.ig_r_nov.toLocaleString()}
+  - DICIEMBRE: ${d.current.ig_r_dic.toLocaleString()}
+
+CONCLUSIONES:
+Facebook retornó a sus patrones normales de distribución. Instagram mostró una recuperación notable, casi duplicando su alcance, demostrando que el contenido circuló mejor dentro de la comunidad y llegó a audiencias nuevas.
+
+INTERACCIONES
+• Facebook:
+  - NOVIEMBRE: ${d.current.fb_i_nov.toLocaleString()}
+  - DICIEMBRE: ${d.current.fb_i_dic.toLocaleString()}
+• Instagram:
+  - NOVIEMBRE: ${d.current.ig_i_nov}
+  - DICIEMBRE: ${d.current.ig_i_dic}
+
+CONCLUSIONES:
+Reflejan el retorno a la normalidad en Facebook. Instagram mantiene niveles saludables de participación con una audiencia comprometida.
+
+CONCLUSIONES FINALES
+El mes de diciembre representó una normalización tras el pico extraordinario de noviembre. Facebook retornó a sus niveles base de rendimiento, alineándose con el histórico del primer trimestre. Instagram mostró resiliencia, recuperando alcance y manteniendo estabilidad en visitas al perfil.`;
+
+      formatAndShow(text);
+      
+      const h = d.historical;
+      Plotly.newPlot('chart1', [{ x: h.months, y: h.fb_inter, type: 'bar', name: 'Interacciones FB', marker: {color: '#9b59b6'} }], {title: 'INTERACCIONES FACEBOOK'});
+      Plotly.newPlot('chart2', [{ x: h.months, y: h.ig_reach, type: 'bar', name: 'Alcance IG', marker: {color: '#3498db'} }], {title: 'ALCANCE INSTAGRAM'});
+      Plotly.newPlot('chart3', [{ x: h.months, y: h.ig_impressions, type: 'bar', name: 'Impresiones IG', marker: {color: '#e74c3c'} }], {title: 'IMPRESIONES INSTAGRAM'});
     }
 
-    function generateCharts(data) {
-      const commonLayout = { barmode: 'group', height: 400, margin: { t: 50, b: 80 } };
-      const h = data.historical;
+    function renderDental(d) {
+      const text = `RESUMEN DICIEMBRE 2025
 
-      Plotly.newPlot('chartFacebook', [
-        { x: h.months, y: h.fb_interactions, name: 'Interacciones', type: 'bar', marker: {color: '#9b59b6'} },
-        { x: h.months, y: h.fb_reach, name: 'Alcance', type: 'bar', marker: {color: '#66cc99'} }
-      ], { ...commonLayout, title: 'Histórico Facebook 2025' });
+Durante diciembre de 2025, se observó un comportamiento de estabilización en DentalCrea. Facebook mostró mejoras notables en visualizaciones tras la caída de noviembre, mientras Instagram mantuvo métricas estables consolidando la comunidad.
 
-      Plotly.newPlot('chartInstagramReach', [
-        { x: h.months, y: h.ig_reach, name: 'Alcance IG', type: 'bar', marker: {color: '#3498db'} },
-        { x: h.months, y: h.ig_visits, name: 'Visitas Perfil', type: 'bar', marker: {color: '#f1c40f'} }
-      ], { ...commonLayout, title: 'Alcance y Visitas Instagram' });
+SEGUIDORES REDES SOCIALES
+• Facebook:
+  - NOVIEMBRE: ${d.current.fb_f_prev}
+  - DICIEMBRE: ${d.current.fb_f_dic}
+• Instagram:
+  - NOVIEMBRE: ${d.current.ig_f_prev}
+  - DICIEMBRE: ${d.current.ig_f_dic}
+  - AUMENTO SEGUIDORES: 6
 
-      Plotly.newPlot('chartInstagramImpressions', [
-        { x: h.months, y: h.ig_impressions, name: 'Impresiones', type: 'scatter', mode: 'lines+markers', line: {color: '#e74c3c'} }
-      ], { ...commonLayout, title: 'Tendencia de Impresiones IG' });
+VISUALIZACIONES
+• Facebook:
+  - NOVIEMBRE: ${d.current.fb_v_nov}
+  - DICIEMBRE: ${d.current.fb_v_dic}
+• Instagram:
+  - NOVIEMBRE: ${d.current.ig_v_nov.toLocaleString()}
+  - DICIEMBRE: ${d.current.ig_v_dic.toLocaleString()}
+
+CONCLUSIONES:
+Facebook registró un aumento importante, recuperando tracción. Instagram se mantuvo sólido, demostrando que el contenido visual especializado sigue reteniendo la atención.
+
+ALCANCE
+• Facebook:
+  - NOVIEMBRE: ${d.current.fb_r_nov}
+  - DICIEMBRE: ${d.current.fb_r_dic}
+• Instagram:
+  - NOVIEMBRE: ${d.current.ig_r_nov}
+  - DICIEMBRE: ${d.current.ig_r_dic}
+
+CONCLUSIONES:
+Facebook logró una recuperación de más del 200% en alcance respecto al mes anterior. Instagram se mantuvo estable, confirmando la efectividad de los reels educativos.
+
+INTERACCIONES
+• Facebook:
+  - DICIEMBRE: ${d.current.fb_i_nov}
+• Instagram:
+  - DICIEMBRE: ${d.current.ig_i_nov}
+
+CONCLUSIONES FINALES:
+Diciembre cierra con una nota positiva en recuperación de visibilidad orgánica. Instagram se consolida como el pilar de la marca, mientras que Facebook empieza a mostrar señales de mayor circulación de contenido.`;
+
+      formatAndShow(text);
+      
+      const h = d.historical;
+      Plotly.newPlot('chart1', [{ x: h.months, y: h.fb_reach, type: 'bar', name: 'Alcance FB', marker: {color: '#2ecc71'} }], {title: 'ALCANCE FACEBOOK'});
+      Plotly.newPlot('chart2', [{ x: h.months, y: h.ig_reach, type: 'bar', name: 'Alcance IG', marker: {color: '#3498db'} }], {title: 'ALCANCE INSTAGRAM'});
+      Plotly.newPlot('chart3', [{ x: h.months, y: h.ig_impressions, type: 'bar', name: 'Impresiones IG', marker: {color: '#e67e22'} }], {title: 'IMPRESIONES INSTAGRAM'});
     }
 
-    function addNewCompany() { alert('Función en desarrollo.'); }
+    function formatAndShow(text) {
+      // Reemplaza los títulos por SPANs con la clase azul
+      const formatted = text.replace(/^[A-ZÁÉÍÓÚ\s]{5,}$/gm, match => `<span class="report-title">${match}</span>`);
+      document.getElementById('reportOutput').innerHTML = formatted;
+    }
   </script>
 </body>
 </html>
