@@ -46,17 +46,25 @@
 
     .results { margin-top: 30px; display: none; }
     
-    /* Estilo para simular el PDF */
     .report-content {
       background: white; padding: 40px;
       border: 1px solid #eee; border-radius: 10px;
-      line-height: 1.8; color: #444;
-      white-space: pre-wrap; font-size: 14px;
+      line-height: 2; color: #333;
+      white-space: pre-wrap; font-size: 15px;
     }
-    .report-title { color: #00BFFF; font-weight: bold; text-transform: uppercase; margin-top: 20px; display: block; }
     
-    .chart-container { margin-bottom: 30px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
-    .back-btn { background: #666; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+    /* Clase para los títulos en Azul Marketing View */
+    .blue-title {
+      color: #00BFFF;
+      font-weight: bold;
+      display: block;
+      margin-top: 25px;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    
+    .chart-container { margin-bottom: 40px; background: white; padding: 20px; border-radius: 8px; border: 1px solid #eee; }
+    .back-btn { background: #666; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 20px; }
   </style>
 </head>
 <body>
@@ -79,10 +87,11 @@
     </button>
     
     <div id="results" class="results">
-      <button class="back-btn" onclick="location.reload()">← Nueva Selección</button>
+      <button class="back-btn" onclick="location.reload()">← Volver a Selección</button>
       <div id="reportOutput" class="report-content"></div>
       
-      <div style="margin-top:40px;">
+      <div class="charts-section" style="margin-top: 50px;">
+        <h2 style="color: #333; margin-bottom: 30px;">📈 GRÁFICAS DE RENDIMIENTO</h2>
         <div class="chart-container" id="chart1"></div>
         <div class="chart-container" id="chart2"></div>
         <div class="chart-container" id="chart3"></div>
@@ -91,48 +100,6 @@
   </div>
 
   <script>
-    const dataStore = {
-      adiestra: {
-        name: "Adiestra",
-        current: {
-          fb_f_oct: 2541, fb_f_nov: 2541, fb_f_dic: 2540,
-          ig_f_oct: 1877, ig_f_nov: 1876, ig_f_dic: 1882,
-          fb_v_nov: 31472, fb_v_dic: 979,
-          ig_v_nov: 4836, ig_v_dic: 96,
-          fb_r_nov: 23914, fb_r_dic: 533,
-          ig_r_nov: 1150, ig_r_dic: 2036,
-          fb_i_nov: 1594, fb_i_dic: 10,
-          ig_i_nov: 99, ig_i_dic: 70
-        },
-        historical: {
-          months: ['Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-          fb_inter: [111, 114, 113, 114, 1481, 1594, 10],
-          fb_reach: [136, 112, 136, 131, 19476, 23914, 533],
-          ig_reach: [961, 682, 1902, 1595, 1347, 1150, 2036],
-          ig_impressions: [2578, 2669, 9097, 6877, 6401, 4836, 2243]
-        }
-      },
-      dentalcrea: {
-        name: "DentalCrea",
-        current: {
-          fb_f_prev: 180, fb_f_dic: 180,
-          ig_f_prev: 1145, ig_f_dic: 1151,
-          fb_v_nov: 338, fb_v_dic: 482,
-          ig_v_nov: 11895, ig_v_dic: 11895,
-          fb_r_nov: 45, fb_r_dic: 166,
-          ig_r_nov: 781, ig_r_dic: 781,
-          fb_i_nov: 5, fb_i_dic: 4,
-          ig_i_nov: 54, ig_i_dic: 54
-        },
-        historical: {
-          months: ['Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-          fb_reach: [91, 88, 87, 96, 68, 59, 45, 166],
-          ig_reach: [1735, 1390, 1480, 5384, 3982, 1098, 781, 781],
-          ig_impressions: [9539, 7568, 13109, 21077, 19805, 14616, 11895, 11895]
-        }
-      }
-    };
-
     function selectCompany() {
       const val = document.getElementById('companyDropdown').value;
       document.getElementById('generateBtn').classList.toggle('active', val !== "");
@@ -140,148 +107,157 @@
 
     function generateReport() {
       const companyKey = document.getElementById('companyDropdown').value;
-      const data = dataStore[companyKey];
       document.getElementById('companySelector').style.display = 'none';
       document.getElementById('generateBtn').style.display = 'none';
       document.getElementById('results').style.display = 'block';
 
       if(companyKey === 'adiestra') {
-        renderAdiestra(data);
+        renderAdiestra();
       } else {
-        renderDental(data);
+        renderDental();
       }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function renderAdiestra(d) {
-      const text = `RESUMEN DICIEMBRE 2025
-
+    function renderAdiestra() {
+      const text = `<span class="blue-title">RESUMEN DICIEMBRE 2025</span>
 Durante diciembre de 2025, se observó un comportamiento de transición en las redes sociales de Adiestra. Facebook experimentó una disminución significativa en todas las métricas tras el pico excepcional de noviembre, regresando a niveles más cercanos a los primeros meses del año. Instagram mostró una recuperación importante en alcance y mantuvo métricas estables.
 
-SEGUIDORES REDES SOCIALES
+<span class="blue-title">SEGUIDORES REDES SOCIALES</span>
 • Facebook:
-  - OCTUBRE: ${d.current.fb_f_oct}
-  - NOVIEMBRE: ${d.current.fb_f_nov}
-  - DICIEMBRE: ${d.current.fb_f_dic}
+  - OCTUBRE: 2,541
+  - NOVIEMBRE: 2,541
+  - DICIEMBRE: 2,540
   - AUMENTO SEGUIDORES: 0
   - DEJARON DE SEGUIRTE: 1
 
 • Instagram:
-  - OCTUBRE: ${d.current.ig_f_oct}
-  - NOVIEMBRE: ${d.current.ig_f_nov}
-  - DICIEMBRE: ${d.current.ig_f_dic}
+  - OCTUBRE: 1,877
+  - NOVIEMBRE: 1,876
+  - DICIEMBRE: 1,882
   - AUMENTO SEGUIDORES: 6
   - DEJARON DE SEGUIRTE: 0
 
-MEJORES POSTS
+<span class="blue-title">MEJORES POSTS</span>
 • DICIEMBRE, Facebook:
   - Una buena convivencia en casa con tu peludo
-  - 🐾 A veces pueden poner a prueba tu paciencia...
-  - ✨ La confianza no aparece de un día para otro...
+  - 🐾 A veces pueden poner a prueba tu paciencia con sus travesuras...
+  - ✨ La confianza no aparece de un día para otro... se construye paso a paso
+  - 👉🏼 ¿Qué llevar al paseo con tu peludo?
+
 • DICIEMBRE, Instagram:
   - Mejor Post: 371 visualizaciones
   - Mejor Reel: 320 visualizaciones
 
-VISUALIZACIONES
+<span class="blue-title">VISUALIZACIONES</span>
 • Facebook:
-  - NOVIEMBRE: ${d.current.fb_v_nov.toLocaleString()}
-  - DICIEMBRE: ${d.current.fb_v_dic.toLocaleString()}
+  - NOVIEMBRE: 31,472
+  - DICIEMBRE: 979
 • Instagram:
-  - NOVIEMBRE: ${d.current.ig_v_nov.toLocaleString()}
-  - DICIEMBRE: ${d.current.ig_v_dic.toLocaleString()}
+  - NOVIEMBRE: 4,836
+  - DICIEMBRE: 96
 
-CONCLUSIONES:
-Facebook registró una disminución drástica descendiendo de las cifras excepcionales de noviembre. Este comportamiento es natural tras un pico viral y representa un retorno a niveles consistentes con el histórico. Instagram experimentó una baja típica de fin de año al reducirse la frecuencia de reels.
+<span class="blue-title">CONCLUSIONES:</span>
+Facebook registró una disminución drástica, descendiendo de 31,472 visualizaciones en noviembre a 979 en diciembre. Este comportamiento es natural después del pico excepcional del mes anterior y representa un retorno a niveles más consistentes con el histórico de la marca. Instagram experimentó una baja significativa, pasando de 4,836 a 96, lo cual es típico cuando se reduce la frecuencia o el formato del contenido dinámico.
 
-ALCANCE
+<span class="blue-title">ALCANCE</span>
 • Facebook:
-  - NOVIEMBRE: ${d.current.fb_r_nov.toLocaleString()}
-  - DICIEMBRE: ${d.current.fb_r_dic.toLocaleString()}
+  - NOVIEMBRE: 23,914
+  - DICIEMBRE: 533
 • Instagram:
-  - NOVIEMBRE: ${d.current.ig_r_nov.toLocaleString()}
-  - DICIEMBRE: ${d.current.ig_r_dic.toLocaleString()}
+  - NOVIEMBRE: 1,150
+  - DICIEMBRE: 2,036
 
-CONCLUSIONES:
-Facebook retornó a sus patrones normales de distribución. Instagram mostró una recuperación notable, casi duplicando su alcance, demostrando que el contenido circuló mejor dentro de la comunidad y llegó a audiencias nuevas.
+<span class="blue-title">CONCLUSIONES:</span>
+Facebook experimentó una caída considerable, regresando de 23,914 a 533, lo que indica que después del comportamiento excepcional de noviembre, la plataforma retornó a sus patrones normales de distribución. Instagram mostró una recuperación notable, incrementando su alcance de 1,150 a 2,036, demostrando que el contenido logró circular mejor dentro de la comunidad y llegó a audiencias nuevas.
 
-INTERACCIONES
+<span class="blue-title">INTERACCIONES</span>
 • Facebook:
-  - NOVIEMBRE: ${d.current.fb_i_nov.toLocaleString()}
-  - DICIEMBRE: ${d.current.fb_i_dic.toLocaleString()}
+  - NOVIEMBRE: 1,594
+  - DICIEMBRE: 10
 • Instagram:
-  - NOVIEMBRE: ${d.current.ig_i_nov}
-  - DICIEMBRE: ${d.current.ig_i_dic}
+  - NOVIEMBRE: 99
+  - DICIEMBRE: 70
 
-CONCLUSIONES:
-Reflejan el retorno a la normalidad en Facebook. Instagram mantiene niveles saludables de participación con una audiencia comprometida.
+<span class="blue-title">CONCLUSIONES:</span>
+Facebook mostró una reducción importante en la interacción, bajando de 1,594 a 10, lo que refleja el retorno a la normalidad después del mes excepcional anterior. Instagram registró una ligera disminución, pasando de 99 a 70, pero mantiene niveles saludables de participación que indican una audiencia comprometida.
 
-CONCLUSIONES FINALES
-El mes de diciembre representó una normalización tras el pico extraordinario de noviembre. Facebook retornó a sus niveles base de rendimiento, alineándose con el histórico del primer trimestre. Instagram mostró resiliencia, recuperando alcance y manteniendo estabilidad en visitas al perfil.`;
+<span class="blue-title">CONCLUSIONES FINALES</span>
+El mes de diciembre representó una normalización después del comportamiento excepcional observado en noviembre. Facebook experimentó una caída significativa en todas sus métricas, regresando a niveles más cercanos a los primeros meses del año, lo cual es consistente con el ciclo natural de la plataforma y refleja que el pico de noviembre fue un evento extraordinario. Instagram, por su parte, mostró una recuperación importante en alcance y mantuvo métricas estables, confirmando que la plataforma mantiene su capacidad de engagement cuando se mantiene una presencia constante.`;
 
-      formatAndShow(text);
+      document.getElementById('reportOutput').innerHTML = text;
+
+      // GRÁFICAS ADIESTRA (Barras con datos Nov-Dic)
+      const months = ['Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
       
-      const h = d.historical;
-      Plotly.newPlot('chart1', [{ x: h.months, y: h.fb_inter, type: 'bar', name: 'Interacciones FB', marker: {color: '#9b59b6'} }], {title: 'INTERACCIONES FACEBOOK'});
-      Plotly.newPlot('chart2', [{ x: h.months, y: h.ig_reach, type: 'bar', name: 'Alcance IG', marker: {color: '#3498db'} }], {title: 'ALCANCE INSTAGRAM'});
-      Plotly.newPlot('chart3', [{ x: h.months, y: h.ig_impressions, type: 'bar', name: 'Impresiones IG', marker: {color: '#e74c3c'} }], {title: 'IMPRESIONES INSTAGRAM'});
+      Plotly.newPlot('chart1', [{
+        x: months, y: [114, 113, 114, 1481, 1594, 10], type: 'bar', marker: {color: '#00BFFF'}
+      }], {title: 'INTERACCIONES FACEBOOK (Histórico)'});
+
+      Plotly.newPlot('chart2', [{
+        x: months, y: [682, 1902, 1595, 1347, 1150, 2036], type: 'bar', marker: {color: '#FF9933'}
+      }], {title: 'ALCANCE INSTAGRAM (Histórico)'});
+
+      Plotly.newPlot('chart3', [{
+        x: months, y: [2669, 9097, 6877, 6401, 4836, 2243], type: 'bar', marker: {color: '#4CAF50'}
+      }], {title: 'IMPRESIONES INSTAGRAM (Barras)'});
     }
 
-    function renderDental(d) {
-      const text = `RESUMEN DICIEMBRE 2025
+    function renderDental() {
+      const text = `<span class="blue-title">RESUMEN DICIEMBRE 2025</span>
+Durante diciembre de 2025, se observó un comportamiento de estabilización en DentalCrea. Facebook mostró mejoras notables en visualizaciones y alcance tras la caída de noviembre, mientras Instagram mantuvo métricas estables.
 
-Durante diciembre de 2025, se observó un comportamiento de estabilización en DentalCrea. Facebook mostró mejoras notables en visualizaciones tras la caída de noviembre, mientras Instagram mantuvo métricas estables consolidando la comunidad.
-
-SEGUIDORES REDES SOCIALES
+<span class="blue-title">SEGUIDORES REDES SOCIALES</span>
 • Facebook:
-  - NOVIEMBRE: ${d.current.fb_f_prev}
-  - DICIEMBRE: ${d.current.fb_f_dic}
+  - NOVIEMBRE: 180
+  - DICIEMBRE: 180
 • Instagram:
-  - NOVIEMBRE: ${d.current.ig_f_prev}
-  - DICIEMBRE: ${d.current.ig_f_dic}
-  - AUMENTO SEGUIDORES: 6
+  - NOVIEMBRE: 1,145
+  - DICIEMBRE: 1,151
+  - AUMENTO: 6
 
-VISUALIZACIONES
+<span class="blue-title">VISUALIZACIONES</span>
 • Facebook:
-  - NOVIEMBRE: ${d.current.fb_v_nov}
-  - DICIEMBRE: ${d.current.fb_v_dic}
+  - NOVIEMBRE: 338
+  - DICIEMBRE: 482
 • Instagram:
-  - NOVIEMBRE: ${d.current.ig_v_nov.toLocaleString()}
-  - DICIEMBRE: ${d.current.ig_v_dic.toLocaleString()}
+  - NOVIEMBRE: 11,895
+  - DICIEMBRE: 11,895
 
-CONCLUSIONES:
-Facebook registró un aumento importante, recuperando tracción. Instagram se mantuvo sólido, demostrando que el contenido visual especializado sigue reteniendo la atención.
+<span class="blue-title">CONCLUSIONES:</span>
+Facebook registró un aumento importante, pasando de 338 visualizaciones en noviembre a 482 en diciembre. Instagram se mantuvo estable en 11,895 visualizaciones.
 
-ALCANCE
+<span class="blue-title">ALCANCE</span>
 • Facebook:
-  - NOVIEMBRE: ${d.current.fb_r_nov}
-  - DICIEMBRE: ${d.current.fb_r_dic}
+  - NOVIEMBRE: 45
+  - DICIEMBRE: 166
 • Instagram:
-  - NOVIEMBRE: ${d.current.ig_r_nov}
-  - DICIEMBRE: ${d.current.ig_r_dic}
+  - NOVIEMBRE: 781
+  - DICIEMBRE: 781
 
-CONCLUSIONES:
-Facebook logró una recuperación de más del 200% en alcance respecto al mes anterior. Instagram se mantuvo estable, confirmando la efectividad de los reels educativos.
+<span class="blue-title">INTERACCIONES</span>
+• Facebook: 4
+• Instagram: 54
 
-INTERACCIONES
-• Facebook:
-  - DICIEMBRE: ${d.current.fb_i_nov}
-• Instagram:
-  - DICIEMBRE: ${d.current.ig_i_nov}
+<span class="blue-title">CONCLUSIONES FINALES</span>
+Diciembre mostró una estabilización. Facebook experimentó una recuperación importante en alcance (+260%), mientras Instagram se consolidó como el pilar de la marca con contenido visual educativo.`;
 
-CONCLUSIONES FINALES:
-Diciembre cierra con una nota positiva en recuperación de visibilidad orgánica. Instagram se consolida como el pilar de la marca, mientras que Facebook empieza a mostrar señales de mayor circulación de contenido.`;
+      document.getElementById('reportOutput').innerHTML = text;
 
-      formatAndShow(text);
+      // GRÁFICAS DENTALCREA (Barras)
+      const months = ['Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
       
-      const h = d.historical;
-      Plotly.newPlot('chart1', [{ x: h.months, y: h.fb_reach, type: 'bar', name: 'Alcance FB', marker: {color: '#2ecc71'} }], {title: 'ALCANCE FACEBOOK'});
-      Plotly.newPlot('chart2', [{ x: h.months, y: h.ig_reach, type: 'bar', name: 'Alcance IG', marker: {color: '#3498db'} }], {title: 'ALCANCE INSTAGRAM'});
-      Plotly.newPlot('chart3', [{ x: h.months, y: h.ig_impressions, type: 'bar', name: 'Impresiones IG', marker: {color: '#e67e22'} }], {title: 'IMPRESIONES INSTAGRAM'});
-    }
+      Plotly.newPlot('chart1', [{
+        x: months, y: [91, 88, 87, 96, 68, 59, 45, 166], type: 'bar', marker: {color: '#00BFFF'}
+      }], {title: 'ALCANCE FACEBOOK (Recuperación Dic)'});
 
-    function formatAndShow(text) {
-      // Reemplaza los títulos por SPANs con la clase azul
-      const formatted = text.replace(/^[A-ZÁÉÍÓÚ\s]{5,}$/gm, match => `<span class="report-title">${match}</span>`);
-      document.getElementById('reportOutput').innerHTML = formatted;
+      Plotly.newPlot('chart2', [{
+        x: months, y: [1735, 1390, 1480, 5384, 3982, 1098, 781, 781], type: 'bar', marker: {color: '#FF9933'}
+      }], {title: 'ALCANCE INSTAGRAM'});
+
+      Plotly.newPlot('chart3', [{
+        x: months, y: [9539, 7568, 13109, 21077, 19805, 14616, 11895, 11895], type: 'bar', marker: {color: '#4CAF50'}
+      }], {title: 'IMPRESIONES INSTAGRAM (Barras)'});
     }
   </script>
 </body>
