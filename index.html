@@ -27,6 +27,7 @@
       font-size: 32px; 
       text-align: center;
     }
+    
     .company-selector {
       margin: 30px 0;
       padding: 30px;
@@ -58,7 +59,17 @@
       border-radius: 8px;
       background: white;
       cursor: pointer;
+      transition: all 0.3s;
     }
+    .dropdown-container select:hover {
+      border-color: #00BFFF;
+    }
+    .dropdown-container select:focus {
+      outline: none;
+      border-color: #00BFFF;
+      box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.1);
+    }
+    
     .add-company-btn {
       display: block;
       margin: 20px auto 0;
@@ -70,7 +81,13 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
+      transition: all 0.3s;
     }
+    .add-company-btn:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+    }
+    
     .generate-button {
       background: linear-gradient(135deg, #00BFFF 0%, #00A3E0 100%);
       color: white;
@@ -82,9 +99,29 @@
       cursor: pointer;
       width: 100%;
       margin: 30px 0;
+      box-shadow: 0 4px 15px rgba(0, 191, 255, 0.4);
+      transition: all 0.3s;
       display: none;
     }
-    .generate-button.active { display: block; }
+    .generate-button.active {
+      display: block;
+    }
+    .generate-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 191, 255, 0.6);
+    }
+    
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+      text-align: center;
+      font-weight: 500;
+    }
+    .status.loading { background: #e3f2fd; color: #1976d2; display: block; }
+    .status.success { background: #e8f5e9; color: #2e7d32; display: block; }
+    
     .results {
       margin-top: 30px;
       padding: 30px;
@@ -92,122 +129,730 @@
       border-radius: 12px;
       display: none;
     }
+    .results h2 {
+      color: #00BFFF;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
     .report-content {
       background: white;
       padding: 40px;
       border-radius: 10px;
       line-height: 2;
+      color: #333;
       font-size: 15px;
       white-space: pre-wrap;
     }
-    .fb-icon::before { content: "📘 "; font-size: 22px; }
-    .ig-icon::before { content: "📷 "; font-size: 22px; }
+    
+    /* Styling for report sections */
+    .report-content h2 {
+      color: #00BFFF !important;
+      font-size: 22px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    
+    .report-content h3 {
+      color: #333;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+    
+    .platform-section {
+      margin: 25px 0;
+      padding: 20px;
+      border-left: 4px solid #00BFFF;
+      background: #f8f9fa;
+    }
+    
+    .fb-icon::before {
+      content: "📘 ";
+      font-size: 24px;
+    }
+    
+    .ig-icon::before {
+      content: "📷 ";
+      font-size: 24px;
+    }
+    
+    .charts-section {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-top: 30px;
+    }
+    .chart-container {
+      margin-bottom: 40px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    
+    .download-btn {
+      display: inline-block;
+      background: #4caf50;
+      color: white;
+      padding: 14px 30px;
+      border-radius: 8px;
+      text-decoration: none;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+    
+    .back-btn {
+      background: #666;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+    .back-btn:hover {
+      background: #555;
+    }
   </style>
 </head>
-
 <body>
-<div class="container">
-  <h1>📊 Generador de Reportes - Marketing View</h1>
-
-  <div class="company-selector" id="companySelector">
-    <h2>Selecciona la Empresa</h2>
-    <div class="dropdown-container">
-      <label for="companyDropdown">Empresa:</label>
-      <select id="companyDropdown" onchange="selectCompany()">
-        <option value="">-- Selecciona una empresa --</option>
-        <option value="adiestra">🐾 Adiestra - Educación Canina</option>
-        <option value="dentalcrea">🦷 DentalCrea - Clínica Dental</option>
-      </select>
-      <button class="add-company-btn">➕ Agregar Nueva Empresa</button>
+  <div class="container">
+    <h1>📊 Generador de Reportes - Marketing View</h1>
+    
+    <div class="company-selector" id="companySelector">
+      <h2>Selecciona la Empresa</h2>
+      <div class="dropdown-container">
+        <label for="companyDropdown">Empresa:</label>
+        <select id="companyDropdown" onchange="selectCompany()">
+          <option value="">-- Selecciona una empresa --</option>
+          <option value="adiestra">🐾 Adiestra - Educación Canina</option>
+          <option value="dentalcrea">🦷 DentalCrea - Clínica Dental</option>
+        </select>
+        <button class="add-company-btn" onclick="addNewCompany()">➕ Agregar Nueva Empresa</button>
+      </div>
+    </div>
+    
+    <button class="generate-button" id="generateBtn" onclick="generateReport()">
+      🚀 Generar Reporte de Diciembre 2025
+    </button>
+    
+    <div id="status" class="status"></div>
+    
+    <div id="results" class="results">
+      <button class="back-btn" onclick="backToSelection()">← Volver a Selección de Empresa</button>
+      <h2>📄 Reporte Generado</h2>
+      <div id="reportContent" class="report-content"></div>
+      
+      <div class="charts-section">
+        <h3 style="color: #00BFFF; margin-bottom: 20px;">📈 Gráficas de Rendimiento</h3>
+        <div class="chart-container" id="chartFacebook"></div>
+        <div class="chart-container" id="chartInstagramReach"></div>
+        <div class="chart-container" id="chartInstagramImpressions"></div>
+      </div>
+      
+      <a id="downloadLink" class="download-btn" style="display: none;">📥 Descargar Reporte</a>
     </div>
   </div>
 
-  <button class="generate-button" id="generateBtn" onclick="generateReport()">
-    🚀 Generar Reporte de Diciembre 2025
-  </button>
-
-  <div id="results" class="results">
-    <h2>📄 Reporte Generado</h2>
-    <div id="reportContent" class="report-content"></div>
-  </div>
-</div>
-
-<script>
-let selectedCompany = null;
-
-const companiesData = {
-  dentalcrea: {
-    company: "DentalCrea",
-    currentMonth: {
-      month: 12,
-      year: 2025,
-
-      fb_followers_current: 180,
-      fb_followers_previous: 180,
-      fb_new_followers: 0,
-      fb_unfollows: 0,
-      fb_views_current: 331,
-      fb_views_previous: 338,
-      fb_reach_current: 166,
-      fb_reach_previous: 45,
-      fb_interactions_current: 5,
-      fb_interactions_previous: 5,
-      fb_visits: 47,
-
-      ig_followers_current: 1151,
-      ig_followers_previous: 1145,
-      ig_new_followers: 13,
-      ig_unfollows: 7,
-      ig_views_current: 9500,
-      ig_views_previous: 11895,
-      ig_reach_current: 1300,
-      ig_reach_previous: 781,
-
-      ig_interactions_current: 40,
-      ig_interactions_previous: 54,
-
-      ig_likes_posts: 11,
-      ig_likes_reels: 21,
-      ig_saves_posts: 0,
-      ig_saves_reels: 0,
-      ig_shares_posts: 1,
-      ig_shares_reels: 6,
-
-      ig_impressions_total: 9500,
-      ig_profile_visits: 59,
-
-      ig_best_post: "Mejor Post: ¿Sabías que el mejor diseño de sonrisa empieza con un tratamiento de ortodoncia?",
-      ig_best_reel: "Mejor Reel: 11,536 visualizaciones (Hábitos que pueden hacerte perder tus dientes)"
+  <script>
+    let selectedCompany = null;
+    
+    const companiesData = {
+      adiestra: {
+        company: "Adiestra",
+        currentMonth: {
+          month: 12,
+          year: 2025,
+          
+          fb_followers_current: 2544,
+          fb_followers_previous: 2541,
+          fb_new_followers: 3,
+          fb_unfollows: 0,
+          fb_views_current: 957,
+          fb_views_previous: 31472,
+          fb_reach_current: 567,
+          fb_reach_previous: 23914,
+          fb_interactions_current: 14,
+          fb_interactions_previous: 1594,
+          fb_visits: 100,
+          fb_best_posts: [
+            "Una buena convivencia en casa empieza con comprender y guiar a tu peludo desde el amor y la empatía",
+            "A veces pueden poner a prueba tu paciencia con sus travesuras... pero nunca pondrán a prueba tu corazón",
+            "La confianza no aparece de un día para otro... se construye paso a paso",
+            "¿Qué llevar al paseo con tu peludo?"
+          ],
+          
+          ig_followers_current: 1886,
+          ig_followers_previous: 1876,
+          ig_new_followers: 10,
+          ig_unfollows: 0,
+          ig_views_current: 4100,
+          ig_views_previous: 4836,
+          ig_reach_current: 1300,
+          ig_reach_previous: 1150,
+          ig_interactions_current: 91,
+          ig_interactions_previous: 99,
+          ig_likes_posts: 32,
+          ig_likes_reels: 39,
+          ig_saves_posts: 2,
+          ig_saves_reels: 1,
+          ig_shares_posts: 0,
+          ig_shares_reels: 2,
+          ig_impressions_total: 4100,
+          ig_profile_visits: 92,
+          ig_best_post: "Mejor Post: 213 visualizaciones (Un peludo seguro y equilibrado)",
+          ig_best_reel: "Mejor Reel: 373 visualizaciones (A veces pueden poner a prueba tu paciencia)"
+        },
+        
+        historical: {
+          fb_interactions: [113, 114, 138, 116, 117, 111, 114, 113, 114, 1481, 1594, 14],
+          fb_reach: [146, 112, 171, 116, 141, 136, 112, 136, 131, 19476, 23914, 567],
+          ig_reach: [502, 1251, 1756, 636, 1119, 961, 682, 1902, 1595, 1347, 1150, 1300],
+          ig_visits: [55, 416, 131, 182, 97, 101, 119, 352, 258, 195, 99, 92],
+          ig_impressions: [3130, 5427, 5746, 2433, 2971, 2578, 2669, 9097, 6877, 6401, 4836, 4100]
+        }
+      },
+      
+      dentalcrea: {
+        company: "DentalCrea",
+        currentMonth: {
+          month: 12,
+          year: 2025,
+          
+          fb_followers_current: 180,
+          fb_followers_previous: 180,
+          fb_new_followers: 0,
+          fb_unfollows: 0,
+          fb_views_current: 331,
+          fb_views_previous: 338,
+          fb_reach_current: 166,
+          fb_reach_previous: 45,
+          fb_interactions_current: 5,
+          fb_interactions_previous: 5,
+          fb_visits: 47,
+          fb_best_posts: [
+            "¿Quieres evitar el dolor en tus dientes?",
+            "¿Sabías que el mejor diseño de sonrisa empieza con un tratamiento de ortodoncia?",
+            "En #Dentalcrea contamos con todas las opciones para tu tratamiento de ortodoncia"
+          ],
+          
+          ig_followers_current: 1151,
+          ig_followers_previous: 1145,
+          ig_new_followers: 13,
+          ig_unfollows: 7,
+          ig_views_current: 9500,
+          ig_views_previous: 11895,
+          ig_reach_current: 1300,
+          ig_reach_previous: 781,
+          ig_interactions_current: 40,
+          ig_interactions_previous: 54,
+          ig_likes_posts: 11,
+          ig_likes_reels: 219,
+          ig_saves_posts: 0,
+          ig_saves_reels: 12,
+          ig_shares_posts: 1,
+          ig_shares_reels: 9,
+          ig_impressions_total: 9500,
+          ig_profile_visits: 59,
+          ig_best_post: "Mejor Post: 662 visualizaciones (Comparaciones de inicio y final)",
+          ig_best_reel: "Mejor Reel: 11,536 visualizaciones (Hábitos que pueden hacerte perder tus dientes)"
+        },
+        
+        historical: {
+          fb_views: [969, 747, 449, 8513, 1706, 238, 338, 331],
+          fb_reach: [91, 88, 87, 96, 68, 59, 45, 166],
+          fb_interactions: [9, 12, 14, 3, 6, 10, 11, 5],
+          ig_views: [9539, 7568, 13109, 21077, 19805, 14616, 11895, 9500],
+          ig_reach: [1735, 1390, 1480, 5384, 3982, 1098, 781, 1300],
+          ig_interactions: [233, 109, 125, 64, 138, 40, 54, 40],
+          ig_visits: [405, 399, 318, 313, 307, 441, 333, 333]
+        }
+      }
+    };
+    
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    function selectCompany() {
+      const dropdown = document.getElementById('companyDropdown');
+      selectedCompany = dropdown.value;
+      
+      if (selectedCompany) {
+        document.getElementById('generateBtn').classList.add('active');
+      } else {
+        document.getElementById('generateBtn').classList.remove('active');
+      }
     }
-  }
-};
+    
+    function addNewCompany() {
+      alert('Funcionalidad para agregar nueva empresa estará disponible próximamente. Por favor contacta al administrador.');
+    }
+    
+    function backToSelection() {
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('companySelector').style.display = 'block';
+      document.getElementById('generateBtn').classList.add('active');
+      document.getElementById('status').className = 'status';
+    }
+    
+    function generateReport() {
+      if (!selectedCompany) {
+        alert('Por favor selecciona una empresa primero');
+        return;
+      }
+      
+      const status = document.getElementById('status');
+      const results = document.getElementById('results');
+      const companySelector = document.getElementById('companySelector');
+      const generateBtn = document.getElementById('generateBtn');
+      
+      status.className = 'status loading';
+      status.textContent = '⏳ Generando reporte...';
+      companySelector.style.display = 'none';
+      generateBtn.style.display = 'none';
+      
+      setTimeout(() => {
+        const reportData = companiesData[selectedCompany];
+        const report = generateReportText(reportData);
+        
+        document.getElementById('reportContent').innerHTML = report;
+        results.style.display = 'block';
+        
+        generateCharts(reportData);
+        
+        const plainText = report.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+        const blob = new Blob([plainText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const downloadLink = document.getElementById('downloadLink');
+        downloadLink.href = url;
+        downloadLink.download = `reporte_diciembre_2025_${reportData.company}.txt`;
+        downloadLink.style.display = 'inline-block';
+        
+        status.className = 'status success';
+        status.textContent = '✅ Reporte generado exitosamente!';
+        
+        results.scrollIntoView({ behavior: 'smooth' });
+      }, 30000);
+    }
+    
+    function generateReportText(data) {
+      const d = data.currentMonth;
+      
+      if (data.company === "Adiestra") {
+        return `<h2>RESUMEN DEL MES</h2>
 
-function selectCompany() {
-  selectedCompany = document.getElementById("companyDropdown").value;
-  document.getElementById("generateBtn").classList.toggle("active", !!selectedCompany);
-}
+<p>Durante diciembre de 2025, se observó un comportamiento de normalización en las redes sociales de ${data.company}. Facebook experimentó una disminución significativa en visualizaciones y alcance tras el pico excepcional de noviembre, regresando a niveles más cercanos a los primeros meses del año. Instagram mostró una ligera disminución en visualizaciones pero registró un aumento importante en alcance, reflejando mejor circulación del contenido y llegada a nuevas audiencias.</p>
 
-function generateReport() {
-  const d = companiesData[selectedCompany].currentMonth;
+<h2>SEGUIDORES REDES SOCIALES</h2>
 
-  document.getElementById("reportContent").innerHTML = `
-<h2>INTERACCIONES – INSTAGRAM</h2>
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_followers_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_followers_current.toLocaleString()}<br>
+Aumento de seguidores: ${d.fb_new_followers}<br>
+Dejaron de seguirte: ${d.fb_unfollows}</p>
 
-<p class="ig-icon">
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_followers_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_followers_current.toLocaleString()}<br>
+Aumento de seguidores: ${d.ig_new_followers}<br>
+Dejaron de seguirte: ${d.ig_unfollows}</p>
+
+<h2>MEJORES POSTS</h2>
+
+<p><strong>Diciembre, Facebook:</strong><br>
+${d.fb_best_posts.join('<br>')}</p>
+
+<p><strong>Diciembre, Instagram:</strong><br>
+${d.ig_best_post}<br>
+${d.ig_best_reel}</p>
+
+<h2>VISUALIZACIONES</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_views_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_views_current.toLocaleString()}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_views_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_views_current.toLocaleString()}</p>
+
+<h3>CONCLUSIONES:</h3>
+<p>Facebook registró una caída del 97%, descendiendo de ${d.fb_views_previous.toLocaleString()} visualizaciones en noviembre a ${d.fb_views_current.toLocaleString()} en diciembre. Este comportamiento es natural después del pico excepcional del mes anterior y representa un retorno a niveles más consistentes con el histórico de la marca, donde los meses de enero a octubre promediaron alrededor de 10,000-25,000 visualizaciones.</p>
+
+<p>Instagram experimentó una baja del 15.2%, pasando de ${d.ig_views_previous.toLocaleString()} a ${d.ig_views_current.toLocaleString()}, manteniéndose dentro de rangos saludables para la plataforma y alineándose con el desempeño de meses como mayo, junio y julio.</p>
+
+<h2>ALCANCE</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_reach_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_reach_current.toLocaleString()}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_reach_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_reach_current.toLocaleString()}</p>
+
+<h3>CONCLUSIONES:</h3>
+<p>Facebook experimentó una caída del 97.6%, regresando de ${d.fb_reach_previous.toLocaleString()} a ${d.fb_reach_current.toLocaleString()}. Después del comportamiento excepcional de noviembre (que superó 10 veces el promedio histórico), la plataforma retornó a sus patrones normales de distribución, similares a los observados de enero a octubre donde el alcance promediaba 100-200 personas.</p>
+
+<p>Instagram mostró una recuperación del 13%, incrementando su alcance de ${d.ig_reach_previous.toLocaleString()} a ${d.ig_reach_current.toLocaleString()}, demostrando que el contenido logró circular mejor dentro de la comunidad y llegó a audiencias nuevas, manteniendo el crecimiento positivo iniciado en noviembre.</p>
+
+<h2>INTERACCIONES</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_interactions_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_interactions_current.toLocaleString()}<br>
+Visitas al perfil: ${d.fb_visits}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
 Noviembre: ${d.ig_interactions_previous}<br>
 Diciembre: ${d.ig_interactions_current}<br>
-Me gusta: Post ${d.ig_likes_posts} / Reel ${d.ig_likes_reels}<br>
-Guardados: Post ${d.ig_saves_posts} / Reel ${d.ig_saves_reels}<br>
-Compartidos: Post ${d.ig_shares_posts} / Reel ${d.ig_shares_reels}
-</p>
+Me gusta: Post: ${d.ig_likes_posts}, Reel: ${d.ig_likes_reels}<br>
+Guardados: Post: ${d.ig_saves_posts}, Reel: ${d.ig_saves_reels}<br>
+Compartidos: Post: ${d.ig_shares_posts}, Reel: ${d.ig_shares_reels}</p>
 
-<p>
-La disminución de interacciones confirma un consumo mayormente pasivo del contenido. Aunque los reels concentraron la mayoría de los “me gusta”, no se registraron guardados y los compartidos fueron limitados, lo que redujo la expansión orgánica. El contenido se consume, pero requiere llamados a la acción más claros para activar participación.
-</p>
-`;
+<h3>CONCLUSIONES:</h3>
+<p>Facebook mostró una reducción del 99.1%, bajando de ${d.fb_interactions_previous.toLocaleString()} a ${d.fb_interactions_current}. Noviembre representó un mes extraordinario con interacciones 14 veces superiores al promedio anual (que ronda las 110-115 interacciones mensuales). El retorno a 14 interacciones está ligeramente por debajo del histórico, lo que refleja el retorno a la normalidad después del mes excepcional anterior.</p>
 
-  document.getElementById("results").style.display = "block";
-}
-</script>
+<p>Instagram registró una disminución del 8.1%, pasando de ${d.ig_interactions_previous} a ${d.ig_interactions_current}, pero mantiene niveles saludables de participación que indican una audiencia comprometida, similar al desempeño de julio y octubre.</p>
+
+<hr style="margin: 40px 0;">
+
+<h2>CONCLUSIONES FINALES</h2>
+
+<p>El mes mostró un avance significativo en Facebook, con mayor circulación de contenido, más interacción y un crecimiento que coincide con la tendencia mostrada a lo largo del año, donde esta red ha tenido una curva de consolidación constante en alcance e interacción.</p>
+
+<p>En Instagram, las métricas presentaron una ligera baja respecto al mes anterior; sin embargo, esta disminución se alinea con los comportamientos variables observados durante el año en esta plataforma, donde los picos de rendimiento dependen fuertemente del tipo de contenido publicado.</p>
+
+<p>En conjunto, el mes confirma lo que refleja el periodo anual: la marca mantiene una comunidad estable, con un mejor rendimiento en Facebook y una necesidad de ajustar dinámicas en Instagram para recuperar la tracción observada en meses fuertes como marzo, agosto y octubre.</p>
+
+<div class="platform-section">
+<p class="fb-icon"><strong>Se consolidó como la red más fuerte del periodo, con crecimientos constantes en visualizaciones, alcance e interacción, especialmente en los últimos meses del año.</strong></p>
+
+<p>El comportamiento confirma que la audiencia conecta mejor con el contenido educativo, claro y emocional, lo que permite que las publicaciones circulen más y lleguen a públicos nuevos.</p>
+
+<p>La tendencia anual demuestra que Facebook es la plataforma donde la marca obtiene mayor estabilidad y proyección orgánica, y debe mantenerse como pilar principal de visibilidad para Adiestra.</p>
+</div>
+
+<div class="platform-section">
+<p class="ig-icon"><strong>Mostró un rendimiento más variable a lo largo del año, con meses de alto desempeño cuando se utilizaron Reels y contenido dinámico, y descensos cuando se reduce el formato de reel creado por Uriel en el contenido.</strong></p>
+
+<p>Las métricas recientes confirman esa misma tendencia: la respuesta depende directamente del tipo de contenido, donde el video corto es el que mejor activa visualizaciones, alcance e interacción.</p>
+
+<p>A pesar de las fluctuaciones, la plataforma mantiene una comunidad sólida y con alto potencial de crecimiento si se refuerzan contenidos guardables, compartibles y visualmente más dinámicos.</p>
+</div>
+
+<p>En conjunto, el periodo refleja que la estrategia aplicada ha fortalecido la presencia digital de Adiestra, consolidando su comunidad, aumentando el reconocimiento de marca y permitiendo una comunicación más clara y constante con los seguidores.</p>
+
+<p>Con ajustes específicos en Instagram y manteniendo la línea que ya funciona en Facebook, la marca está bien posicionada para seguir creciendo en 2026.</p>`;
+      } else {
+        return `<h2>RESUMEN DEL MES</h2>
+
+<p>Durante diciembre de 2025, se observó un comportamiento mixto en las redes sociales de ${data.company}. Facebook mostró una ligera disminución en visualizaciones pero una recuperación significativa en alcance (+269%), mientras que Instagram experimentó una baja en visualizaciones pero mantuvo un aumento importante en alcance del 66.5%, reflejando mejor circulación del contenido entre audiencias nuevas.</p>
+
+<h2>SEGUIDORES REDES SOCIALES</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_followers_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_followers_current.toLocaleString()}<br>
+Aumento de seguidores: ${d.fb_new_followers}<br>
+Dejaron de seguirte: ${d.fb_unfollows}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_followers_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_followers_current.toLocaleString()}<br>
+Aumento de seguidores: ${d.ig_new_followers}<br>
+Dejaron de seguirte: ${d.ig_unfollows}</p>
+
+<h2>MEJORES POSTS</h2>
+
+<p><strong>Diciembre, Facebook:</strong><br>
+${d.fb_best_posts.join('<br>')}</p>
+
+<p><strong>Diciembre, Instagram:</strong><br>
+${d.ig_best_post}<br>
+${d.ig_best_reel}</p>
+
+<h2>VISUALIZACIONES</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_views_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_views_current.toLocaleString()}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_views_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_views_current.toLocaleString()}</p>
+
+<h3>CONCLUSIONES:</h3>
+<p>Facebook: La caída del 2.1% de visualizaciones refleja que el contenido tuvo menos retención y, al no generar suficiente interacción, el algoritmo redujo su exposición natural. Sin embargo, se mantiene dentro de niveles estables comparado con los meses de mayo a julio (que promediaron 455 visualizaciones).</p>
+
+<p>Instagram: La baja del 20.1% demuestra que el contenido sigue siendo atractivo visualmente y mantiene la atención del público, incluso cuando otras métricas bajan. El mejor reel del mes alcanzó cifras excepcionales con 11,536 visualizaciones, demostrando alto potencial cuando el contenido conecta con la audiencia, superando por mucho el desempeño de cualquier otro mes del año.</p>
+
+<h2>ALCANCE</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_reach_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_reach_current.toLocaleString()}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_reach_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_reach_current.toLocaleString()}</p>
+
+<h3>CONCLUSIONES:</h3>
+<p>Facebook: El alcance aumentó un 269%, triplicando el desempeño del mes anterior y alcanzando niveles similares a agosto (el mejor mes histórico con alcance de 96 personas). El contenido circuló mejor y alcanzó a más personas fuera de la base de seguidores existente.</p>
+
+<p>Instagram: El aumento del 66.5% indica que el contenido está llegando a significativamente más audiencias nuevas, no solo a seguidores actuales. Este incremento representa el segundo mejor desempeño del año, solo superado por agosto con 5,384 cuentas alcanzadas, lo que confirma mejor distribución del contenido.</p>
+
+<h2>INTERACCIONES</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_interactions_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_interactions_current.toLocaleString()}<br>
+Visitas al perfil: ${d.fb_visits}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_interactions_previous}<br>
+Diciembre: ${d.ig_interactions_current}<br>
+Me gusta: Post: ${d.ig_likes_posts} / Reel: ${d.ig_likes_reels}<br>
+Guardados: Post: ${d.ig_saves_posts} / Reel: ${d.ig_saves_reels}<br>
+Compartidos: Post: ${d.ig_shares_posts} / Reel: ${d.ig_shares_reels}</p>
+
+<h3>CONCLUSIONES:</h3>
+<p>Facebook: La baja participación del 0% (manteniéndose en 5 interacciones) muestra que el contenido fue visto pero no generó respuesta emocional ni estímulos para comentar o reaccionar. Este nivel es consistente con el promedio de mayo a julio (9 interacciones promedio).</p>
+
+<p>Instagram: La disminución del 25.9% confirma que el usuario consumió el contenido, pero no sintió motivación para guardar, compartir o comentar, lo que afecta el crecimiento orgánico. Sin embargo, los reels continúan generando buenos niveles de guardados (${d.ig_saves_reels}) y compartidos (${d.ig_shares_reels}), indicando contenido educativo de valor.</p>
+
+<hr style="margin: 40px 0;">
+
+<h2>CONCLUSIONES FINALES</h2>
+
+<p>El comportamiento general del periodo muestra que, a lo largo del año, se han logrado avances claros en la calidad del contenido, especialmente durante los últimos tres meses, donde los nuevos diseños y reels han fortalecido la presencia visual de la marca.</p>
+
+<p>A pesar de los altibajos propios del comportamiento orgánico, la marca mantiene una presencia estable y reconocible, con mejoras consistentes en la parte estética y en el estilo de comunicación.</p>
+
+<p>El mes actual refleja esa misma línea: un contenido visualmente más sólido y con buena capacidad de retención, aunque con retos en interacción y alcance.</p>
+
+<div class="platform-section">
+<p class="fb-icon"><strong>Las métricas del mes indican que el contenido fue visto, pero generó poca respuesta por parte del usuario, lo que redujo tanto la exposición como la llegada a audiencias nuevas. La baja interacción afectó el impulso natural del algoritmo, haciendo que la plataforma priorizara menos las publicaciones.</strong></p>
+
+<p><strong>Estrategia:</strong> reforzar contenido emocional o cercano que motive reacciones rápidas, ya que Facebook responde mejor cuando detecta engagement inmediato. Esto ayudará a recuperar visibilidad sin depender de cambios drásticos en la línea de contenido.</p>
+</div>
+
+<div class="platform-section">
+<p class="ig-icon"><strong>Aunque el alcance e interacciones bajaron, el contenido logró mantener un volumen estable de visualizaciones, lo que demuestra que sigue siendo atractivo y se consume bien. El reto radica en que esa atención no se tradujo en participación, por lo que el algoritmo limitó la llegada a personas nuevas.</strong></p>
+
+<p><strong>Estrategia:</strong> aprovechar la buena retención visual para introducir llamados a la acción más claros (guardar, compartir, comentar) y generar piezas con valor práctico que incentiven esas acciones y reactiven el alcance orgánico.</p>
+</div>
+
+<p>A lo largo del año, el contenido evolucionó positivamente: mayor coherencia estética, integración de formatos más dinámicos y mejor presencia visual.</p>
+
+<p>La marca mantiene estabilidad en consumo, pero los momentos con menor interacción reflejan la importancia de equilibrar contenido informativo con contenido diseñado para activar al usuario.</p>
+
+<p>La tendencia general del periodo confirma que, cuando se incluyen piezas dinámicas o emocionales, el crecimiento es inmediato; cuando se relaja la interacción, las plataformas reducen el alcance, pero sin afectar la percepción general de la marca.</p>`;
+      }
+    }
+    
+    function generateCharts(reportData) {
+      const months = monthNames.slice(0, 12);
+      const hist = reportData.historical;
+      
+      if (reportData.company === "Adiestra") {
+        Plotly.newPlot('chartFacebook', [
+          {
+            x: months,
+            y: hist.fb_interactions,
+            name: 'Interacción con la publicación',
+            type: 'bar',
+            marker: { color: '#9b59b6' },
+            text: hist.fb_interactions.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          },
+          {
+            x: months,
+            y: hist.fb_reach,
+            name: 'Alcance de las publicaciones',
+            type: 'bar',
+            marker: { color: '#66cc99' },
+            text: hist.fb_reach.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS FACEBOOK - ENE-DICIEMBRE 2025',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333' }
+          },
+          barmode: 'group',
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: true,
+          legend: { x: 0.5, y: -0.2, xanchor: 'center', orientation: 'h' },
+          margin: { t: 80, b: 100 }
+        });
+        
+        Plotly.newPlot('chartInstagramReach', [
+          {
+            x: months,
+            y: hist.ig_reach,
+            name: 'Cuentas alcanzadas',
+            type: 'bar',
+            marker: { color: '#9b59b6' },
+            text: hist.ig_reach.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          },
+          {
+            x: months,
+            y: hist.ig_visits,
+            name: 'Visitas al perfil',
+            type: 'bar',
+            marker: { color: '#66cc99' },
+            text: hist.ig_visits.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS INSTAGRAM - ENE-DICIEMBRE 2025',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333' }
+          },
+          barmode: 'group',
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: true,
+          legend: { x: 0.5, y: -0.2, xanchor: 'center', orientation: 'h' },
+          margin: { t: 80, b: 100 }
+        });
+        
+        Plotly.newPlot('chartInstagramImpressions', [
+          {
+            x: months,
+            y: hist.ig_impressions,
+            name: 'Impresiones',
+            type: 'bar',
+            marker: { color: '#66cc99' },
+            text: hist.ig_impressions.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS INSTAGRAM - ENE-DICIEMBRE 2025',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333' }
+          },
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: false,
+          margin: { t: 80, b: 60 }
+        });
+      } else {
+        const dentalMonths = ['Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        
+        Plotly.newPlot('chartFacebook', [
+          {
+            x: dentalMonths,
+            y: hist.fb_views,
+            name: 'Views',
+            type: 'bar',
+            marker: { color: '#4169E1' },
+            text: hist.fb_views.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          },
+          {
+            x: dentalMonths,
+            y: hist.fb_reach,
+            name: 'Alcance publicaciones',
+            type: 'bar',
+            marker: { color: '#A9A9A9' },
+            text: hist.fb_reach.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS FACEBOOK - MAYO-DIC 2025',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333', weight: 'bold' }
+          },
+          barmode: 'group',
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: true,
+          legend: { x: 0.5, y: -0.2, xanchor: 'center', orientation: 'h' },
+          margin: { t: 80, b: 100 }
+        });
+        
+        Plotly.newPlot('chartInstagramReach', [
+          {
+            x: dentalMonths,
+            y: hist.ig_views,
+            name: 'Visualizaciones',
+            type: 'bar',
+            marker: { color: '#4169E1' },
+            text: hist.ig_views.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          },
+          {
+            x: dentalMonths,
+            y: hist.ig_reach,
+            name: 'Cuentas alcanzadas',
+            type: 'bar',
+            marker: { color: '#A9A9A9' },
+            text: hist.ig_reach.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS INSTAGRAM - MAYO-DIC 2025',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333', weight: 'bold' }
+          },
+          barmode: 'group',
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: true,
+          legend: { x: 0.5, y: -0.2, xanchor: 'center', orientation: 'h' },
+          margin: { t: 80, b: 100 }
+        });
+        
+        Plotly.newPlot('chartInstagramImpressions', [
+          {
+            x: dentalMonths,
+            y: hist.ig_interactions,
+            name: 'Interacciones',
+            type: 'bar',
+            marker: { color: '#4169E1' },
+            text: hist.ig_interactions.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          },
+          {
+            x: dentalMonths,
+            y: hist.ig_visits,
+            name: 'Actividad en el perfil',
+            type: 'bar',
+            marker: { color: '#A9A9A9' },
+            text: hist.ig_visits.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS INSTAGRAM - MAYO-DIC 25',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333', weight: 'bold' }
+          },
+          barmode: 'group',
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: true,
+          legend: { x: 0.5, y: -0.2, xanchor: 'center', orientation: 'h' },
+          margin: { t: 80, b: 100 }
+        });
+      }
+    }
+  </script>
 </body>
 </html>
