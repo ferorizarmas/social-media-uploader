@@ -138,10 +138,24 @@
       background: white;
       padding: 40px;
       border-radius: 10px;
-      line-height: 2;
+      line-height: 1.6;
       color: #333;
       font-size: 15px;
       white-space: pre-wrap;
+    }
+    
+    .report-content p {
+      margin-bottom: 12px;
+    }
+    
+    .report-content h2 {
+      margin-top: 25px;
+      margin-bottom: 12px;
+    }
+    
+    .report-content h3 {
+      margin-top: 18px;
+      margin-bottom: 10px;
     }
     
     /* Styling for report sections */
@@ -289,9 +303,9 @@
           ig_followers_previous: 1876,
           ig_new_followers: 10,
           ig_unfollows: 0,
-          ig_views_current: 4100,
+          ig_views_current: 4077,
           ig_views_previous: 4836,
-          ig_reach_current: 1300,
+          ig_reach_current: 1279,
           ig_reach_previous: 1150,
           ig_interactions_current: 91,
           ig_interactions_previous: 99,
@@ -301,7 +315,7 @@
           ig_saves_reels: 1,
           ig_shares_posts: 0,
           ig_shares_reels: 2,
-          ig_impressions_total: 4100,
+          ig_impressions_total: 4077,
           ig_profile_visits: 92,
           ig_best_post: "Mejor Post: 213 visualizaciones (Un peludo seguro y equilibrado)",
           ig_best_reel: "Mejor Reel: 373 visualizaciones (A veces pueden poner a prueba tu paciencia)"
@@ -310,9 +324,9 @@
         historical: {
           fb_interactions: [113, 114, 138, 116, 117, 111, 114, 113, 114, 1481, 1594, 14],
           fb_reach: [146, 112, 171, 116, 141, 136, 112, 136, 131, 19476, 23914, 567],
-          ig_reach: [502, 1251, 1756, 636, 1119, 961, 682, 1902, 1595, 1347, 1150, 1300],
+          ig_reach: [502, 1251, 1756, 636, 1119, 961, 682, 1902, 1595, 1347, 1150, 1279],
           ig_visits: [55, 416, 131, 182, 97, 101, 119, 352, 258, 195, 99, 92],
-          ig_impressions: [3130, 5427, 5746, 2433, 2971, 2578, 2669, 9097, 6877, 6401, 4836, 4100]
+          ig_impressions: [3130, 5427, 5746, 2433, 2971, 2578, 2669, 9097, 6877, 6401, 4836, 4077]
         }
       },
       
@@ -343,9 +357,9 @@
           ig_followers_previous: 1145,
           ig_new_followers: 13,
           ig_unfollows: 7,
-          ig_views_current: 9500,
+          ig_views_current: 9492,
           ig_views_previous: 11895,
-          ig_reach_current: 1300,
+          ig_reach_current: 1349,
           ig_reach_previous: 781,
           ig_interactions_current: 40,
           ig_interactions_previous: 54,
@@ -355,8 +369,8 @@
           ig_saves_reels: 0,
           ig_shares_posts: 1,
           ig_shares_reels: 6,
-          ig_impressions_total: 9500,
-          ig_profile_visits: 59,
+          ig_impressions_total: 9492,
+          ig_profile_visits: 307,
           ig_best_post: "Mejor Post: ¿Sabías que el mejor diseño de sonrisa empieza con un tratamiento de ortodoncia?",
           ig_best_reel: "Mejor Reel: 11,536 visualizaciones (Hábitos que pueden hacerte perder tus dientes)"
         },
@@ -365,10 +379,10 @@
           fb_views: [969, 747, 449, 8513, 1706, 238, 338, 331],
           fb_reach: [91, 88, 87, 96, 68, 59, 45, 166],
           fb_interactions: [9, 12, 14, 3, 6, 10, 11, 5],
-          ig_views: [9539, 7568, 13109, 21077, 19805, 14616, 11895, 9500],
-          ig_reach: [1735, 1390, 1480, 5384, 3982, 1098, 781, 1300],
+          ig_views: [9539, 7568, 13109, 21077, 19805, 14616, 11895, 9492],
+          ig_reach: [1735, 1390, 1480, 5384, 3982, 1098, 781, 1349],
           ig_interactions: [233, 109, 125, 64, 138, 40, 54, 40],
-          ig_visits: [405, 399, 318, 313, 307, 441, 333, 333]
+          ig_visits: [405, 399, 318, 313, 307, 441, 333, 307]
         }
       }
     };
@@ -434,7 +448,7 @@
         status.textContent = '✅ Reporte generado exitosamente!';
         
         results.scrollIntoView({ behavior: 'smooth' });
-      }, 30000);
+      }, 11000);
     }
     
     function generateReportText(data) {
