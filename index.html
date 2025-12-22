@@ -317,8 +317,8 @@
           ig_shares_reels: 2,
           ig_impressions_total: 4077,
           ig_profile_visits: 92,
-          ig_best_post: "Mejor Post: 213 visualizaciones (Un peludo seguro y equilibrado)",
-          ig_best_reel: "Mejor Reel: 373 visualizaciones (A veces pueden poner a prueba tu paciencia)"
+          ig_best_post: "",
+          ig_best_reel: "Mejor Publicación: A veces pueden poner a prueba tu paciencia (373 visualizaciones)"
         },
         
         historical: {
@@ -476,10 +476,9 @@ Dejaron de seguirte: ${d.ig_unfollows}</p>
 <h2>MEJORES POSTS</h2>
 
 <p><strong>Diciembre, Facebook:</strong><br>
-${d.fb_best_posts.join('<br>')}</p>
+${d.fb_best_posts.map((post, i) => `${i + 1}. ${post}`).join('<br>')}</p>
 
 <p><strong>Diciembre, Instagram:</strong><br>
-${d.ig_best_post}<br>
 ${d.ig_best_reel}</p>
 
 <h2>VISUALIZACIONES</h2>
@@ -508,7 +507,7 @@ Noviembre: ${d.ig_reach_previous.toLocaleString()}<br>
 Diciembre: ${d.ig_reach_current.toLocaleString()}</p>
 
 <h3>CONCLUSIONES:</h3>
-<p>Facebook experimentó un fuerte descenso tras el comportamiento excepcional de noviembre, volviendo a los niveles normales de circulación observados durante enero a octubre, donde el alcance promediaba entre 100-200 personas.</p>
+<p>Facebook experimentó un fuerte descenso tras el comportamiento excepcional de noviembre. Sin embargo, el alcance de diciembre se mantiene por encima del promedio observado durante enero a octubre (100-200 personas), lo que indica un desempeño superior al histórico base.</p>
 
 <p>Instagram mostró una recuperación positiva en alcance, logrando mayor circulación del contenido dentro de la comunidad y llegando a audiencias nuevas, manteniendo el crecimiento iniciado el mes anterior.</p>
 
@@ -582,7 +581,7 @@ Dejaron de seguirte: ${d.ig_unfollows}</p>
 <h2>MEJORES POSTS</h2>
 
 <p><strong>Diciembre, Facebook:</strong><br>
-${d.fb_best_posts.join('<br>')}</p>
+${d.fb_best_posts.map((post, i) => `${i + 1}. ${post}`).join('<br>')}</p>
 
 <p><strong>Diciembre, Instagram:</strong><br>
 ${d.ig_best_post}</p>
@@ -598,9 +597,9 @@ Noviembre: ${d.ig_views_previous.toLocaleString()}<br>
 Diciembre: ${d.ig_views_current.toLocaleString()}</p>
 
 <h3>CONCLUSIONES:</h3>
-<p>Facebook: La ligera caída refleja que el contenido tuvo menos retención y, al no generar suficiente interacción, el algoritmo redujo su exposición natural. Se mantiene dentro de niveles estables comparado con los meses de mayo a julio.</p>
+<p>Facebook: La ligera caída refleja que el contenido tuvo menos retención y, al no generar suficiente interacción, su exposición natural se redujo. Se mantiene dentro de niveles estables comparado con los meses de mayo a julio.</p>
 
-<p>Instagram: La disminución indica que, aunque el contenido visual sigue siendo consumido, tuvo menor retención que en meses anteriores. El mejor reel del mes alcanzó cifras excepcionales (11,536 visualizaciones), demostrando alto potencial cuando el contenido conecta con la audiencia y superando el desempeño de cualquier otro mes del año.</p>
+<p>Instagram: La disminución indica que, aunque el contenido visual sigue siendo consumido, tuvo menor retención que en meses anteriores. El contenido mantiene potencial de conexión con la audiencia cuando se utilizan formatos dinámicos y emocionales.</p>
 
 <h2>ALCANCE</h2>
 
@@ -647,13 +646,13 @@ Compartidos: Post: ${d.ig_shares_posts} / Reel: ${d.ig_shares_reels}</p>
 <p>El mes actual refleja esa misma línea: un contenido visualmente más sólido y con buena capacidad de retención, aunque con retos en interacción y alcance.</p>
 
 <div class="platform-section">
-<p class="fb-icon"><strong>Las métricas del mes indican que el contenido fue visto, pero generó poca respuesta por parte del usuario, lo que redujo tanto la exposición como la llegada a audiencias nuevas. La baja interacción afectó el impulso natural del algoritmo, haciendo que la plataforma priorizara menos las publicaciones.</strong></p>
+<p class="fb-icon"><strong>Las métricas del mes indican que el contenido fue visto, pero generó poca respuesta por parte del usuario, lo que redujo tanto la exposición como la llegada a audiencias nuevas. La baja interacción afectó el impulso natural de la plataforma, haciendo que priorizara menos las publicaciones.</strong></p>
 
 <p><strong>Estrategia:</strong> reforzar contenido emocional o cercano que motive reacciones rápidas, ya que Facebook responde mejor cuando detecta engagement inmediato. Esto ayudará a recuperar visibilidad sin depender de cambios drásticos en la línea de contenido.</p>
 </div>
 
 <div class="platform-section">
-<p class="ig-icon"><strong>Aunque el alcance e interacciones bajaron, el contenido logró mantener un volumen estable de visualizaciones, lo que demuestra que sigue siendo atractivo y se consume bien. El reto radica en que esa atención no se tradujo en participación, por lo que el algoritmo limitó la llegada a personas nuevas.</strong></p>
+<p class="ig-icon"><strong>Aunque el alcance e interacciones bajaron, el contenido logró mantener un volumen estable de visualizaciones, lo que demuestra que sigue siendo atractivo y se consume bien. El reto radica en que esa atención no se tradujo en participación, por lo que la llegada a personas nuevas fue limitada.</strong></p>
 
 <p><strong>Estrategia:</strong> aprovechar la buena retención visual para introducir llamados a la acción más claros (guardar, compartir, comentar) y generar piezas con valor práctico que incentiven esas acciones y reactiven el alcance orgánico.</p>
 </div>
