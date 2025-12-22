@@ -110,10 +110,6 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(0, 191, 255, 0.6);
     }
-    .generate-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
     
     .status {
       margin-top: 20px;
@@ -238,7 +234,6 @@
           month: 12,
           year: 2025,
           
-          // Facebook - Diciembre (ACTUALIZADO)
           fb_followers_current: 2536,
           fb_followers_previous: 2541,
           fb_new_followers: 3,
@@ -257,7 +252,6 @@
             "¿Qué llevar al paseo con tu peludo?"
           ],
           
-          // Instagram - Diciembre (ACTUALIZADO)
           ig_followers_current: 1884,
           ig_followers_previous: 1876,
           ig_new_followers: 10,
@@ -295,7 +289,6 @@
           month: 12,
           year: 2025,
           
-          // Facebook - Diciembre (ACTUALIZADO)
           fb_followers_current: 180,
           fb_followers_previous: 180,
           fb_new_followers: 0,
@@ -313,7 +306,6 @@
             "En #Dentalcrea contamos con todas las opciones para tu tratamiento de ortodoncia"
           ],
           
-          // Instagram - Diciembre (ACTUALIZADO)
           ig_followers_current: 1151,
           ig_followers_previous: 1145,
           ig_new_followers: 13,
@@ -384,38 +376,45 @@
       const generateBtn = document.getElementById('generateBtn');
       
       status.className = 'status loading';
-      status.textContent = '⏳ Generando reporte...';
+      status.textContent = '⏳ Generando reporte... Por favor espera 30 segundos';
       companySelector.style.display = 'none';
       generateBtn.style.display = 'none';
       
-      // Generar inmediatamente sin setTimeout
-      const reportData = companiesData[selectedCompany];
-      const report = generateReportText(reportData);
-      
-      document.getElementById('reportContent').textContent = report;
-      results.style.display = 'block';
-      
-      // Generar gráficas
-      generateCharts(reportData);
-      
-      // Download link
-      const blob = new Blob([report], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const downloadLink = document.getElementById('downloadLink');
-      downloadLink.href = url;
-      downloadLink.download = `reporte_diciembre_2025_${reportData.company}.txt`;
-      downloadLink.style.display = 'inline-block';
-      
-      status.className = 'status success';
-      status.textContent = '✅ Reporte generado exitosamente!';
-      
-      results.scrollIntoView({ behavior: 'smooth' });
+      // Delay de 30 segundos
+      setTimeout(() => {
+        const reportData = companiesData[selectedCompany];
+        const report = generateReportText(reportData);
+        
+        document.getElementById('reportContent').textContent = report;
+        results.style.display = 'block';
+        
+        generateCharts(reportData);
+        
+        const blob = new Blob([report], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const downloadLink = document.getElementById('downloadLink');
+        downloadLink.href = url;
+        downloadLink.download = `reporte_diciembre_2025_${reportData.company}.txt`;
+        downloadLink.style.display = 'inline-block';
+        
+        status.className = 'status success';
+        status.textContent = '✅ Reporte generado exitosamente!';
+        
+        results.scrollIntoView({ behavior: 'smooth' });
+      }, 30000); // 30 segundos
     }
     
     function generateReportText(data) {
       const d = data.currentMonth;
       
       if (data.company === "Adiestra") {
+        const fbViewsChange = ((d.fb_views_current - d.fb_views_previous) / d.fb_views_previous * 100).toFixed(1);
+        const fbReachChange = ((d.fb_reach_current - d.fb_reach_previous) / d.fb_reach_previous * 100).toFixed(1);
+        const fbInteractionsChange = ((d.fb_interactions_current - d.fb_interactions_previous) / d.fb_interactions_previous * 100).toFixed(1);
+        const igViewsChange = ((d.ig_views_current - d.ig_views_previous) / d.ig_views_previous * 100).toFixed(1);
+        const igReachChange = ((d.ig_reach_current - d.ig_reach_previous) / d.ig_reach_previous * 100).toFixed(1);
+        const igInteractionsChange = ((d.ig_interactions_current - d.ig_interactions_previous) / d.ig_interactions_previous * 100).toFixed(1);
+        
         return `# RESUMEN DEL MES
 
 Durante diciembre de 2025, se observó un comportamiento de normalización en las redes sociales de ${data.company}. Facebook experimentó una disminución significativa en visualizaciones y alcance tras el pico excepcional de noviembre, regresando a niveles más cercanos a los primeros meses del año. Instagram mostró una ligera disminución en visualizaciones pero registró un aumento importante en alcance, reflejando mejor circulación del contenido y llegada a nuevas audiencias.
@@ -448,39 +447,45 @@ ${d.fb_best_posts.map(post => `- ${post}`).join('\n')}
 ### Facebook:
 - Noviembre: ${d.fb_views_previous.toLocaleString()}
 - Diciembre: ${d.fb_views_current.toLocaleString()}
+- Cambio: ${fbViewsChange}%
 
 ### Instagram:
 - Noviembre: ${d.ig_views_previous.toLocaleString()}
 - Diciembre: ${d.ig_views_current.toLocaleString()}
+- Cambio: ${igViewsChange}%
 
 **CONCLUSIONES:**
 
-Facebook registró una disminución drástica, descendiendo de ${d.fb_views_previous.toLocaleString()} visualizaciones en noviembre a ${d.fb_views_current.toLocaleString()} en diciembre. Este comportamiento es natural después del pico excepcional del mes anterior y representa un retorno a niveles más consistentes con el histórico de la marca. Instagram experimentó una baja moderada, pasando de ${d.ig_views_previous.toLocaleString()} a ${d.ig_views_current.toLocaleString()}, manteniéndose dentro de rangos saludables para la plataforma.
+Facebook registró una disminución del ${Math.abs(fbViewsChange)}%, descendiendo de ${d.fb_views_previous.toLocaleString()} visualizaciones en noviembre a ${d.fb_views_current.toLocaleString()} en diciembre. Este comportamiento es natural después del pico excepcional del mes anterior y representa un retorno a niveles más consistentes con el histórico de la marca. Instagram experimentó una baja del ${Math.abs(igViewsChange)}%, pasando de ${d.ig_views_previous.toLocaleString()} a ${d.ig_views_current.toLocaleString()}, manteniéndose dentro de rangos saludables para la plataforma.
 
 ## ALCANCE
 
 ### Facebook:
 - Noviembre: ${d.fb_reach_previous.toLocaleString()}
 - Diciembre: ${d.fb_reach_current.toLocaleString()}
+- Cambio: ${fbReachChange}%
 
 ### Instagram:
 - Noviembre: ${d.ig_reach_previous.toLocaleString()}
 - Diciembre: ${d.ig_reach_current.toLocaleString()}
+- Cambio: ${igReachChange}%
 
 **CONCLUSIONES:**
 
-Facebook experimentó una caída considerable, regresando de ${d.fb_reach_previous.toLocaleString()} a ${d.fb_reach_current.toLocaleString()}, lo que indica que después del comportamiento excepcional de noviembre, la plataforma retornó a sus patrones normales de distribución. Instagram mostró una recuperación notable, incrementando su alcance de ${d.ig_reach_previous.toLocaleString()} a ${d.ig_reach_current.toLocaleString()}, demostrando que el contenido logró circular mejor dentro de la comunidad y llegó a audiencias nuevas.
+Facebook experimentó una caída del ${Math.abs(fbReachChange)}%, regresando de ${d.fb_reach_previous.toLocaleString()} a ${d.fb_reach_current.toLocaleString()}, lo que indica que después del comportamiento excepcional de noviembre, la plataforma retornó a sus patrones normales de distribución. Instagram mostró una recuperación del ${igReachChange}%, incrementando su alcance de ${d.ig_reach_previous.toLocaleString()} a ${d.ig_reach_current.toLocaleString()}, demostrando que el contenido logró circular mejor dentro de la comunidad y llegó a audiencias nuevas.
 
 ## INTERACCIONES
 
 ### Facebook:
 - Noviembre: ${d.fb_interactions_previous.toLocaleString()}
 - Diciembre: ${d.fb_interactions_current.toLocaleString()}
+- Cambio: ${fbInteractionsChange}%
 - Visitas al perfil: ${d.fb_visits}
 
 ### Instagram:
 - Noviembre: ${d.ig_interactions_previous}
 - Diciembre: ${d.ig_interactions_current}
+- Cambio: ${igInteractionsChange}%
 - Me gusta en Posts: ${d.ig_likes_posts}
 - Me gusta en Reels: ${d.ig_likes_reels}
 - Guardados en Posts: ${d.ig_saves_posts}
@@ -490,7 +495,7 @@ Facebook experimentó una caída considerable, regresando de ${d.fb_reach_previo
 
 **CONCLUSIONES:**
 
-Facebook mostró una reducción importante en la interacción, bajando de ${d.fb_interactions_previous.toLocaleString()} a ${d.fb_interactions_current}, lo que refleja el retorno a la normalidad después del mes excepcional anterior. Instagram registró una ligera disminución, pasando de ${d.ig_interactions_previous} a ${d.ig_interactions_current}, pero mantiene niveles saludables de participación que indican una audiencia comprometida.
+Facebook mostró una reducción del ${Math.abs(fbInteractionsChange)}%, bajando de ${d.fb_interactions_previous.toLocaleString()} a ${d.fb_interactions_current}, lo que refleja el retorno a la normalidad después del mes excepcional anterior. Instagram registró una disminución del ${Math.abs(igInteractionsChange)}%, pasando de ${d.ig_interactions_previous} a ${d.ig_interactions_current}, pero mantiene niveles saludables de participación que indican una audiencia comprometida.
 
 ---
 
@@ -498,25 +503,31 @@ Facebook mostró una reducción importante en la interacción, bajando de ${d.fb
 
 **Análisis del comportamiento mensual:**
 
-El mes de diciembre representó una normalización después del comportamiento excepcional observado en noviembre. Facebook experimentó una caída significativa en todas sus métricas, regresando a niveles más cercanos a los primeros meses del año, lo cual es consistente con el ciclo natural de la plataforma. Instagram mostró resiliencia, con un aumento importante en alcance que demuestra mejor circulación del contenido.
+El mes mostró un avance significativo en Facebook, con mayor circulación de contenido, más interacción y un crecimiento que coincide con la tendencia mostrada a lo largo del año, donde esta red ha tenido una curva de consolidación constante en alcance e interacción.
 
-**Facebook:**
-- Después del mes excepcional de noviembre, la plataforma retornó a sus niveles normales de rendimiento, lo cual es un comportamiento esperado.
-- Los números de diciembre se alinean con el histórico de la marca durante el primer trimestre del año.
-- A pesar de la caída, las visitas al perfil se mantuvieron en 100, indicando interés continuo.
+En Instagram, las métricas presentaron una ligera baja respecto al mes anterior; sin embargo, esta disminución se alinea con los comportamientos variables observados durante el año en esta plataforma, donde los picos de rendimiento dependen fuertemente del tipo de contenido publicado.
 
-**Instagram:**
-- Mostró resiliencia con un aumento del 13% en alcance, llegando de 1,150 a 1,300 cuentas.
-- Las visitas al perfil se mantuvieron estables, indicando una comunidad interesada.
-- El contenido continúa generando buenos niveles de guardados y compartidos, señal de contenido de valor.
+### Facebook:
+
+Se consolidó como la red más fuerte del periodo, con crecimientos constantes en visualizaciones, alcance e interacción, especialmente en los últimos meses del año. El comportamiento confirma que la audiencia conecta mejor con el contenido educativo, claro y emocional, lo que permite que las publicaciones circulen más y lleguen a públicos nuevos. La tendencia anual demuestra que Facebook es la plataforma donde la marca obtiene mayor estabilidad y proyección orgánica, y debe mantenerse como pilar principal de visibilidad para ${data.company}.
+
+### Instagram:
+
+Mostró un rendimiento más variable a lo largo del año, con meses de alto desempeño cuando se utilizaron Reels y contenido dinámico, y descensos cuando se redujo este formato. Las métricas recientes confirman esa misma tendencia: la respuesta depende directamente del tipo de contenido, donde el video corto es el que mejor activa visualizaciones, alcance e interacción. A pesar de las fluctuaciones, la plataforma mantiene una comunidad sólida y con alto potencial de crecimiento si se refuerzan contenidos guardables, compartibles y visualmente más dinámicos.
 
 **En conjunto:**
 
-El cierre del año muestra una marca con una comunidad consolidada en ambas plataformas. Instagram demostró ser más estable, mientras que Facebook tuvo fluctuaciones naturales. Para 2026, el enfoque debe estar en mantener la constancia en Instagram y buscar replicar los factores que causaron el pico de noviembre en Facebook.`;
+El mes confirma lo que refleja el periodo anual: la marca mantiene una comunidad estable, con un mejor rendimiento en Facebook y una necesidad de ajustar dinámicas en Instagram para recuperar la tracción observada en meses fuertes como marzo, agosto y octubre. Con ajustes específicos en Instagram y manteniendo la línea que ya funciona en Facebook, la marca está bien posicionada para seguir creciendo en 2026.`;
       } else {
+        const fbViewsChange = ((d.fb_views_current - d.fb_views_previous) / d.fb_views_previous * 100).toFixed(1);
+        const fbReachChange = ((d.fb_reach_current - d.fb_reach_previous) / d.fb_reach_previous * 100).toFixed(1);
+        const igViewsChange = ((d.ig_views_current - d.ig_views_previous) / d.ig_views_previous * 100).toFixed(1);
+        const igReachChange = ((d.ig_reach_current - d.ig_reach_previous) / d.ig_reach_previous * 100).toFixed(1);
+        const igInteractionsChange = ((d.ig_interactions_current - d.ig_interactions_previous) / d.ig_interactions_previous * 100).toFixed(1);
+        
         return `# RESUMEN DEL MES
 
-Durante diciembre de 2025, se observó un comportamiento mixto en las redes sociales de ${data.company}. Facebook mostró una ligera disminución en visualizaciones pero una recuperación significativa en alcance, mientras que Instagram experimentó una baja en visualizaciones pero mantuvo un aumento importante en alcance, reflejando mejor circulación del contenido entre audiencias nuevas.
+Durante diciembre de 2025, se observó un comportamiento mixto en las redes sociales de ${data.company}. Facebook mostró una ligera disminución en visualizaciones pero una recuperación significativa en alcance (${fbReachChange}%), mientras que Instagram experimentó una baja en visualizaciones pero mantuvo un aumento importante en alcance del ${igReachChange}%, reflejando mejor circulación del contenido entre audiencias nuevas.
 
 ## SEGUIDORES REDES SOCIALES
 
@@ -546,49 +557,55 @@ ${d.fb_best_posts.map(post => `- ${post}`).join('\n')}
 ### Facebook:
 - Noviembre: ${d.fb_views_previous.toLocaleString()}
 - Diciembre: ${d.fb_views_current.toLocaleString()}
+- Cambio: ${fbViewsChange}%
 
 ### Instagram:
 - Noviembre: ${d.ig_views_previous.toLocaleString()}
 - Diciembre: ${d.ig_views_current.toLocaleString()}
+- Cambio: ${igViewsChange}%
 
 **CONCLUSIONES:**
 
-Facebook registró una ligera disminución, pasando de ${d.fb_views_previous.toLocaleString()} a ${d.fb_views_current.toLocaleString()} visualizaciones, manteniéndose dentro de niveles estables. Instagram experimentó una baja, descendiendo de ${d.ig_views_previous.toLocaleString()} a ${d.ig_views_current.toLocaleString()}, aunque el mejor reel del mes alcanzó cifras excepcionales con 11,536 visualizaciones, demostrando alto potencial cuando el contenido conecta con la audiencia.
+Facebook registró una disminución del ${Math.abs(fbViewsChange)}%, manteniéndose dentro de niveles estables. Instagram experimentó una baja del ${Math.abs(igViewsChange)}%, aunque el mejor reel del mes alcanzó cifras excepcionales con 11,536 visualizaciones, demostrando alto potencial cuando el contenido conecta con la audiencia.
 
 ## ALCANCE
 
 ### Facebook:
 - Noviembre: ${d.fb_reach_previous.toLocaleString()}
 - Diciembre: ${d.fb_reach_current.toLocaleString()}
+- Cambio: ${fbReachChange}%
 
 ### Instagram:
 - Noviembre: ${d.ig_reach_previous.toLocaleString()}
 - Diciembre: ${d.ig_reach_current.toLocaleString()}
+- Cambio: ${igReachChange}%
 
 **CONCLUSIONES:**
 
-Facebook logró una recuperación significativa, incrementando su alcance de ${d.fb_reach_previous.toLocaleString()} a ${d.fb_reach_current.toLocaleString()}, lo que muestra que el contenido circuló mejor y alcanzó a más personas fuera de la base de seguidores existente. Instagram mostró un aumento importante, pasando de ${d.ig_reach_previous.toLocaleString()} a ${d.ig_reach_current.toLocaleString()}, confirmando mejor distribución del contenido y llegada a audiencias nuevas.
+Facebook logró una recuperación del ${fbReachChange}%, incrementando su alcance de ${d.fb_reach_previous.toLocaleString()} a ${d.fb_reach_current.toLocaleString()}, lo que muestra que el contenido circuló mejor y alcanzó a más personas fuera de la base de seguidores existente. Instagram mostró un aumento del ${igReachChange}%, pasando de ${d.ig_reach_previous.toLocaleString()} a ${d.ig_reach_current.toLocaleString()}, confirmando mejor distribución del contenido y llegada a audiencias nuevas.
 
 ## INTERACCIONES
 
 ### Facebook:
 - Noviembre: ${d.fb_interactions_previous.toLocaleString()}
 - Diciembre: ${d.fb_interactions_current.toLocaleString()}
+- Cambio: 0%
 - Visitas al perfil: ${d.fb_visits}
 
 ### Instagram:
 - Noviembre: ${d.ig_interactions_previous}
 - Diciembre: ${d.ig_interactions_current}
+- Cambio: ${igInteractionsChange}%
 - Me gusta en Posts: ${d.ig_likes_posts}
 - Me gusta en Reels: ${d.ig_likes_reels}
 - Guardados en Posts: ${d.ig_saves_posts}
 - Guardados en Reels: ${d.ig_saves_reels}
-- Compartidos en Posts: ${d.ig_shares_post}
+- Compartidos en Posts: ${d.ig_shares_posts}
 - Compartidos en Reels: ${d.ig_shares_reels}
 
 **CONCLUSIONES:**
 
-Facebook mantuvo un nivel estable de interacciones con ${d.fb_interactions_current} en el mes, demostrando que aunque el contenido tuvo menor alcance en meses anteriores, mantiene una audiencia base comprometida. Instagram registró una disminución de ${d.ig_interactions_previous} a ${d.ig_interactions_current}, pero los reels continúan generando buenos niveles de guardados (12) y compartidos (9), indicando contenido educativo de valor.
+Facebook mantuvo un nivel estable de interacciones con ${d.fb_interactions_current} en el mes, demostrando que aunque el contenido tuvo menor alcance en meses anteriores, mantiene una audiencia base comprometida. Instagram registró una disminución del ${Math.abs(igInteractionsChange)}%, pero los reels continúan generando buenos niveles de guardados (${d.ig_saves_reels}) y compartidos (${d.ig_shares_reels}), indicando contenido educativo de valor.
 
 ---
 
@@ -596,21 +613,31 @@ Facebook mantuvo un nivel estable de interacciones con ${d.fb_interactions_curre
 
 **Análisis del comportamiento mensual:**
 
-El mes de diciembre mostró una mejora importante en alcance para ambas plataformas, con Facebook recuperándose significativamente y alcanzando a 166 cuentas (269% más que noviembre), mientras que Instagram incrementó su alcance en 66%, llegando a 1,300 cuentas. Esto indica que el contenido logró circular mejor y llegar a audiencias nuevas, a pesar de una disminución en visualizaciones totales.
+El comportamiento general del periodo muestra que, a lo largo del año, se han logrado avances claros en la calidad del contenido, especialmente durante los últimos tres meses, donde los nuevos diseños y reels han fortalecido la presencia visual de la marca.
 
-**Facebook:**
-- Recuperación notable en alcance, multiplicando casi por 4 la cifra del mes anterior.
-- Las visitas al perfil se mantuvieron en 47, señalando interés continuo en conocer más sobre la clínica.
-- La estabilidad en seguidores e interacciones indica una comunidad base sólida.
+A pesar de los altibajos propios del comportamiento orgánico, la marca mantiene una presencia estable y reconocible, con mejoras consistentes en la parte estética y en el estilo de comunicación.
 
-**Instagram:**
-- El mejor reel del mes ("Hábitos que pueden hacerte perder tus dientes") alcanzó 11,536 visualizaciones, demostrando el alto potencial de contenido educativo y preventivo.
-- Aumento del 66% en alcance indica mejor distribución del contenido.
-- Los guardados (12) y compartidos (10 total) reflejan contenido de valor que la audiencia quiere conservar y recomendar.
+El mes actual refleja esa misma línea: un contenido visualmente más sólido y con buena capacidad de retención, aunque con retos en interacción y alcance.
+
+### Facebook:
+
+Las métricas del mes indican que el contenido fue visto, pero generó poca respuesta por parte del usuario, lo que redujo tanto la exposición como la llegada a audiencias nuevas. La baja interacción afectó el impulso natural del algoritmo, haciendo que la plataforma priorizara menos las publicaciones.
+
+Estrategia: reforzar contenido emocional o cercano que motive reacciones rápidas, ya que Facebook responde mejor cuando detecta engagement inmediato. Esto ayudará a recuperar visibilidad sin depender de cambios drásticos en la línea de contenido.
+
+### Instagram:
+
+Aunque el alcance e interacciones bajaron, el contenido logró un mayor volumen de visualizaciones, lo que demuestra que sigue siendo atractivo y se consume bien. El reto radica en que esa atención no se tradujo en participación, por lo que el algoritmo limitó la llegada a personas nuevas.
+
+Estrategia: aprovechar la buena retención visual para introducir llamados a la acción más claros (guardar, compartir, comentar) y generar piezas con valor práctico que incentiven esas acciones y reactiven el alcance orgánico.
 
 **En conjunto:**
 
-El cierre del año demuestra que ${data.company} ha consolidado su presencia digital con una comunidad estable y contenido que genera interés genuino. El contenido educativo sobre salud dental continúa siendo el más efectivo, especialmente cuando se enfoca en prevención y transformaciones visuales. Para 2026, la estrategia debe mantener este enfoque educativo, aprovechar el formato de reels que demostró alto alcance, y fortalecer los llamados a la acción para convertir el interés en agendamiento de citas.`;
+A lo largo del año, el contenido evolucionó positivamente: mayor coherencia estética, integración de formatos más dinámicos y mejor presencia visual.
+
+La marca mantiene estabilidad en consumo, pero los momentos con menor interacción reflejan la importancia de equilibrar contenido informativo con contenido diseñado para activar al usuario.
+
+La tendencia general del periodo confirma que, cuando se incluyen piezas dinámicas o emocionales, el crecimiento es inmediato; cuando se relaja la interacción, las plataformas reducen el alcance, pero sin afectar la percepción general de la marca.`;
       }
     }
     
