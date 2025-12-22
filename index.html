@@ -27,27 +27,114 @@
       font-size: 32px; 
       text-align: center;
     }
+    .company-selector {
+      margin: 30px 0;
+      padding: 30px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+      border-radius: 12px;
+    }
+    .company-selector h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 24px;
+      text-align: center;
+    }
+    .dropdown-container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .dropdown-container label {
+      display: block;
+      font-size: 16px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    .dropdown-container select {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+    }
+    .add-company-btn {
+      display: block;
+      margin: 20px auto 0;
+      background: #4caf50;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .generate-button {
+      background: linear-gradient(135deg, #00BFFF 0%, #00A3E0 100%);
+      color: white;
+      padding: 20px 50px;
+      border: none;
+      border-radius: 12px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      margin: 30px 0;
+      display: none;
+    }
+    .generate-button.active { display: block; }
+    .results {
+      margin-top: 30px;
+      padding: 30px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      display: none;
+    }
     .report-content {
       background: white;
       padding: 40px;
       border-radius: 10px;
       line-height: 2;
-      color: #333;
       font-size: 15px;
       white-space: pre-wrap;
     }
-    .fb-icon::before { content: "📘 "; }
-    .ig-icon::before { content: "📷 "; }
+    .fb-icon::before { content: "📘 "; font-size: 22px; }
+    .ig-icon::before { content: "📷 "; font-size: 22px; }
   </style>
 </head>
 
 <body>
 <div class="container">
   <h1>📊 Generador de Reportes - Marketing View</h1>
-  <div id="reportContent" class="report-content"></div>
+
+  <div class="company-selector" id="companySelector">
+    <h2>Selecciona la Empresa</h2>
+    <div class="dropdown-container">
+      <label for="companyDropdown">Empresa:</label>
+      <select id="companyDropdown" onchange="selectCompany()">
+        <option value="">-- Selecciona una empresa --</option>
+        <option value="adiestra">🐾 Adiestra - Educación Canina</option>
+        <option value="dentalcrea">🦷 DentalCrea - Clínica Dental</option>
+      </select>
+      <button class="add-company-btn">➕ Agregar Nueva Empresa</button>
+    </div>
+  </div>
+
+  <button class="generate-button" id="generateBtn" onclick="generateReport()">
+    🚀 Generar Reporte de Diciembre 2025
+  </button>
+
+  <div id="results" class="results">
+    <h2>📄 Reporte Generado</h2>
+    <div id="reportContent" class="report-content"></div>
+  </div>
 </div>
 
 <script>
+let selectedCompany = null;
+
 const companiesData = {
   dentalcrea: {
     company: "DentalCrea",
@@ -89,59 +176,39 @@ const companiesData = {
       ig_impressions_total: 9500,
       ig_profile_visits: 59,
 
-      ig_best_post: "Mejor Post de Instagram DentalCrea: ¿Sabías que el mejor diseño de sonrisa empieza con un tratamiento de ortodoncia?",
+      ig_best_post: "Mejor Post: ¿Sabías que el mejor diseño de sonrisa empieza con un tratamiento de ortodoncia?",
       ig_best_reel: "Mejor Reel: 11,536 visualizaciones (Hábitos que pueden hacerte perder tus dientes)"
     }
   }
 };
 
-const d = companiesData.dentalcrea.currentMonth;
+function selectCompany() {
+  selectedCompany = document.getElementById("companyDropdown").value;
+  document.getElementById("generateBtn").classList.toggle("active", !!selectedCompany);
+}
 
-document.getElementById("reportContent").innerHTML = `
-<h2>RESUMEN DEL MES</h2>
-<p>
-Durante diciembre de 2025, Instagram mostró un consumo estable de contenido con buena retención visual, aunque con una disminución en la participación activa del usuario. El contenido fue visto, pero no generó suficientes acciones para potenciar el crecimiento orgánico.
-</p>
+function generateReport() {
+  const d = companiesData[selectedCompany].currentMonth;
 
-<h2>SEGUIDORES – INSTAGRAM</h2>
-<p class="ig-icon">
-Noviembre: ${d.ig_followers_previous}<br>
-Diciembre: ${d.ig_followers_current}<br>
-Aumento de seguidores: ${d.ig_new_followers}<br>
-Unfollows: ${d.ig_unfollows}
-</p>
-
-<h2>MEJOR POST DE DICIEMBRE – INSTAGRAM</h2>
-<p><strong>${d.ig_best_post}</strong></p>
-
+  document.getElementById("reportContent").innerHTML = `
 <h2>INTERACCIONES – INSTAGRAM</h2>
+
 <p class="ig-icon">
 Noviembre: ${d.ig_interactions_previous}<br>
-Diciembre: ${d.ig_interactions_current}<br><br>
-
-<strong>Me gusta</strong><br>
-Post: ${d.ig_likes_posts}<br>
-Reel: ${d.ig_likes_reels}<br><br>
-
-<strong>Guardados</strong><br>
-Post: ${d.ig_saves_posts}<br>
-Reel: ${d.ig_saves_reels}<br><br>
-
-<strong>Compartidos</strong><br>
-Post: ${d.ig_shares_posts}<br>
-Reel: ${d.ig_shares_reels}
+Diciembre: ${d.ig_interactions_current}<br>
+Me gusta: Post ${d.ig_likes_posts} / Reel ${d.ig_likes_reels}<br>
+Guardados: Post ${d.ig_saves_posts} / Reel ${d.ig_saves_reels}<br>
+Compartidos: Post ${d.ig_shares_posts} / Reel ${d.ig_shares_reels}
 </p>
 
-<h3>CONCLUSIONES – INTERACCIONES</h3>
 <p>
-La disminución de interacciones refleja un consumo mayormente pasivo del contenido. Aunque los reels concentraron la mayoría de los “me gusta”, no se registraron guardados y los compartidos fueron bajos, lo que limitó la expansión orgánica. El contenido es atractivo visualmente, pero requiere llamados a la acción más claros para convertir visualización en participación.
-</p>
-
-<h2>CONCLUSIÓN FINAL</h2>
-<p>
-DentalCrea mantiene una presencia visual sólida y consistente en Instagram. El principal reto no es captar atención, sino activar al usuario. Reforzar contenido guardable, educativo y con llamados a la acción directos permitirá transformar el consumo pasivo en interacción real y mejorar el rendimiento orgánico en los próximos meses.
+La disminución de interacciones confirma un consumo mayormente pasivo del contenido. Aunque los reels concentraron la mayoría de los “me gusta”, no se registraron guardados y los compartidos fueron limitados, lo que redujo la expansión orgánica. El contenido se consume, pero requiere llamados a la acción más claros para activar participación.
 </p>
 `;
+
+  document.getElementById("results").style.display = "block";
+}
 </script>
 </body>
 </html>
+
