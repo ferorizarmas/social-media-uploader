@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reporte Adiestra - Diciembre 2025</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generador de Reportes - Marketing View</title>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -20,7 +21,73 @@
       padding: 40px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
-    h1 { color: #333; margin-bottom: 30px; font-size: 32px; text-align: center; }
+    h1 { 
+      color: #333; 
+      margin-bottom: 30px; 
+      font-size: 32px; 
+      text-align: center;
+    }
+    
+    .company-selector {
+      margin: 30px 0;
+      padding: 30px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+      border-radius: 12px;
+    }
+    .company-selector h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 24px;
+      text-align: center;
+    }
+    .dropdown-container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .dropdown-container label {
+      display: block;
+      font-size: 16px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    .dropdown-container select {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .dropdown-container select:hover {
+      border-color: #00BFFF;
+    }
+    .dropdown-container select:focus {
+      outline: none;
+      border-color: #00BFFF;
+      box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.1);
+    }
+    
+    .add-company-btn {
+      display: block;
+      margin: 20px auto 0;
+      background: #4caf50;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .add-company-btn:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+    }
+    
     .generate-button {
       background: linear-gradient(135deg, #00BFFF 0%, #00A3E0 100%);
       color: white;
@@ -34,11 +101,16 @@
       margin: 30px 0;
       box-shadow: 0 4px 15px rgba(0, 191, 255, 0.4);
       transition: all 0.3s;
+      display: none;
+    }
+    .generate-button.active {
+      display: block;
     }
     .generate-button:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(0, 191, 255, 0.6);
     }
+    
     .status {
       margin-top: 20px;
       padding: 15px;
@@ -49,6 +121,7 @@
     }
     .status.loading { background: #e3f2fd; color: #1976d2; display: block; }
     .status.success { background: #e8f5e9; color: #2e7d32; display: block; }
+    
     .results {
       margin-top: 30px;
       padding: 30px;
@@ -65,11 +138,72 @@
       background: white;
       padding: 40px;
       border-radius: 10px;
-      line-height: 2;
+      line-height: 1.6;
       color: #333;
       font-size: 15px;
       white-space: pre-wrap;
     }
+    
+    .report-content p {
+      margin-bottom: 12px;
+    }
+    
+    .report-content h2 {
+      margin-top: 25px;
+      margin-bottom: 12px;
+    }
+    
+    .report-content h3 {
+      margin-top: 18px;
+      margin-bottom: 10px;
+    }
+    
+    /* Styling for report sections */
+    .report-content h2 {
+      color: #00BFFF !important;
+      font-size: 22px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    
+    .report-content h3 {
+      color: #333;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+    
+    .platform-section {
+      margin: 25px 0;
+      padding: 20px;
+      border-left: 4px solid #00BFFF;
+      background: #f8f9fa;
+    }
+    
+    .fb-icon::before {
+      content: "📘 ";
+      font-size: 24px;
+    }
+    
+    .ig-icon::before {
+      content: "📷 ";
+      font-size: 24px;
+    }
+    
+    .charts-section {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-top: 30px;
+    }
+    .chart-container {
+      margin-bottom: 40px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    
     .download-btn {
       display: inline-block;
       background: #4caf50;
@@ -80,215 +214,669 @@
       margin-top: 20px;
       font-weight: 600;
     }
+    
+    .back-btn {
+      background: #666;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+    .back-btn:hover {
+      background: #555;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📊 Reporte Adiestra - Diciembre 2025</h1>
+    <h1>📊 Generador de Reportes - Marketing View</h1>
     
-    <button class="generate-button" onclick="generateReport()">
-      🚀 Generar Reporte
+    <div class="company-selector" id="companySelector">
+      <h2>Selecciona la Empresa</h2>
+      <div class="dropdown-container">
+        <label for="companyDropdown">Empresa:</label>
+        <select id="companyDropdown" onchange="selectCompany()">
+          <option value="">-- Selecciona una empresa --</option>
+          <option value="adiestra">🐾 Adiestra - Educación Canina</option>
+          <option value="dentalcrea">🦷 DentalCrea - Clínica Dental</option>
+        </select>
+        <button class="add-company-btn" onclick="addNewCompany()">➕ Agregar Nueva Empresa</button>
+      </div>
+    </div>
+    
+    <button class="generate-button" id="generateBtn" onclick="generateReport()">
+      🚀 Generar Reporte de Diciembre 2025
     </button>
     
     <div id="status" class="status"></div>
     
     <div id="results" class="results">
+      <button class="back-btn" onclick="backToSelection()">← Volver a Selección de Empresa</button>
       <h2>📄 Reporte Generado</h2>
       <div id="reportContent" class="report-content"></div>
+      
+      <div class="charts-section">
+        <h3 style="color: #00BFFF; margin-bottom: 20px;">📈 Gráficas de Rendimiento</h3>
+        <div class="chart-container" id="chartFacebook"></div>
+        <div class="chart-container" id="chartInstagramReach"></div>
+        <div class="chart-container" id="chartInstagramImpressions"></div>
+      </div>
+      
       <a id="downloadLink" class="download-btn" style="display: none;">📥 Descargar Reporte</a>
     </div>
   </div>
 
   <script>
-    const data = {
-      company: "Adiestra",
-      month: "Diciembre",
-      year: 2025,
-      fb_followers_prev: 2541,
-      fb_followers_curr: 2537,
-      fb_new_followers: 4,
-      fb_unfollows: 8,
-      ig_followers_prev: 1876,
-      ig_followers_curr: 1881,
-      ig_new_followers: 10,
-      ig_unfollows: 5,
-      fb_views_prev: 31472,
-      fb_views_curr: 774,
-      ig_views_prev: 4836,
-      ig_views_curr: 3887,
-      fb_reach_prev: 23914,
-      fb_reach_curr: 23954,
-      ig_reach_prev: 1150,
-      ig_reach_curr: 1450,
-      fb_interactions_prev: 1594,
-      fb_interactions_curr: 1595,
-      ig_interactions_prev: 99,
-      ig_interactions_curr: 124,
-      ig_likes_posts: 14,
-      ig_likes_reels: 47,
-      ig_saves_posts: 1,
-      ig_saves_reels: 1,
-      ig_shares_posts: 2,
-      ig_shares_reels: 2,
-      best_post_ig: "🤚🏽🚫 Gritar no ayuda 🚫🤚🏽 Muchos piensan que alzar la voz corrige la conducta de un peludo...",
-      best_posts_fb: [
-        "Educar antes entrenar: el verdadero inicio del vínculo...",
-        "Gritar no ayuda...",
-        "Un peludo seguro y equilibrado se logra gracias a..."
-      ]
+    let selectedCompany = null;
+    
+    const companiesData = {
+      adiestra: {
+        company: "Adiestra",
+        currentMonth: {
+          month: 12,
+          year: 2025,
+          
+          fb_followers_current: 2537,
+          fb_followers_previous: 2541,
+          fb_new_followers: 4,
+          fb_unfollows: 8,
+          fb_views_current: 774,
+          fb_views_previous: 31472,
+          fb_reach_current: 23954,
+          fb_reach_previous: 23914,
+          fb_interactions_current: 1595,
+          fb_interactions_previous: 1594,
+          fb_visits: 100,
+          fb_best_posts: [
+            "Educar antes entrenar: el verdadero inicio del vínculo...",
+            "Gritar no ayuda...",
+            "UN peludo seguro y equilibrado se logra gracias a..."
+          ],
+          
+          ig_followers_current: 1881,
+          ig_followers_previous: 1876,
+          ig_new_followers: 5,
+          ig_unfollows: 0,
+          ig_views_current: 3887,
+          ig_views_previous: 4836,
+          ig_reach_current: 1450,
+          ig_reach_previous: 1150,
+          ig_interactions_current: 124,
+          ig_interactions_previous: 99,
+          ig_likes_posts: 14,
+          ig_likes_reels: 47,
+          ig_saves_posts: 1,
+          ig_saves_reels: 1,
+          ig_shares_posts: 2,
+          ig_shares_reels: 2,
+          ig_impressions_total: 3887,
+          ig_profile_visits: 92,
+          ig_best_post: "",
+          ig_best_reel: "Mejor Publicación: 🤚🏽🚫 Gritar no ayuda 🚫🤚🏽"
+        },
+        
+        historical: {
+          fb_interactions: [113, 114, 138, 116, 117, 111, 114, 113, 114, 1481, 1594, 1595],
+          fb_reach: [146, 112, 171, 116, 141, 136, 112, 136, 131, 19476, 23914, 23954],
+          ig_reach: [502, 1251, 1756, 636, 1119, 961, 682, 1902, 1595, 1347, 1150, 1450],
+          ig_visits: [55, 416, 131, 182, 97, 101, 119, 352, 258, 195, 99, 92],
+          ig_impressions: [3130, 5427, 5746, 2433, 2971, 2578, 2669, 9097, 6877, 6401, 4836, 3887]
+        }
+      },
+      
+      dentalcrea: {
+        company: "DentalCrea",
+        currentMonth: {
+          month: 12,
+          year: 2025,
+          
+          fb_followers_current: 180,
+          fb_followers_previous: 180,
+          fb_new_followers: 0,
+          fb_unfollows: 0,
+          fb_views_current: 350,
+          fb_views_previous: 338,
+          fb_reach_current: 49,
+          fb_reach_previous: 45,
+          fb_interactions_current: 8,
+          fb_interactions_previous: 5,
+          fb_visits: 47,
+          fb_best_posts: [
+            "En esta Navidad queremos desear a nuestros pacientes momentos llenos de alegría, unión familiar y muchas sonrisas.…"
+          ],
+          
+          ig_followers_current: 1151,
+          ig_followers_previous: 1145,
+          ig_new_followers: 6,
+          ig_unfollows: 0,
+          ig_views_current: 8183,
+          ig_views_previous: 11895,
+          ig_reach_current: 1290,
+          ig_reach_previous: 781,
+          ig_interactions_current: 57,
+          ig_interactions_previous: 54,
+          ig_likes_posts: 27,
+          ig_likes_reels: 25,
+          ig_saves_posts: 0,
+          ig_saves_reels: 1,
+          ig_shares_posts: 2,
+          ig_shares_reels: 0,
+          ig_impressions_total: 8183,
+          ig_profile_visits: 307,
+          ig_best_post: "Mejor Publicación: En esta Navidad queremos desear a nuestros pacientes momentos llenos de alegría, unión familiar y muchas sonrisas....",
+          ig_best_reel: ""
+        },
+        
+        historical: {
+          fb_views: [969, 747, 449, 8513, 1706, 238, 338, 350],
+          fb_reach: [91, 88, 87, 96, 68, 59, 45, 49],
+          fb_interactions: [9, 12, 14, 3, 6, 10, 5, 8],
+          ig_views: [9539, 7568, 13109, 21077, 19805, 14616, 11895, 8183],
+          ig_reach: [1735, 1390, 1480, 5384, 3982, 1098, 781, 1290],
+          ig_interactions: [233, 109, 125, 64, 138, 40, 54, 57],
+          ig_visits: [405, 399, 318, 313, 307, 441, 333, 307]
+        }
+      }
     };
-
+    
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    function selectCompany() {
+      const dropdown = document.getElementById('companyDropdown');
+      selectedCompany = dropdown.value;
+      
+      if (selectedCompany) {
+        document.getElementById('generateBtn').classList.add('active');
+      } else {
+        document.getElementById('generateBtn').classList.remove('active');
+      }
+    }
+    
+    function addNewCompany() {
+      alert('Funcionalidad para agregar nueva empresa estará disponible próximamente. Por favor contacta al administrador.');
+    }
+    
+    function backToSelection() {
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('companySelector').style.display = 'block';
+      document.getElementById('generateBtn').classList.add('active');
+      document.getElementById('status').className = 'status';
+    }
+    
     function generateReport() {
+      if (!selectedCompany) {
+        alert('Por favor selecciona una empresa primero');
+        return;
+      }
+      
       const status = document.getElementById('status');
       const results = document.getElementById('results');
+      const companySelector = document.getElementById('companySelector');
+      const generateBtn = document.getElementById('generateBtn');
       
       status.className = 'status loading';
       status.textContent = '⏳ Generando reporte...';
+      companySelector.style.display = 'none';
+      generateBtn.style.display = 'none';
       
       setTimeout(() => {
-        const report = `# REPORTE Y CONCLUSIONES - GESTIÓN SOCIAL MEDIA
-${data.month.toUpperCase()} ${data.year}
-Para ${data.company}
-
-## INTRODUCCIÓN DEL MES ANALIZADO
-
-Durante ${data.month.toLowerCase()}, la gestión de redes sociales de ${data.company} presentó un comportamiento contrastante frente a noviembre. El mes se caracterizó por ajustes en el consumo de contenido, una ligera variación en la base de seguidores y una mejora clara en la interacción, especialmente en Instagram. Esto refleja un periodo de transición en el que la audiencia respondió más al contenido, aunque con menor volumen de visualizaciones.
-
----
-
-## SEGUIDORES REDES SOCIALES
-
-### Facebook:
-- Noviembre: ${data.fb_followers_prev.toLocaleString()}
-- Diciembre: ${data.fb_followers_curr.toLocaleString()}
-- Aumento de seguidores: ${data.fb_new_followers}
-- Dejaron de seguirte: ${data.fb_unfollows}
-
-### Instagram:
-- Noviembre: ${data.ig_followers_prev.toLocaleString()}
-- Diciembre: ${data.ig_followers_curr.toLocaleString()}
-- Aumento de seguidores: ${data.ig_new_followers}
-- Dejaron de seguirte: ${data.ig_unfollows}
-
-## MEJORES POSTS
-
-### ${data.month}, Facebook:
-${data.best_posts_fb.map((post, i) => `${i + 1}. ${post}`).join('\n')}
-
-### ${data.month}, Instagram:
-${data.best_post_ig}
-
----
-
-## VISUALIZACIONES
-
-### Facebook:
-- Noviembre: ${data.fb_views_prev.toLocaleString()}
-- Diciembre: ${data.fb_views_curr.toLocaleString()}
-
-### Instagram:
-- Noviembre: ${data.ig_views_prev.toLocaleString()}
-- Diciembre: ${data.ig_views_curr.toLocaleString()}
-
-**CONCLUSIONES:**
-
-Facebook: La caída fuerte en visualizaciones sugiere un menor consumo general del contenido durante el mes, algo común en periodos estacionales. Sin embargo, el hecho de que las interacciones no se hayan visto afectadas confirma que quienes sí vieron las publicaciones tuvieron una participación constante.
-
-Instagram: La baja en visualizaciones refleja que el formato utilizado este mes no generó la misma retención; sin embargo, esto es común cuando se reduce la fuerza de los Reels.
-
----
-
-## ALCANCE
-
-### Facebook:
-- Noviembre: ${data.fb_reach_prev.toLocaleString()}
-- Diciembre: ${data.fb_reach_curr.toLocaleString()}
-
-### Instagram:
-- Noviembre: ${data.ig_reach_prev.toLocaleString()}
-- Diciembre: ${data.ig_reach_curr.toLocaleString()}
-
-**CONCLUSIONES:**
-
-Facebook: El aumento en alcance, aunque mínimo, indica que las publicaciones lograron mantener su presencia dentro de audiencias nuevas y existentes, compensando la baja en visualizaciones con una distribución estable del contenido.
-
-Instagram: El crecimiento significativo del alcance refleja mayor circulación del contenido dentro de audiencias más amplias. Esto indica que, aunque las visualizaciones bajaron, las publicaciones lograron llegar a más usuarios únicos.
-
----
-
-## INTERACCIONES
-
-### Facebook:
-- Noviembre: ${data.fb_interactions_prev.toLocaleString()}
-- Diciembre: ${data.fb_interactions_curr.toLocaleString()}
-
-### Instagram:
-- Noviembre: ${data.ig_interactions_prev}
-- Diciembre: ${data.ig_interactions_curr}
-- Me gusta en Posts: ${data.ig_likes_posts}
-- Me gusta en Reels: ${data.ig_likes_reels}
-- Guardados en Posts: ${data.ig_saves_posts}
-- Guardados en Reels: ${data.ig_saves_reels}
-- Compartidos en Posts: ${data.ig_shares_posts}
-- Compartidos en Reels: ${data.ig_shares_reels}
-
-**CONCLUSIONES:**
-
-Facebook: Las interacciones se mantuvieron estables, lo que refleja una audiencia comprometida que sigue respondiendo al contenido publicado, a pesar de la caída en visualizaciones.
-
-Instagram: El aumento en interacciones muestra una respuesta más activa de la audiencia. La distribución de "me gusta" favoreció claramente a los reels, confirmando que este formato es el principal impulsor de participación en la plataforma.
-
----
-
-## ANÁLISIS POR RED SOCIAL
-
-**Facebook:**
-
-En Facebook, la base de seguidores mostró una leve disminución, lo que indica una depuración natural de la audiencia más que una pérdida significativa de interés. Aun con este ajuste, la interacción se mantuvo estable, lo que demuestra que la comunidad activa sigue respondiendo al contenido publicado. La caída fuerte en visualizaciones sugiere un menor consumo general del contenido durante el mes, algo común en periodos estacionales, pero el hecho de que las interacciones no se hayan visto afectadas confirma que quienes sí vieron las publicaciones tuvieron una participación constante. Esto habla de una audiencia más reducida, pero comprometida.
-
-**Instagram:**
-
-En Instagram, la comunidad presentó un crecimiento muy moderado, acompañado de algunas bajas, lo que refleja un balance estable en la captación y salida de usuarios. Aunque las visualizaciones descendieron respecto al mes anterior, las interacciones aumentaron de forma clara. Este comportamiento indica que el contenido fue consumido por menos personas, pero generó una mayor respuesta entre quienes sí lo vieron. La distribución de interacciones muestra una preferencia por los reels, lo que confirma que este formato es el principal impulsor de participación y debe seguir siendo un eje central en la estrategia de contenido.
-
----
-
-## ANÁLISIS DEL COMPORTAMIENTO GENERAL
-
-En términos generales, ${data.month.toLowerCase()} fue un mes donde la calidad de la interacción tuvo mayor peso que el volumen de alcance o visualizaciones. Aunque la exposición del contenido disminuyó, la respuesta de la audiencia mejoró, especialmente en Instagram, lo que fortalece el posicionamiento de la marca frente a una comunidad más interesada y receptiva. Este tipo de comportamiento es positivo para el crecimiento a mediano plazo, ya que prioriza relaciones más sólidas con la audiencia sobre métricas superficiales de volumen.
-
----
-
-## CONCLUSIONES GENERALES DEL PERIODO
-
-El análisis del comportamiento anual muestra que la presencia constante de ${data.company} en redes sociales ha permitido construir una comunidad estable, con momentos de alto consumo de contenido y otros de mayor interacción. A lo largo del periodo, la gestión ha favorecido la consolidación de la marca, manteniendo la visibilidad y reforzando el vínculo con su audiencia, incluso en meses con variaciones estacionales. Esto demuestra la importancia de una estrategia sostenida y adaptable a los distintos momentos del año.
-
----
-
-## RECOMENDACIONES PARA EL PRÓXIMO PERIODO
-
-Para el siguiente mes, se recomienda reforzar el uso de reels en Instagram, priorizando contenidos educativos y prácticos que fomenten la interacción, ya que este formato ha demostrado generar mayor respuesta. Adicionalmente, es importante trabajar en estrategias que ayuden a recuperar y ampliar las visualizaciones, como ajustes en horarios de publicación y mensajes más directos, sin perder el enfoque en la calidad del contenido y la conexión con la audiencia.
-
----
-
-## CIERRE
-
-La gestión profesional de redes sociales permite interpretar correctamente los cambios en el comportamiento de la audiencia y tomar decisiones estratégicas basadas en datos reales. Contar con un equipo especializado asegura una presencia digital consistente, enfocada no solo en números, sino en construir una comunidad activa y en fortalecer el posicionamiento de la marca en el entorno digital.`;
-
-        document.getElementById('reportContent').textContent = report;
+        const reportData = companiesData[selectedCompany];
+        const report = generateReportText(reportData);
+        
+        document.getElementById('reportContent').innerHTML = report;
         results.style.display = 'block';
         
-        const blob = new Blob([report], { type: 'text/plain' });
+        generateCharts(reportData);
+        
+        const plainText = report.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+        const blob = new Blob([plainText], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const downloadLink = document.getElementById('downloadLink');
         downloadLink.href = url;
-        downloadLink.download = `reporte_${data.company}_${data.month}_${data.year}.txt`;
+        downloadLink.download = `reporte_diciembre_2025_${reportData.company}.txt`;
         downloadLink.style.display = 'inline-block';
         
         status.className = 'status success';
         status.textContent = '✅ Reporte generado exitosamente!';
         
         results.scrollIntoView({ behavior: 'smooth' });
-      }, 800);
+      }, 11000);
+    }
+    
+    function generateReportText(data) {
+      const d = data.currentMonth;
+      
+      if (data.company === "Adiestra") {
+        return `<h2>RESUMEN DEL MES</h2>
+
+<p>Durante diciembre de 2025, se observó un comportamiento de normalización en las redes sociales de ${data.company}. Facebook experimentó una disminución significativa en visualizaciones tras el pico excepcional de noviembre, regresando a niveles más cercanos a los primeros meses del año, mientras que el alcance e interacciones se mantuvieron estables. Instagram mostró una baja en visualizaciones pero registró aumentos importantes en alcance e interacciones, reflejando mejor respuesta y participación de la audiencia.</p>
+
+<h2>SEGUIDORES REDES SOCIALES</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_followers_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_followers_current.toLocaleString()}<br>
+Aumento de seguidores: ${d.fb_new_followers}<br>
+Dejaron de seguirte: ${d.fb_unfollows}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_followers_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_followers_current.toLocaleString()}<br>
+Aumento de seguidores: ${d.ig_new_followers}<br>
+Dejaron de seguirte: ${d.ig_unfollows}</p>
+
+<h2>MEJORES POSTS</h2>
+
+<p><strong>Diciembre, Facebook:</strong><br>
+${d.fb_best_posts.map((post, i) => `${i + 1}. ${post}`).join('<br>')}</p>
+
+<p><strong>Diciembre, Instagram:</strong><br>
+${d.ig_best_reel}</p>
+
+<h2>VISUALIZACIONES</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_views_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_views_current.toLocaleString()}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_views_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_views_current.toLocaleString()}</p>
+
+<h3>CONCLUSIONES:</h3>
+<p>Facebook registró una caída significativa que refleja una normalización tras el pico excepcional de noviembre, regresando a niveles observados en los primeros meses del año.</p>
+
+<p>Instagram tuvo una baja en visualizaciones, reflejando que el formato utilizado este mes no generó la misma retención; sin embargo, esto es común cuando se reduce la fuerza de los Reels.</p>
+
+<h2>ALCANCE</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_reach_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_reach_current.toLocaleString()}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_reach_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_reach_current.toLocaleString()}</p>
+
+<h3>CONCLUSIONES:</h3>
+<p>Facebook logró llegar a un volumen mayor de personas que el mes pasado, lo que indica mayor circulación del contenido dentro de audiencias nuevas y no solo de seguidores existentes.</p>
+
+<p>Instagram mostró un crecimiento positivo en alcance, lo cual es consistente con el buen desempeño de la plataforma cuando el contenido logra mayor distribución.</p>
+
+<h2>INTERACCIONES</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_interactions_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_interactions_current.toLocaleString()}<br>
+Visitas al perfil: ${d.fb_visits}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_interactions_previous}<br>
+Diciembre: ${d.ig_interactions_current}<br>
+Me gusta: Post: ${d.ig_likes_posts}, Reel: ${d.ig_likes_reels}<br>
+Guardados: Post: ${d.ig_saves_posts}, Reel: ${d.ig_saves_reels}<br>
+Compartidos: Post: ${d.ig_shares_posts}, Reel: ${d.ig_shares_reels}</p>
+
+<h3>CONCLUSIONES:</h3>
+<p>Facebook mantuvo su nivel de interacción estable, lo cual refleja una audiencia activa, dispuesta a reaccionar y conectar con el contenido.</p>
+
+<p>Instagram mostró un aumento considerable en interacciones, señalando que el contenido generó mayor respuesta y participación entre la audiencia que lo consumió.</p>
+
+<hr style="margin: 40px 0;">
+
+<h2>CONCLUSIONES FINALES</h2>
+
+<p>Durante diciembre, la gestión de redes sociales de Adiestra present
+
+ó un comportamiento contrastante frente a noviembre. El mes se caracterizó por ajustes en el consumo de contenido, una ligera variación en la base de seguidores y una mejora clara en la interacción, especialmente en Instagram. Esto refleja un periodo de transición en el que la audiencia respondió más al contenido, aunque con menor volumen de visualizaciones.</p>
+
+<h3>Análisis por red social</h3>
+
+<div class="platform-section">
+<p class="fb-icon"><strong>En Facebook, la base de seguidores mostró una leve disminución, lo que indica una depuración natural de la audiencia más que una pérdida significativa de interés. Aun con este ajuste, la interacción se mantuvo estable, lo que demuestra que la comunidad activa sigue respondiendo al contenido publicado.</strong></p>
+
+<p>La caída fuerte en visualizaciones sugiere un menor consumo general del contenido durante el mes, algo común en periodos estacionales, pero el hecho de que las interacciones no se hayan visto afectadas confirma que quienes sí vieron las publicaciones tuvieron una participación constante. Esto habla de una audiencia más reducida, pero comprometida.</p>
+</div>
+
+<div class="platform-section">
+<p class="ig-icon"><strong>En Instagram, la comunidad presentó un crecimiento muy moderado, acompañado de algunas bajas, lo que refleja un balance estable en la captación y salida de usuarios. Aunque las visualizaciones descendieron respecto al mes anterior, las interacciones aumentaron de forma clara.</strong></p>
+
+<p>Este comportamiento indica que el contenido fue consumido por menos personas, pero generó una mayor respuesta entre quienes sí lo vieron. La distribución de interacciones muestra una preferencia por los reels, lo que confirma que este formato es el principal impulsor de participación y debe seguir siendo un eje central en la estrategia de contenido.</p>
+</div>
+
+<h3>Análisis del comportamiento general</h3>
+
+<p>En términos generales, diciembre fue un mes donde la calidad de la interacción tuvo mayor peso que el volumen de alcance o visualizaciones. Aunque la exposición del contenido disminuyó, la respuesta de la audiencia mejoró, especialmente en Instagram, lo que fortalece el posicionamiento de la marca frente a una comunidad más interesada y receptiva. Este tipo de comportamiento es positivo para el crecimiento a mediano plazo, ya que prioriza relaciones más sólidas con la audiencia sobre métricas superficiales de volumen.</p>
+
+<h3>Conclusiones generales del periodo</h3>
+
+<p>El análisis del comportamiento anual muestra que la presencia constante de Adiestra en redes sociales ha permitido construir una comunidad estable, con momentos de alto consumo de contenido y otros de mayor interacción. A lo largo del periodo, la gestión ha favorecido la consolidación de la marca, manteniendo la visibilidad y reforzando el vínculo con su audiencia, incluso en meses con variaciones estacionales. Esto demuestra la importancia de una estrategia sostenida y adaptable a los distintos momentos del año.</p>
+
+<h3>Recomendaciones para el próximo periodo</h3>
+
+<p>Para el siguiente mes, se recomienda reforzar el uso de reels en Instagram, priorizando contenidos educativos y prácticos que fomenten la interacción, ya que este formato ha demostrado generar mayor respuesta. Adicionalmente, es importante trabajar en estrategias que ayuden a recuperar y ampliar las visualizaciones, como ajustes en horarios de publicación y mensajes más directos, sin perder el enfoque en la calidad del contenido y la conexión con la audiencia.</p>
+
+<h3>Cierre</h3>
+
+<p>La gestión profesional de redes sociales permite interpretar correctamente los cambios en el comportamiento de la audiencia y tomar decisiones estratégicas basadas en datos reales. Contar con un equipo especializado asegura una presencia digital consistente, enfocada no solo en números, sino en construir una comunidad activa y en fortalecer el posicionamiento de la marca en el entorno digital.</p>`;
+      } else {
+        return `<h2>RESUMEN DEL MES</h2>
+
+<p>Durante diciembre de 2025, se observó un comportamiento mixto en las redes sociales de ${data.company}. Facebook mostró un ligero aumento en visualizaciones y alcance, junto con una mejora notable en interacciones, mientras que Instagram experimentó una disminución en visualizaciones pero mantuvo crecimientos significativos en alcance e interacciones, reflejando mejor distribución del contenido y mayor respuesta de la audiencia.</p>
+
+<h2>SEGUIDORES REDES SOCIALES</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_followers_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_followers_current.toLocaleString()}<br>
+Aumento de seguidores: ${d.fb_new_followers}<br>
+Dejaron de seguirte: ${d.fb_unfollows}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_followers_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_followers_current.toLocaleString()}<br>
+Aumento de seguidores: ${d.ig_new_followers}<br>
+Dejaron de seguirte: ${d.ig_unfollows}</p>
+
+<h2>MEJORES POSTS</h2>
+
+<p><strong>Diciembre, Facebook:</strong><br>
+${d.fb_best_posts.map((post, i) => `${i + 1}. ${post}`).join('<br>')}</p>
+
+<p><strong>Diciembre, Instagram:</strong><br>
+${d.ig_best_post}</p>
+
+<h2>VISUALIZACIONES</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_views_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_views_current.toLocaleString()}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_views_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_views_current.toLocaleString()}</p>
+
+<h3>CONCLUSIONES:</h3>
+<p>Facebook: El ligero aumento de visualizaciones indica una estabilidad en el consumo de contenido. Aunque el crecimiento es moderado, refleja que las publicaciones lograron sostener la atención del público y mantener un nivel constante de exposición.</p>
+
+<p>Instagram: La disminución muestra una ligera pérdida de alcance respecto al mes anterior. Esto sugiere que el contenido tuvo menor capacidad de captar y retener la atención, lo que impactó directamente en el volumen total de vistas.</p>
+
+<h2>ALCANCE</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_reach_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_reach_current.toLocaleString()}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_reach_previous.toLocaleString()}<br>
+Diciembre: ${d.ig_reach_current.toLocaleString()}</p>
+
+<h3>CONCLUSIONES:</h3>
+<p>Facebook: El aumento en el alcance, aunque leve, indica una mayor distribución del contenido frente al mes anterior. Esto sugiere que las publicaciones lograron llegar a más personas, manteniendo una presencia estable dentro y fuera de la comunidad existente.</p>
+
+<p>Instagram: El crecimiento significativo del alcance refleja una mayor visibilidad del contenido durante el mes. Los resultados indican que las publicaciones lograron expandirse hacia audiencias más amplias, superando el alcance obtenido en el periodo anterior.</p>
+
+<h2>INTERACCIONES</h2>
+
+<p><strong class="fb-icon">Facebook:</strong><br>
+Noviembre: ${d.fb_interactions_previous.toLocaleString()}<br>
+Diciembre: ${d.fb_interactions_current.toLocaleString()}<br>
+Visitas al perfil: ${d.fb_visits}</p>
+
+<p><strong class="ig-icon">Instagram:</strong><br>
+Noviembre: ${d.ig_interactions_previous}<br>
+Diciembre: ${d.ig_interactions_current}<br>
+Me gusta: Post: ${d.ig_likes_posts} / Reel: ${d.ig_likes_reels}<br>
+Guardados: Post: ${d.ig_saves_posts} / Reel: ${d.ig_saves_reels}<br>
+Compartidos: Post: ${d.ig_shares_posts} / Reel: ${d.ig_shares_reels}</p>
+
+<h3>CONCLUSIONES:</h3>
+<p>Facebook: El aumento en las interacciones, aunque bajo, refleja una ligera mejora en la respuesta del público, sin llegar aún a una participación consistente.</p>
+
+<p>Instagram: El crecimiento marginal en las interacciones muestra una respuesta estable del usuario. Los "me gusta" se concentran en publicaciones y reels, mientras que los guardados y compartidos siguen siendo limitados, lo que indica consumo sin acciones de mayor valor.</p>
+
+<hr style="margin: 40px 0;">
+
+<h2>CONCLUSIONES FINALES</h2>
+
+<p>Durante diciembre, la gestión de redes sociales de Dentalcrea mostró un comportamiento mixto. Se mantuvo la base de seguidores, se observaron mejoras en visibilidad e interacción en Facebook y un avance claro en alcance e interacción en Instagram, aunque con una disminución en el volumen de visualizaciones. El mes estuvo marcado por contenidos estacionales que ayudaron a reforzar la presencia de marca y la cercanía con la comunidad.</p>
+
+<h3>Análisis por red social</h3>
+
+<div class="platform-section">
+<p class="fb-icon"><strong>En Facebook, la comunidad se mantuvo estable sin crecimiento ni pérdida de seguidores, lo que indica una audiencia consolidada. A pesar de no haber incremento en la base, el contenido logró mayor exposición y respuesta.</strong></p>
+
+<p>El aumento en visualizaciones y alcance refleja que las publicaciones llegaron a más personas que el mes anterior, y el incremento en interacciones confirma una mejor respuesta del público. El mejor desempeño del contenido navideño demuestra que los mensajes emocionales y alineados a fechas clave generan mayor interés y participación, incluso en una audiencia que no crece en número.</p>
+</div>
+
+<div class="platform-section">
+<p class="ig-icon"><strong>En Instagram, se presentó un crecimiento moderado de seguidores, lo que señala una captación orgánica constante. Aunque las visualizaciones disminuyeron respecto al mes anterior, el alcance creció de forma significativa, lo que indica que el contenido llegó a más usuarios únicos, aun cuando estos consumieron menos veces las publicaciones.</strong></p>
+
+<p>Este comportamiento suele darse cuando se diversifica la audiencia o se amplía la exposición a nuevos usuarios. Las interacciones aumentaron ligeramente, mostrando que quienes sí vieron el contenido reaccionaron de manera positiva. El mejor post, de temática navideña, confirma que los mensajes cercanos y humanos fortalecen la conexión con la audiencia y generan respuestas más consistentes.</p>
+</div>
+
+<h3>Análisis del comportamiento general</h3>
+
+<p>En conjunto, las métricas de diciembre muestran una cuenta estable y con señales de crecimiento cualitativo. Más allá de los números absolutos, se observa una mejora en la capacidad de las publicaciones para llegar a nuevas personas y generar interacción. Esto impacta directamente en el posicionamiento de la marca, ya que una mayor visibilidad y participación fortalecen el reconocimiento y la confianza en Dentalcrea. La gestión realizada permitió mantener la comunidad, ampliar el alcance y reforzar el vínculo con la audiencia, lo cual es clave para la construcción de marca en el largo plazo.</p>
+
+<h3>Conclusiones generales del periodo</h3>
+
+<p>A lo largo del año, el comportamiento de las redes sociales muestra una evolución progresiva en visibilidad y engagement, con picos asociados a contenidos relevantes y bien contextualizados. La constancia en la gestión ha permitido sostener la presencia digital de la marca, evitar caídas significativas y sentar bases sólidas para el crecimiento futuro. El periodo refleja que el trabajo continuo en redes sociales no solo impacta en métricas, sino en el posicionamiento y recordación de la marca frente a su audiencia.</p>
+
+<h3>Recomendaciones para el próximo periodo</h3>
+
+<p>Para el siguiente mes, se recomienda reforzar formatos que prioricen el alcance y la interacción, especialmente en Instagram, con contenidos educativos y cercanos que mantengan el interés de nuevos usuarios. Además, es conveniente planificar publicaciones alineadas a fechas relevantes y temas de interés para la audiencia, replicando el enfoque emocional que mostró buenos resultados en diciembre, pero complementándolo con mensajes de valor sobre los servicios y beneficios de la marca.</p>
+
+<h3>Cierre</h3>
+
+<p>Contar con una gestión profesional de redes sociales permite interpretar correctamente el comportamiento de la audiencia, optimizar los contenidos y sostener una presencia digital coherente y estratégica. La experiencia y el análisis constante que aporta una agencia especializada son fundamentales para que la marca no solo esté presente en redes, sino que crezca, se posicione y genere una relación sólida con su comunidad.</p>`;
+      }
+    }
+    
+    function generateCharts(reportData) {
+      const months = monthNames.slice(0, 12);
+      const hist = reportData.historical;
+      
+      if (reportData.company === "Adiestra") {
+        Plotly.newPlot('chartFacebook', [
+          {
+            x: months,
+            y: hist.fb_interactions,
+            name: 'Interacción con la publicación',
+            type: 'bar',
+            marker: { color: '#9b59b6' },
+            text: hist.fb_interactions.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          },
+          {
+            x: months,
+            y: hist.fb_reach,
+            name: 'Alcance de las publicaciones',
+            type: 'bar',
+            marker: { color: '#66cc99' },
+            text: hist.fb_reach.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS FACEBOOK - ENE-DICIEMBRE 2025',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333' }
+          },
+          barmode: 'group',
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: true,
+          legend: { x: 0.5, y: -0.2, xanchor: 'center', orientation: 'h' },
+          margin: { t: 80, b: 100 }
+        });
+        
+        Plotly.newPlot('chartInstagramReach', [
+          {
+            x: months,
+            y: hist.ig_reach,
+            name: 'Cuentas alcanzadas',
+            type: 'bar',
+            marker: { color: '#9b59b6' },
+            text: hist.ig_reach.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          },
+          {
+            x: months,
+            y: hist.ig_visits,
+            name: 'Visitas al perfil',
+            type: 'bar',
+            marker: { color: '#66cc99' },
+            text: hist.ig_visits.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS INSTAGRAM - ENE-DICIEMBRE 2025',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333' }
+          },
+          barmode: 'group',
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: true,
+          legend: { x: 0.5, y: -0.2, xanchor: 'center', orientation: 'h' },
+          margin: { t: 80, b: 100 }
+        });
+        
+        Plotly.newPlot('chartInstagramImpressions', [
+          {
+            x: months,
+            y: hist.ig_impressions,
+            name: 'Impresiones',
+            type: 'bar',
+            marker: { color: '#66cc99' },
+            text: hist.ig_impressions.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS INSTAGRAM - ENE-DICIEMBRE 2025',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333' }
+          },
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: false,
+          margin: { t: 80, b: 60 }
+        });
+      } else {
+        const dentalMonths = ['Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        
+        Plotly.newPlot('chartFacebook', [
+          {
+            x: dentalMonths,
+            y: hist.fb_views,
+            name: 'Views',
+            type: 'bar',
+            marker: { color: '#4169E1' },
+            text: hist.fb_views.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          },
+          {
+            x: dentalMonths,
+            y: hist.fb_reach,
+            name: 'Alcance publicaciones',
+            type: 'bar',
+            marker: { color: '#A9A9A9' },
+            text: hist.fb_reach.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS FACEBOOK - MAYO-DIC 2025',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333', weight: 'bold' }
+          },
+          barmode: 'group',
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: true,
+          legend: { x: 0.5, y: -0.2, xanchor: 'center', orientation: 'h' },
+          margin: { t: 80, b: 100 }
+        });
+        
+        Plotly.newPlot('chartInstagramReach', [
+          {
+            x: dentalMonths,
+            y: hist.ig_views,
+            name: 'Visualizaciones',
+            type: 'bar',
+            marker: { color: '#4169E1' },
+            text: hist.ig_views.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          },
+          {
+            x: dentalMonths,
+            y: hist.ig_reach,
+            name: 'Cuentas alcanzadas',
+            type: 'bar',
+            marker: { color: '#A9A9A9' },
+            text: hist.ig_reach.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS INSTAGRAM - MAYO-DIC 2025',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333', weight: 'bold' }
+          },
+          barmode: 'group',
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: true,
+          legend: { x: 0.5, y: -0.2, xanchor: 'center', orientation: 'h' },
+          margin: { t: 80, b: 100 }
+        });
+        
+        Plotly.newPlot('chartInstagramImpressions', [
+          {
+            x: dentalMonths,
+            y: hist.ig_interactions,
+            name: 'Interacciones',
+            type: 'bar',
+            marker: { color: '#4169E1' },
+            text: hist.ig_interactions.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          },
+          {
+            x: dentalMonths,
+            y: hist.ig_visits,
+            name: 'Actividad en el perfil',
+            type: 'bar',
+            marker: { color: '#A9A9A9' },
+            text: hist.ig_visits.map(v => v.toString()),
+            textposition: 'outside',
+            textfont: { size: 10 }
+          }
+        ], {
+          title: {
+            text: 'ESTADÍSTICAS INSTAGRAM - MAYO-DIC 25',
+            font: { family: 'Arial, sans-serif', size: 16, color: '#333', weight: 'bold' }
+          },
+          barmode: 'group',
+          height: 450,
+          font: { family: 'Arial', size: 12 },
+          showlegend: true,
+          legend: { x: 0.5, y: -0.2, xanchor: 'center', orientation: 'h' },
+          margin: { t: 80, b: 100 }
+        });
+      }
     }
   </script>
 </body>
